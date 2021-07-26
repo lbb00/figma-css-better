@@ -2,8 +2,8 @@
 
 > Figma CSS 转换为微信小程序的样式
 
-- Viewport 375px to 750rpx
-- 仅保留 figma css 中有用的样式（figma 中生成的 position、top、left 等属性大多数情况下都是不需要的）
+- 使用 postcss px-to-viewport 将 375px to 750rpx
+- 仅保留 Figma css 中有用的样式（Figma 中生成的 position、top、left 等属性大多数情况下都是不需要的）
 
 ## Install
 
