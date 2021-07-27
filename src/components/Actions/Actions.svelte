@@ -1,8 +1,8 @@
 <script>
   import CopyButton from '../CopyButton/CopyButton.svelte'
-  import Setting from '../Setting/Setting.svelte'
+  import SettingButton from '../Setting/SettingButton.svelte'
   export let codeEl
 </script>
 
 <CopyButton {codeEl} />
-<Setting />
+<SettingButton />
