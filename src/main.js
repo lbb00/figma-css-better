@@ -1,6 +1,7 @@
 import { debounce } from 'lodash-es'
 import Actions from './components/Actions/Actions.svelte'
 import SettingPanel from './components/Setting/SettingPanel.svelte'
+import { toast } from './components/Toast/index'
 
 const installFigmaPlugin = debounce(function (el) {
   const btnEl = el.querySelector('#fcb-copy-button')
@@ -15,11 +16,11 @@ const installFigmaPlugin = debounce(function (el) {
       props: { codeEl }
     })
   }
-}, 1000)
+}, 500)
 
 function checkFigma () {
-  const oldLog = console.log
-  window.console.log = function (...args) {
+  const oldLog = unsafeWindow.console.log
+  unsafeWindow.console.log = function (...args) {
     if (/\[Fullscreen\] loadtime/gi.test(args[0])) {
       setTimeout(() => {
         const el = document.querySelector('[name=propertiesPanelContainer]')
@@ -30,6 +31,11 @@ function checkFigma () {
             installFigmaPlugin.bind(null, el),
             false
           )
+        } else {
+          toast({
+            title: 'FigmaCssBetter 初始化失败',
+            duration: 5000
+          })
         }
       }, 1000)
     }
@@ -39,7 +45,7 @@ function checkFigma () {
 
 function checkSetting () {
   if (
-    /^http:\/\/lbb00.github.io\/figma-css-better\/setting/.test(
+    /^https:\/\/lbb00.github.io\/figma-css-better\/setting/.test(
       window.location.href
     )
   ) {

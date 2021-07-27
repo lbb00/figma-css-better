@@ -10,19 +10,18 @@ import {
   pxToViewportConfigDefault,
   filterConfigDefault
 } from '../constant/config'
-import getStorage from '../utils/getStorage'
 
 export async function getCSS (el) {
   const cssHtml = '{' + el.parentElement.innerText + '}'
 
   const content = await postcss([
     postcssPxToViewport(
-      getStorage(PX_TO_VIEWPORT_CONFIG_KEY, pxToViewportConfigDefault)
+      GM_getValue(PX_TO_VIEWPORT_CONFIG_KEY, pxToViewportConfigDefault)
     ),
     postcssDiscardComments({})
   ]).process(cssHtml)
 
-  const filters = getStorage(FILTER_CONFIG_KEY, filterConfigDefault)
+  const filters = GM_getValue(FILTER_CONFIG_KEY, filterConfigDefault)
   const styleArray = content.css
     .replace(/(^\{)|(\}$)/g, '')
     .split('\n')
