@@ -9,11 +9,9 @@ const installFigmaPlugin = debounce(function (el) {
   if (!btnEl && codeEl) {
     const targetEl = document.createElement('div')
     codeEl.parentElement.parentElement.prepend(targetEl)
-
     // eslint-disable-next-line no-new
     new Actions({
-      target: targetEl,
-      props: { codeEl }
+      target: targetEl
     })
   }
 }, 500)

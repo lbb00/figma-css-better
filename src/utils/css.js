@@ -11,15 +11,13 @@ import {
   filterConfigDefault
 } from '../constant/config'
 
-export async function getCSS (el) {
-  const cssHtml = '{' + el.parentElement.innerText + '}'
-
+export async function getCSS (css) {
   const content = await postcss([
     postcssPxToViewport(
       GM_getValue(PX_TO_VIEWPORT_CONFIG_KEY, pxToViewportConfigDefault)
     ),
     postcssDiscardComments({})
-  ]).process(cssHtml)
+  ]).process(css)
 
   const filters = GM_getValue(FILTER_CONFIG_KEY, filterConfigDefault)
   const styleArray = content.css
