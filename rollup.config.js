@@ -32,12 +32,24 @@ module.exports = {
     banner2(() => {
       const items = [
         ['name', 'Figma CSS Better'],
-        ['namespace', 'http://tampermonkey.net/'],
-        ['version', '1.1.0'],
+        ['namespace', 'https://github.com/lbb00'],
+        ['version', '1.2.0'],
         ['description', 'Figma CSS 转为小程序样式'],
+        ['encoding', 'utf-8'],
         ['author', 'lbb00'],
+        ['homepage', 'https://github.com/lbb00/figma-css-better'],
+        ['supportURL', 'https://github.com/lbb00/figma-css-better/issues'],
+        [
+          'updateURL',
+          'https://github.com/lbb00/figma-css-better/raw/master/figma-css-better.user.js'
+        ],
+        [
+          'downloadURL',
+          'https://github.com/lbb00/figma-css-better/raw/master/figma-css-better.user.js'
+        ],
         ['match', '*://www.figma.com/file/*'],
         ['match', 'https://lbb00.github.io/figma-css-better/setting'],
+        ['run-at', 'document-start'],
         ['icon', 'https://www.google.com/s2/favicons?domain=figma.com'],
         [
           'license',
