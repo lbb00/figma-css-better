@@ -1,9 +1,15 @@
 <script>
   import { debounce } from 'lodash-es'
   import { getCSS } from '../../utils/css'
-  export let codeEl
+  import { toast } from '../Toast/index'
   const copy = debounce(() => {
-    getCSS(codeEl)
+    const codeEl = document.querySelector('[name=propertiesPanelContainer]')?.querySelector('p.hljs-comment')
+      ?.parentElement?.innerText
+    if (!codeEl) {
+      toast('从网页上获取css失败')
+      return
+    }
+    getCSS(`{${codeEl}}`)
   }, 500)
 </script>
 
@@ -16,7 +22,8 @@
     background: #05bea9;
     outline: none;
     color: #fff;
-    cursor: point;
+    cursor: pointer;
     margin-bottom: 10px;
+    user-select: none;
   }
 </style>
