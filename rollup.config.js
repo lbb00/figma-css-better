@@ -33,7 +33,7 @@ module.exports = {
       const items = [
         ['name', 'Figma CSS Better'],
         ['namespace', 'https://github.com/lbb00'],
-        ['version', '1.2.0'],
+        ['version', '1.2.1'],
         ['description', 'Figma CSS 转为小程序样式'],
         ['encoding', 'utf-8'],
         ['author', 'lbb00'],

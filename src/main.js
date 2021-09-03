@@ -47,11 +47,13 @@ function checkSetting () {
       window.location.href
     )
   ) {
-    const mainEl = document.querySelector('main')
+    window.onload(() => {
+      const mainEl = document.querySelector('main')
 
-    // eslint-disable-next-line no-new
-    new SettingPanel({
-      target: mainEl
+      // eslint-disable-next-line no-new
+      new SettingPanel({
+        target: mainEl
+      })
     })
   }
 }

@@ -7,7 +7,7 @@
 
 ## Install
 
-安装点这里: [Figma Css Better](https://greasyfork.org/zh-CN/scripts/429340-figma-css-better)
+安装点这里: [Figma Css Better](https://github.com/lbb00/figma-css-better/raw/master/figma-css-better.user.js)
 
 ## Example
 
