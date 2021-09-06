@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Figma CSS Better
 // @namespace   https://github.com/lbb00
-// @version     1.2.1
+// @version     1.2.2
 // @description Figma CSS 转为小程序样式
 // @encoding    utf-8
 // @author      lbb00
@@ -19,10 +19,2641 @@
 // @grant       GM_getValue
 // @grant       GM_setValue
 // ==/UserScript==
-!function(){"use strict";var t="object"==typeof global&&global&&global.Object===Object&&global,e="object"==typeof self&&self&&self.Object===Object&&self,r=t||e||Function("return this")(),n=r.Symbol,s=Object.prototype,i=s.hasOwnProperty,o=s.toString,a=n?n.toStringTag:void 0;var l=Object.prototype.toString;var u=n?n.toStringTag:void 0;function c(t){return null==t?void 0===t?"[object Undefined]":"[object Null]":u&&u in Object(t)?function(t){var e=i.call(t,a),r=t[a];try{t[a]=void 0;var n=!0}catch(t){}var s=o.call(t);return n&&(e?t[a]=r:delete t[a]),s}(t):function(t){return l.call(t)}(t)}var h=/\s/;var p=/^\s+/;function f(t){return t?t.slice(0,function(t){for(var e=t.length;e--&&h.test(t.charAt(e)););return e}(t)+1).replace(p,""):t}function d(t){var e=typeof t;return null!=t&&("object"==e||"function"==e)}var m=/^[-+]0x[0-9a-f]+$/i,g=/^0b[01]+$/i,w=/^0o[0-7]+$/i,y=parseInt;function v(t){if("number"==typeof t)return t;if(function(t){return"symbol"==typeof t||function(t){return null!=t&&"object"==typeof t}(t)&&"[object Symbol]"==c(t)}(t))return NaN;if(d(t)){var e="function"==typeof t.valueOf?t.valueOf():t;t=d(e)?e+"":e}if("string"!=typeof t)return 0===t?t:+t;t=f(t);var r=g.test(t);return r||w.test(t)?y(t.slice(2),r?2:8):m.test(t)?NaN:+t}var b=function(){return r.Date.now()},x=Math.max,O=Math.min;function C(t,e,r){var n,s,i,o,a,l,u=0,c=!1,h=!1,p=!0;if("function"!=typeof t)throw new TypeError("Expected a function");function f(e){var r=n,i=s;return n=s=void 0,u=e,o=t.apply(i,r)}function m(t){return u=t,a=setTimeout(w,e),c?f(t):o}function g(t){var r=t-l;return void 0===l||r>=e||r<0||h&&t-u>=i}function w(){var t=b();if(g(t))return y(t);a=setTimeout(w,function(t){var r=e-(t-l);return h?O(r,i-(t-u)):r}(t))}function y(t){return a=void 0,p&&n?f(t):(n=s=void 0,o)}function C(){var t=b(),r=g(t);if(n=arguments,s=this,l=t,r){if(void 0===a)return m(l);if(h)return clearTimeout(a),a=setTimeout(w,e),f(l)}return void 0===a&&(a=setTimeout(w,e)),o}return e=v(e)||0,d(r)&&(c=!!r.leading,i=(h="maxWait"in r)?x(v(r.maxWait)||0,e):i,p="trailing"in r?!!r.trailing:p),C.cancel=function(){void 0!==a&&clearTimeout(a),u=0,n=l=s=a=void 0},C.flush=function(){return void 0===a?o:y(b())},C}function S(){}function k(t){return t()}function E(){return Object.create(null)}function P(t){t.forEach(k)}function A(t){return"function"==typeof t}function $(t,e){return t!=t?e==e:t!==e||t&&"object"==typeof t||"function"==typeof t}function j(t,e){t.appendChild(e)}function R(t,e,r){t.insertBefore(e,r||null)}function M(t){t.parentNode.removeChild(t)}function _(t){return document.createElement(t)}function U(t){return document.createTextNode(t)}function I(){return U(" ")}function T(t,e,r,n){return t.addEventListener(e,r,n),()=>t.removeEventListener(e,r,n)}function F(t,e,r){null==r?t.removeAttribute(e):t.getAttribute(e)!==r&&t.setAttribute(e,r)}function B(t,e){t.value=null==e?"":e}let W;function L(t){W=t}const z=[],N=[],D=[],V=[],J=Promise.resolve();let G=!1;function q(t){D.push(t)}let Y=!1;const Q=new Set;function H(){if(!Y){Y=!0;do{for(let t=0;t<z.length;t+=1){const e=z[t];L(e),K(e.$$)}for(L(null),z.length=0;N.length;)N.pop()();for(let t=0;t<D.length;t+=1){const e=D[t];Q.has(e)||(Q.add(e),e())}D.length=0}while(z.length);for(;V.length;)V.pop()();G=!1,Y=!1,Q.clear()}}function K(t){if(null!==t.fragment){t.update(),P(t.before_update);const e=t.dirty;t.dirty=[-1],t.fragment&&t.fragment.p(t.ctx,e),t.after_update.forEach(q)}}const X=new Set;function Z(t,e){t&&t.i&&(X.delete(t),t.i(e))}function tt(t,e,r,n){if(t&&t.o){if(X.has(t))return;X.add(t),undefined.c.push((()=>{X.delete(t),n&&(r&&t.d(1),n())})),t.o(e)}}function et(t){t&&t.c()}function rt(t,e,r,n){const{fragment:s,on_mount:i,on_destroy:o,after_update:a}=t.$$;s&&s.m(e,r),n||q((()=>{const e=i.map(k).filter(A);o?o.push(...e):P(e),t.$$.on_mount=[]})),a.forEach(q)}function nt(t,e){const r=t.$$;null!==r.fragment&&(P(r.on_destroy),r.fragment&&r.fragment.d(e),r.on_destroy=r.fragment=null,r.ctx=[])}function st(t,e){-1===t.$$.dirty[0]&&(z.push(t),G||(G=!0,J.then(H)),t.$$.dirty.fill(0)),t.$$.dirty[e/31|0]|=1<<e%31}function it(t,e,r,n,s,i,o,a=[-1]){const l=W;L(t);const u=t.$$={fragment:null,ctx:null,props:i,update:S,not_equal:s,bound:E(),on_mount:[],on_destroy:[],on_disconnect:[],before_update:[],after_update:[],context:new Map(l?l.$$.context:e.context||[]),callbacks:E(),dirty:a,skip_bound:!1,root:e.target||l.$$.root};o&&o(u.root);let c=!1;if(u.ctx=r?r(t,e.props||{},((e,r,...n)=>{const i=n.length?n[0]:r;return u.ctx&&s(u.ctx[e],u.ctx[e]=i)&&(!u.skip_bound&&u.bound[e]&&u.bound[e](i),c&&st(t,e)),r})):[],u.update(),c=!0,P(u.before_update),u.fragment=!!n&&n(u.ctx),e.target){if(e.hydrate){const t=function(t){return Array.from(t.childNodes)}(e.target);u.fragment&&u.fragment.l(t),t.forEach(M)}else u.fragment&&u.fragment.c();e.intro&&Z(t.$$.fragment),rt(t,e.target,e.anchor,e.customElement),H()}L(l)}class ot{$destroy(){nt(this,1),this.$destroy=S}$on(t,e){const r=this.$$.callbacks[t]||(this.$$.callbacks[t]=[]);return r.push(e),()=>{const t=r.indexOf(e);-1!==t&&r.splice(t,1)}}$set(t){var e;this.$$set&&(e=t,0!==Object.keys(e).length)&&(this.$$.skip_bound=!0,this.$$set(t),this.$$.skip_bound=!1)}}function at(t,e){void 0===e&&(e={});var r=e.insertAt;if(t&&"undefined"!=typeof document){var n=document.head||document.getElementsByTagName("head")[0],s=document.createElement("style");s.type="text/css","top"===r&&n.firstChild?n.insertBefore(s,n.firstChild):n.appendChild(s),s.styleSheet?s.styleSheet.cssText=t:s.appendChild(document.createTextNode(t))}}function lt(t){let e,r,n;return{c(){e=_("div"),r=U(t[2]),F(e,"class",n="lbb-toast "+(t[1]?"":"lbb-toast--hide")+" svelte-6z5ekl")},m(n,s){R(n,e,s),j(e,r),t[4](e)},p(t,[s]){4&s&&function(t,e){e=""+e,t.wholeText!==e&&(t.data=e)}(r,t[2]),2&s&&n!==(n="lbb-toast "+(t[1]?"":"lbb-toast--hide")+" svelte-6z5ekl")&&F(e,"class",n)},i:S,o:S,d(r){r&&M(e),t[4](null)}}}function ut(t,e,r){let n,s,i=!1,o=null;return[n,i,s,function({title:t,duration:e=1500}){r(2,s=t),o&&clearTimeout(o),r(1,i=!0),o=setTimeout((()=>{r(1,i=!1),o=null}),e)},function(t){N[t?"unshift":"push"]((()=>{n=t,r(0,n)}))}]}at(".lbb-toast.svelte-6z5ekl{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);border-radius:4px;background-color:rgba(0,0,0,.8);padding:12px 24px;max-width:200px;color:#eee;font-size:16px;z-index:9999999}.lbb-toast--hide.svelte-6z5ekl{z-index:-1;visibility:hidden}");class ct extends ot{constructor(t){super(),it(this,t,ut,lt,$,{show:3})}get show(){return this.$$.ctx[3]}}const ht=function(t,{withKey:e=!1,immediate:r=!1}={}){const n={};let s,i=n;function o(r){return i!==n&&function(t){return!e||void 0===t||t===s}(r)||(s=r,i=t(s)),i}return r&&o(),o}((()=>{const t=new ct({target:document.body,props:{content:""}});return({title:e,duration:r=1500})=>{t.show({title:e,duration:r})}}))();function pt(t){return t&&t.__esModule&&Object.prototype.hasOwnProperty.call(t,"default")?t.default:t}function ft(t){if(t.__esModule)return t;var e=Object.defineProperty({},"__esModule",{value:!0});return Object.keys(t).forEach((function(r){var n=Object.getOwnPropertyDescriptor(t,r);Object.defineProperty(e,r,n.get?n:{enumerable:!0,get:function(){return t[r]}})})),e}var dt=ft(Object.freeze({__proto__:null,default:{}}));let{red:mt,bold:gt,gray:wt,options:yt}=dt,vt=dt;class bt extends Error{constructor(t,e,r,n,s,i){super(t),this.name="CssSyntaxError",this.reason=t,s&&(this.file=s),n&&(this.source=n),i&&(this.plugin=i),void 0!==e&&void 0!==r&&(this.line=e,this.column=r),this.setMessage(),Error.captureStackTrace&&Error.captureStackTrace(this,bt)}setMessage(){this.message=this.plugin?this.plugin+": ":"",this.message+=this.file?this.file:"<css input>",void 0!==this.line&&(this.message+=":"+this.line+":"+this.column),this.message+=": "+this.reason}showSourceCode(t){if(!this.source)return"";let e=this.source;null==t&&(t=yt.enabled),vt&&t&&(e=vt(e));let r,n,s=e.split(/\r?\n/),i=Math.max(this.line-3,0),o=Math.min(this.line+2,s.length),a=String(o).length;return t?(r=t=>gt(mt(t)),n=t=>wt(t)):r=n=t=>t,s.slice(i,o).map(((t,e)=>{let s=i+1+e,o=" "+(" "+s).slice(-a)+" | ";if(s===this.line){let e=n(o.replace(/\d/g," "))+t.slice(0,this.column-1).replace(/[^\t]/g," ");return r(">")+n(o)+t+"\n "+e+r("^")}return" "+n(o)+t})).join("\n")}toString(){let t=this.showSourceCode();return t&&(t="\n\n"+t+"\n"),this.name+": "+this.message+t}}var xt=bt;bt.default=bt;var Ot={};Ot.isClean=Symbol("isClean"),Ot.my=Symbol("my");const Ct={colon:": ",indent:"    ",beforeDecl:"\n",beforeRule:"\n",beforeOpen:" ",beforeClose:"\n",beforeComment:"\n",after:"\n",emptyBody:"",commentLeft:" ",commentRight:" ",semicolon:!1};var St=class{constructor(t){this.builder=t}stringify(t,e){if(!this[t.type])throw new Error("Unknown AST node type "+t.type+". Maybe you need to change PostCSS stringifier.");this[t.type](t,e)}document(t){this.body(t)}root(t){this.body(t),t.raws.after&&this.builder(t.raws.after)}comment(t){let e=this.raw(t,"left","commentLeft"),r=this.raw(t,"right","commentRight");this.builder("/*"+e+t.text+r+"*/",t)}decl(t,e){let r=this.raw(t,"between","colon"),n=t.prop+r+this.rawValue(t,"value");t.important&&(n+=t.raws.important||" !important"),e&&(n+=";"),this.builder(n,t)}rule(t){this.block(t,this.rawValue(t,"selector")),t.raws.ownSemicolon&&this.builder(t.raws.ownSemicolon,t,"end")}atrule(t,e){let r="@"+t.name,n=t.params?this.rawValue(t,"params"):"";if(void 0!==t.raws.afterName?r+=t.raws.afterName:n&&(r+=" "),t.nodes)this.block(t,r+n);else{let s=(t.raws.between||"")+(e?";":"");this.builder(r+n+s,t)}}body(t){let e=t.nodes.length-1;for(;e>0&&"comment"===t.nodes[e].type;)e-=1;let r=this.raw(t,"semicolon");for(let n=0;n<t.nodes.length;n++){let s=t.nodes[n],i=this.raw(s,"before");i&&this.builder(i),this.stringify(s,e!==n||r)}}block(t,e){let r,n=this.raw(t,"between","beforeOpen");this.builder(e+n+"{",t,"start"),t.nodes&&t.nodes.length?(this.body(t),r=this.raw(t,"after")):r=this.raw(t,"after","emptyBody"),r&&this.builder(r),this.builder("}",t,"end")}raw(t,e,r){let n;if(r||(r=e),e&&(n=t.raws[e],void 0!==n))return n;let s=t.parent;if("before"===r){if(!s||"root"===s.type&&s.first===t)return"";if(s&&"document"===s.type)return""}if(!s)return Ct[r];let i=t.root();if(i.rawCache||(i.rawCache={}),void 0!==i.rawCache[r])return i.rawCache[r];if("before"===r||"after"===r)return this.beforeAfter(t,r);{let s="raw"+((o=r)[0].toUpperCase()+o.slice(1));this[s]?n=this[s](i,t):i.walk((t=>{if(n=t.raws[e],void 0!==n)return!1}))}var o;return void 0===n&&(n=Ct[r]),i.rawCache[r]=n,n}rawSemicolon(t){let e;return t.walk((t=>{if(t.nodes&&t.nodes.length&&"decl"===t.last.type&&(e=t.raws.semicolon,void 0!==e))return!1})),e}rawEmptyBody(t){let e;return t.walk((t=>{if(t.nodes&&0===t.nodes.length&&(e=t.raws.after,void 0!==e))return!1})),e}rawIndent(t){if(t.raws.indent)return t.raws.indent;let e;return t.walk((r=>{let n=r.parent;if(n&&n!==t&&n.parent&&n.parent===t&&void 0!==r.raws.before){let t=r.raws.before.split("\n");return e=t[t.length-1],e=e.replace(/\S/g,""),!1}})),e}rawBeforeComment(t,e){let r;return t.walkComments((t=>{if(void 0!==t.raws.before)return r=t.raws.before,r.includes("\n")&&(r=r.replace(/[^\n]+$/,"")),!1})),void 0===r?r=this.raw(e,null,"beforeDecl"):r&&(r=r.replace(/\S/g,"")),r}rawBeforeDecl(t,e){let r;return t.walkDecls((t=>{if(void 0!==t.raws.before)return r=t.raws.before,r.includes("\n")&&(r=r.replace(/[^\n]+$/,"")),!1})),void 0===r?r=this.raw(e,null,"beforeRule"):r&&(r=r.replace(/\S/g,"")),r}rawBeforeRule(t){let e;return t.walk((r=>{if(r.nodes&&(r.parent!==t||t.first!==r)&&void 0!==r.raws.before)return e=r.raws.before,e.includes("\n")&&(e=e.replace(/[^\n]+$/,"")),!1})),e&&(e=e.replace(/\S/g,"")),e}rawBeforeClose(t){let e;return t.walk((t=>{if(t.nodes&&t.nodes.length>0&&void 0!==t.raws.after)return e=t.raws.after,e.includes("\n")&&(e=e.replace(/[^\n]+$/,"")),!1})),e&&(e=e.replace(/\S/g,"")),e}rawBeforeOpen(t){let e;return t.walk((t=>{if("decl"!==t.type&&(e=t.raws.between,void 0!==e))return!1})),e}rawColon(t){let e;return t.walkDecls((t=>{if(void 0!==t.raws.between)return e=t.raws.between.replace(/[^\s:]/g,""),!1})),e}beforeAfter(t,e){let r;r="decl"===t.type?this.raw(t,null,"beforeDecl"):"comment"===t.type?this.raw(t,null,"beforeComment"):"before"===e?this.raw(t,null,"beforeRule"):this.raw(t,null,"beforeClose");let n=t.parent,s=0;for(;n&&"root"!==n.type;)s+=1,n=n.parent;if(r.includes("\n")){let e=this.raw(t,null,"indent");if(e.length)for(let t=0;t<s;t++)r+=e}return r}rawValue(t,e){let r=t[e],n=t.raws[e];return n&&n.value===r?n.raw:r}};let kt=St;function Et(t,e){new kt(e).stringify(t)}var Pt=Et;Et.default=Et;let{isClean:At,my:$t}=Ot,jt=xt,Rt=St,Mt=Pt;function _t(t,e){let r=new t.constructor;for(let n in t){if(!Object.prototype.hasOwnProperty.call(t,n))continue;if("proxyCache"===n)continue;let s=t[n],i=typeof s;"parent"===n&&"object"===i?e&&(r[n]=e):"source"===n?r[n]=s:Array.isArray(s)?r[n]=s.map((t=>_t(t,r))):("object"===i&&null!==s&&(s=_t(s)),r[n]=s)}return r}class Ut{constructor(t={}){this.raws={},this[At]=!1,this[$t]=!0;for(let e in t)if("nodes"===e){this.nodes=[];for(let r of t[e])"function"==typeof r.clone?this.append(r.clone()):this.append(r)}else this[e]=t[e]}error(t,e={}){if(this.source){let r=this.positionBy(e);return this.source.input.error(t,r.line,r.column,e)}return new jt(t)}warn(t,e,r){let n={node:this};for(let t in r)n[t]=r[t];return t.warn(e,n)}remove(){return this.parent&&this.parent.removeChild(this),this.parent=void 0,this}toString(t=Mt){t.stringify&&(t=t.stringify);let e="";return t(this,(t=>{e+=t})),e}assign(t={}){for(let e in t)this[e]=t[e];return this}clone(t={}){let e=_t(this);for(let r in t)e[r]=t[r];return e}cloneBefore(t={}){let e=this.clone(t);return this.parent.insertBefore(this,e),e}cloneAfter(t={}){let e=this.clone(t);return this.parent.insertAfter(this,e),e}replaceWith(...t){if(this.parent){let e=this,r=!1;for(let n of t)n===this?r=!0:r?(this.parent.insertAfter(e,n),e=n):this.parent.insertBefore(e,n);r||this.remove()}return this}next(){if(!this.parent)return;let t=this.parent.index(this);return this.parent.nodes[t+1]}prev(){if(!this.parent)return;let t=this.parent.index(this);return this.parent.nodes[t-1]}before(t){return this.parent.insertBefore(this,t),this}after(t){return this.parent.insertAfter(this,t),this}root(){let t=this;for(;t.parent&&"document"!==t.parent.type;)t=t.parent;return t}raw(t,e){return(new Rt).raw(this,t,e)}cleanRaws(t){delete this.raws.before,delete this.raws.after,t||delete this.raws.between}toJSON(t,e){let r={},n=null==e;e=e||new Map;let s=0;for(let t in this){if(!Object.prototype.hasOwnProperty.call(this,t))continue;if("parent"===t||"proxyCache"===t)continue;let n=this[t];if(Array.isArray(n))r[t]=n.map((t=>"object"==typeof t&&t.toJSON?t.toJSON(null,e):t));else if("object"==typeof n&&n.toJSON)r[t]=n.toJSON(null,e);else if("source"===t){let i=e.get(n.input);null==i&&(i=s,e.set(n.input,s),s++),r[t]={inputId:i,start:n.start,end:n.end}}else r[t]=n}return n&&(r.inputs=[...e.keys()].map((t=>t.toJSON()))),r}positionInside(t){let e=this.toString(),r=this.source.start.column,n=this.source.start.line;for(let s=0;s<t;s++)"\n"===e[s]?(r=1,n+=1):r+=1;return{line:n,column:r}}positionBy(t){let e=this.source.start;if(t.index)e=this.positionInside(t.index);else if(t.word){let r=this.toString().indexOf(t.word);-1!==r&&(e=this.positionInside(r))}return e}getProxyProcessor(){return{set:(t,e,r)=>(t[e]===r||(t[e]=r,"prop"!==e&&"value"!==e&&"name"!==e&&"params"!==e&&"important"!==e&&"text"!==e||t.markDirty()),!0),get:(t,e)=>"proxyOf"===e?t:"root"===e?()=>t.root().toProxy():t[e]}}toProxy(){return this.proxyCache||(this.proxyCache=new Proxy(this,this.getProxyProcessor())),this.proxyCache}addToError(t){if(t.postcssNode=this,t.stack&&this.source&&/\n\s{4}at /.test(t.stack)){let e=this.source;t.stack=t.stack.replace(/\n\s{4}at /,`$&${e.input.from}:${e.start.line}:${e.start.column}$&`)}return t}markDirty(){if(this[At]){this[At]=!1;let t=this;for(;t=t.parent;)t[At]=!1}}get proxyOf(){return this}}var It=Ut;Ut.default=Ut;let Tt=It;class Ft extends Tt{constructor(t){t&&void 0!==t.value&&"string"!=typeof t.value&&(t={...t,value:String(t.value)}),super(t),this.type="decl"}get variable(){return this.prop.startsWith("--")||"$"===this.prop[0]}}var Bt=Ft;Ft.default=Ft;let{SourceMapConsumer:Wt,SourceMapGenerator:Lt}=dt,{dirname:zt,resolve:Nt,relative:Dt,sep:Vt}=dt,{pathToFileURL:Jt}=dt,Gt=Boolean(Wt&&Lt),qt=Boolean(zt&&Nt&&Dt&&Vt);var Yt=class{constructor(t,e,r){this.stringify=t,this.mapOpts=r.map||{},this.root=e,this.opts=r}isMap(){return void 0!==this.opts.map?!!this.opts.map:this.previous().length>0}previous(){return this.previousMaps||(this.previousMaps=[],this.root.walk((t=>{if(t.source&&t.source.input.map){let e=t.source.input.map;this.previousMaps.includes(e)||this.previousMaps.push(e)}}))),this.previousMaps}isInline(){if(void 0!==this.mapOpts.inline)return this.mapOpts.inline;let t=this.mapOpts.annotation;return(void 0===t||!0===t)&&(!this.previous().length||this.previous().some((t=>t.inline)))}isSourcesContent(){return void 0!==this.mapOpts.sourcesContent?this.mapOpts.sourcesContent:!this.previous().length||this.previous().some((t=>t.withContent()))}clearAnnotation(){if(!1===this.mapOpts.annotation)return;let t;for(let e=this.root.nodes.length-1;e>=0;e--)t=this.root.nodes[e],"comment"===t.type&&0===t.text.indexOf("# sourceMappingURL=")&&this.root.removeChild(e)}setSourcesContent(){let t={};this.root.walk((e=>{if(e.source){let r=e.source.input.from;r&&!t[r]&&(t[r]=!0,this.map.setSourceContent(this.toUrl(this.path(r)),e.source.input.css))}}))}applyPrevMaps(){for(let t of this.previous()){let e,r=this.toUrl(this.path(t.file)),n=t.root||zt(t.file);!1===this.mapOpts.sourcesContent?(e=new Wt(t.text),e.sourcesContent&&(e.sourcesContent=e.sourcesContent.map((()=>null)))):e=t.consumer(),this.map.applySourceMap(e,r,this.toUrl(this.path(n)))}}isAnnotation(){return!!this.isInline()||(void 0!==this.mapOpts.annotation?this.mapOpts.annotation:!this.previous().length||this.previous().some((t=>t.annotation)))}toBase64(t){return Buffer?Buffer.from(t).toString("base64"):window.btoa(unescape(encodeURIComponent(t)))}addAnnotation(){let t;t=this.isInline()?"data:application/json;base64,"+this.toBase64(this.map.toString()):"string"==typeof this.mapOpts.annotation?this.mapOpts.annotation:"function"==typeof this.mapOpts.annotation?this.mapOpts.annotation(this.opts.to,this.root):this.outputFile()+".map";let e="\n";this.css.includes("\r\n")&&(e="\r\n"),this.css+=e+"/*# sourceMappingURL="+t+" */"}outputFile(){return this.opts.to?this.path(this.opts.to):this.opts.from?this.path(this.opts.from):"to.css"}generateMap(){return this.generateString(),this.isSourcesContent()&&this.setSourcesContent(),this.previous().length>0&&this.applyPrevMaps(),this.isAnnotation()&&this.addAnnotation(),this.isInline()?[this.css]:[this.css,this.map]}path(t){if(0===t.indexOf("<"))return t;if(/^\w+:\/\//.test(t))return t;if(this.mapOpts.absolute)return t;let e=this.opts.to?zt(this.opts.to):".";return"string"==typeof this.mapOpts.annotation&&(e=zt(Nt(e,this.mapOpts.annotation))),t=Dt(e,t)}toUrl(t){return"\\"===Vt&&(t=t.replace(/\\/g,"/")),encodeURI(t).replace(/[#?]/g,encodeURIComponent)}sourcePath(t){if(this.mapOpts.from)return this.toUrl(this.mapOpts.from);if(this.mapOpts.absolute){if(Jt)return Jt(t.source.input.from).toString();throw new Error("`map.absolute` option is not available in this PostCSS build")}return this.toUrl(this.path(t.source.input.from))}generateString(){this.css="",this.map=new Lt({file:this.outputFile()});let t,e,r=1,n=1,s="<no source>",i={source:"",generated:{line:0,column:0},original:{line:0,column:0}};this.stringify(this.root,((o,a,l)=>{if(this.css+=o,a&&"end"!==l&&(i.generated.line=r,i.generated.column=n-1,a.source&&a.source.start?(i.source=this.sourcePath(a),i.original.line=a.source.start.line,i.original.column=a.source.start.column-1,this.map.addMapping(i)):(i.source=s,i.original.line=1,i.original.column=0,this.map.addMapping(i))),t=o.match(/\n/g),t?(r+=t.length,e=o.lastIndexOf("\n"),n=o.length-e):n+=o.length,a&&"start"!==l){let t=a.parent||{raws:{}};("decl"!==a.type||a!==t.last||t.raws.semicolon)&&(a.source&&a.source.end?(i.source=this.sourcePath(a),i.original.line=a.source.end.line,i.original.column=a.source.end.column-1,i.generated.line=r,i.generated.column=n-2,this.map.addMapping(i)):(i.source=s,i.original.line=1,i.original.column=0,i.generated.line=r,i.generated.column=n-1,this.map.addMapping(i)))}}))}generate(){if(this.clearAnnotation(),qt&&Gt&&this.isMap())return this.generateMap();let t="";return this.stringify(this.root,(e=>{t+=e})),[t]}};let Qt=It;class Ht extends Qt{constructor(t){super(t),this.type="comment"}}var Kt=Ht;Ht.default=Ht;let Xt,Zt,te,{isClean:ee,my:re}=Ot,ne=Bt,se=Kt,ie=It;function oe(t){return t.map((t=>(t.nodes&&(t.nodes=oe(t.nodes)),delete t.source,t)))}function ae(t){if(t[ee]=!1,t.proxyOf.nodes)for(let e of t.proxyOf.nodes)ae(e)}class le extends ie{push(t){return t.parent=this,this.proxyOf.nodes.push(t),this}each(t){if(!this.proxyOf.nodes)return;let e,r,n=this.getIterator();for(;this.indexes[n]<this.proxyOf.nodes.length&&(e=this.indexes[n],r=t(this.proxyOf.nodes[e],e),!1!==r);)this.indexes[n]+=1;return delete this.indexes[n],r}walk(t){return this.each(((e,r)=>{let n;try{n=t(e,r)}catch(t){throw e.addToError(t)}return!1!==n&&e.walk&&(n=e.walk(t)),n}))}walkDecls(t,e){return e?t instanceof RegExp?this.walk(((r,n)=>{if("decl"===r.type&&t.test(r.prop))return e(r,n)})):this.walk(((r,n)=>{if("decl"===r.type&&r.prop===t)return e(r,n)})):(e=t,this.walk(((t,r)=>{if("decl"===t.type)return e(t,r)})))}walkRules(t,e){return e?t instanceof RegExp?this.walk(((r,n)=>{if("rule"===r.type&&t.test(r.selector))return e(r,n)})):this.walk(((r,n)=>{if("rule"===r.type&&r.selector===t)return e(r,n)})):(e=t,this.walk(((t,r)=>{if("rule"===t.type)return e(t,r)})))}walkAtRules(t,e){return e?t instanceof RegExp?this.walk(((r,n)=>{if("atrule"===r.type&&t.test(r.name))return e(r,n)})):this.walk(((r,n)=>{if("atrule"===r.type&&r.name===t)return e(r,n)})):(e=t,this.walk(((t,r)=>{if("atrule"===t.type)return e(t,r)})))}walkComments(t){return this.walk(((e,r)=>{if("comment"===e.type)return t(e,r)}))}append(...t){for(let e of t){let t=this.normalize(e,this.last);for(let e of t)this.proxyOf.nodes.push(e)}return this.markDirty(),this}prepend(...t){t=t.reverse();for(let e of t){let t=this.normalize(e,this.first,"prepend").reverse();for(let e of t)this.proxyOf.nodes.unshift(e);for(let e in this.indexes)this.indexes[e]=this.indexes[e]+t.length}return this.markDirty(),this}cleanRaws(t){if(super.cleanRaws(t),this.nodes)for(let e of this.nodes)e.cleanRaws(t)}insertBefore(t,e){let r,n=0===(t=this.index(t))&&"prepend",s=this.normalize(e,this.proxyOf.nodes[t],n).reverse();for(let e of s)this.proxyOf.nodes.splice(t,0,e);for(let e in this.indexes)r=this.indexes[e],t<=r&&(this.indexes[e]=r+s.length);return this.markDirty(),this}insertAfter(t,e){t=this.index(t);let r,n=this.normalize(e,this.proxyOf.nodes[t]).reverse();for(let e of n)this.proxyOf.nodes.splice(t+1,0,e);for(let e in this.indexes)r=this.indexes[e],t<r&&(this.indexes[e]=r+n.length);return this.markDirty(),this}removeChild(t){let e;t=this.index(t),this.proxyOf.nodes[t].parent=void 0,this.proxyOf.nodes.splice(t,1);for(let r in this.indexes)e=this.indexes[r],e>=t&&(this.indexes[r]=e-1);return this.markDirty(),this}removeAll(){for(let t of this.proxyOf.nodes)t.parent=void 0;return this.proxyOf.nodes=[],this.markDirty(),this}replaceValues(t,e,r){return r||(r=e,e={}),this.walkDecls((n=>{e.props&&!e.props.includes(n.prop)||e.fast&&!n.value.includes(e.fast)||(n.value=n.value.replace(t,r))})),this.markDirty(),this}every(t){return this.nodes.every(t)}some(t){return this.nodes.some(t)}index(t){return"number"==typeof t?t:(t.proxyOf&&(t=t.proxyOf),this.proxyOf.nodes.indexOf(t))}get first(){if(this.proxyOf.nodes)return this.proxyOf.nodes[0]}get last(){if(this.proxyOf.nodes)return this.proxyOf.nodes[this.proxyOf.nodes.length-1]}normalize(t,e){if("string"==typeof t)t=oe(Xt(t).nodes);else if(Array.isArray(t)){t=t.slice(0);for(let e of t)e.parent&&e.parent.removeChild(e,"ignore")}else if("root"===t.type&&"document"!==this.type){t=t.nodes.slice(0);for(let e of t)e.parent&&e.parent.removeChild(e,"ignore")}else if(t.type)t=[t];else if(t.prop){if(void 0===t.value)throw new Error("Value field is missed in node creation");"string"!=typeof t.value&&(t.value=String(t.value)),t=[new ne(t)]}else if(t.selector)t=[new Zt(t)];else if(t.name)t=[new te(t)];else{if(!t.text)throw new Error("Unknown node type in node creation");t=[new se(t)]}return t.map((t=>(t[re]||le.rebuild(t),(t=t.proxyOf).parent&&t.parent.removeChild(t),t[ee]&&ae(t),void 0===t.raws.before&&e&&void 0!==e.raws.before&&(t.raws.before=e.raws.before.replace(/\S/g,"")),t.parent=this,t)))}getProxyProcessor(){return{set:(t,e,r)=>(t[e]===r||(t[e]=r,"name"!==e&&"params"!==e&&"selector"!==e||t.markDirty()),!0),get:(t,e)=>"proxyOf"===e?t:t[e]?"each"===e||"string"==typeof e&&e.startsWith("walk")?(...r)=>t[e](...r.map((t=>"function"==typeof t?(e,r)=>t(e.toProxy(),r):t))):"every"===e||"some"===e?r=>t[e](((t,...e)=>r(t.toProxy(),...e))):"root"===e?()=>t.root().toProxy():"nodes"===e?t.nodes.map((t=>t.toProxy())):"first"===e||"last"===e?t[e].toProxy():t[e]:t[e]}}getIterator(){this.lastEach||(this.lastEach=0),this.indexes||(this.indexes={}),this.lastEach+=1;let t=this.lastEach;return this.indexes[t]=0,t}}le.registerParse=t=>{Xt=t},le.registerRule=t=>{Zt=t},le.registerAtRule=t=>{te=t};var ue=le;le.default=le,le.rebuild=t=>{"atrule"===t.type?Object.setPrototypeOf(t,te.prototype):"rule"===t.type?Object.setPrototypeOf(t,Zt.prototype):"decl"===t.type?Object.setPrototypeOf(t,ne.prototype):"comment"===t.type&&Object.setPrototypeOf(t,se.prototype),t[re]=!0,t.nodes&&t.nodes.forEach((t=>{le.rebuild(t)}))};let ce,he,pe=ue;class fe extends pe{constructor(t){super({type:"document",...t}),this.nodes||(this.nodes=[])}toResult(t={}){return new ce(new he,this,t).stringify()}}fe.registerLazyResult=t=>{ce=t},fe.registerProcessor=t=>{he=t};var de=fe;fe.default=fe;let me={};class ge{constructor(t,e={}){if(this.type="warning",this.text=t,e.node&&e.node.source){let t=e.node.positionBy(e);this.line=t.line,this.column=t.column}for(let t in e)this[t]=e[t]}toString(){return this.node?this.node.error(this.text,{plugin:this.plugin,index:this.index,word:this.word}).message:this.plugin?this.plugin+": "+this.text:this.text}}var we=ge;ge.default=ge;let ye=we;class ve{constructor(t,e,r){this.processor=t,this.messages=[],this.root=e,this.opts=r,this.css=void 0,this.map=void 0}toString(){return this.css}warn(t,e={}){e.plugin||this.lastPlugin&&this.lastPlugin.postcssPlugin&&(e.plugin=this.lastPlugin.postcssPlugin);let r=new ye(t,e);return this.messages.push(r),r}warnings(){return this.messages.filter((t=>"warning"===t.type))}get content(){return this.css}}var be=ve;ve.default=ve;const xe="'".charCodeAt(0),Oe='"'.charCodeAt(0),Ce="\\".charCodeAt(0),Se="/".charCodeAt(0),ke="\n".charCodeAt(0),Ee=" ".charCodeAt(0),Pe="\f".charCodeAt(0),Ae="\t".charCodeAt(0),$e="\r".charCodeAt(0),je="[".charCodeAt(0),Re="]".charCodeAt(0),Me="(".charCodeAt(0),_e=")".charCodeAt(0),Ue="{".charCodeAt(0),Ie="}".charCodeAt(0),Te=";".charCodeAt(0),Fe="*".charCodeAt(0),Be=":".charCodeAt(0),We="@".charCodeAt(0),Le=/[\t\n\f\r "#'()/;[\\\]{}]/g,ze=/[\t\n\f\r !"#'():;@[\\\]{}]|\/(?=\*)/g,Ne=/.[\n"'(/\\]/,De=/[\da-f]/i;let Ve=ue;class Je extends Ve{constructor(t){super(t),this.type="atrule"}append(...t){return this.proxyOf.nodes||(this.nodes=[]),super.append(...t)}prepend(...t){return this.proxyOf.nodes||(this.nodes=[]),super.prepend(...t)}}var Ge=Je;Je.default=Je,Ve.registerAtRule(Je);let qe,Ye,Qe=ue;class He extends Qe{constructor(t){super(t),this.type="root",this.nodes||(this.nodes=[])}removeChild(t,e){let r=this.index(t);return!e&&0===r&&this.nodes.length>1&&(this.nodes[1].raws.before=this.nodes[r].raws.before),super.removeChild(t)}normalize(t,e,r){let n=super.normalize(t);if(e)if("prepend"===r)this.nodes.length>1?e.raws.before=this.nodes[1].raws.before:delete e.raws.before;else if(this.first!==e)for(let t of n)t.raws.before=e.raws.before;return n}toResult(t={}){return new qe(new Ye,this,t).stringify()}}He.registerLazyResult=t=>{qe=t},He.registerProcessor=t=>{Ye=t};var Ke=He;He.default=He;let Xe={split(t,e,r){let n=[],s="",i=!1,o=0,a=!1,l=!1;for(let r of t)l?l=!1:"\\"===r?l=!0:a?r===a&&(a=!1):'"'===r||"'"===r?a=r:"("===r?o+=1:")"===r?o>0&&(o-=1):0===o&&e.includes(r)&&(i=!0),i?(""!==s&&n.push(s.trim()),s="",i=!1):s+=r;return(r||""!==s)&&n.push(s.trim()),n},space:t=>Xe.split(t,[" ","\n","\t"]),comma:t=>Xe.split(t,[","],!0)};var Ze=Xe;Xe.default=Xe;let tr=ue,er=Ze;class rr extends tr{constructor(t){super(t),this.type="rule",this.nodes||(this.nodes=[])}get selectors(){return er.comma(this.selector)}set selectors(t){let e=this.selector?this.selector.match(/,\s*/):null,r=e?e[0]:","+this.raw("between","beforeOpen");this.selector=t.join(r)}}var nr=rr;rr.default=rr,tr.registerRule(rr);let sr=Bt,ir=function(t,e={}){let r,n,s,i,o,a,l,u,c,h,p=t.css.valueOf(),f=e.ignoreErrors,d=p.length,m=0,g=[],w=[];function y(e){throw t.error("Unclosed "+e,m)}return{back:function(t){w.push(t)},nextToken:function(t){if(w.length)return w.pop();if(m>=d)return;let e=!!t&&t.ignoreUnclosed;switch(r=p.charCodeAt(m),r){case ke:case Ee:case Ae:case $e:case Pe:n=m;do{n+=1,r=p.charCodeAt(n)}while(r===Ee||r===ke||r===Ae||r===$e||r===Pe);h=["space",p.slice(m,n)],m=n-1;break;case je:case Re:case Ue:case Ie:case Be:case Te:case _e:{let t=String.fromCharCode(r);h=[t,t,m];break}case Me:if(u=g.length?g.pop()[1]:"",c=p.charCodeAt(m+1),"url"===u&&c!==xe&&c!==Oe&&c!==Ee&&c!==ke&&c!==Ae&&c!==Pe&&c!==$e){n=m;do{if(a=!1,n=p.indexOf(")",n+1),-1===n){if(f||e){n=m;break}y("bracket")}for(l=n;p.charCodeAt(l-1)===Ce;)l-=1,a=!a}while(a);h=["brackets",p.slice(m,n+1),m,n],m=n}else n=p.indexOf(")",m+1),i=p.slice(m,n+1),-1===n||Ne.test(i)?h=["(","(",m]:(h=["brackets",i,m,n],m=n);break;case xe:case Oe:s=r===xe?"'":'"',n=m;do{if(a=!1,n=p.indexOf(s,n+1),-1===n){if(f||e){n=m+1;break}y("string")}for(l=n;p.charCodeAt(l-1)===Ce;)l-=1,a=!a}while(a);h=["string",p.slice(m,n+1),m,n],m=n;break;case We:Le.lastIndex=m+1,Le.test(p),n=0===Le.lastIndex?p.length-1:Le.lastIndex-2,h=["at-word",p.slice(m,n+1),m,n],m=n;break;case Ce:for(n=m,o=!0;p.charCodeAt(n+1)===Ce;)n+=1,o=!o;if(r=p.charCodeAt(n+1),o&&r!==Se&&r!==Ee&&r!==ke&&r!==Ae&&r!==$e&&r!==Pe&&(n+=1,De.test(p.charAt(n)))){for(;De.test(p.charAt(n+1));)n+=1;p.charCodeAt(n+1)===Ee&&(n+=1)}h=["word",p.slice(m,n+1),m,n],m=n;break;default:r===Se&&p.charCodeAt(m+1)===Fe?(n=p.indexOf("*/",m+2)+1,0===n&&(f||e?n=p.length:y("comment")),h=["comment",p.slice(m,n+1),m,n],m=n):(ze.lastIndex=m+1,ze.test(p),n=0===ze.lastIndex?p.length-1:ze.lastIndex-2,h=["word",p.slice(m,n+1),m,n],g.push(h),m=n)}return m++,h},endOfFile:function(){return 0===w.length&&m>=d},position:function(){return m}}},or=Kt,ar=Ge,lr=Ke,ur=nr;var cr=class{constructor(t){this.input=t,this.root=new lr,this.current=this.root,this.spaces="",this.semicolon=!1,this.customProperty=!1,this.createTokenizer(),this.root.source={input:t,start:{offset:0,line:1,column:1}}}createTokenizer(){this.tokenizer=ir(this.input)}parse(){let t;for(;!this.tokenizer.endOfFile();)switch(t=this.tokenizer.nextToken(),t[0]){case"space":this.spaces+=t[1];break;case";":this.freeSemicolon(t);break;case"}":this.end(t);break;case"comment":this.comment(t);break;case"at-word":this.atrule(t);break;case"{":this.emptyRule(t);break;default:this.other(t)}this.endFile()}comment(t){let e=new or;this.init(e,t[2]),e.source.end=this.getPosition(t[3]||t[2]);let r=t[1].slice(2,-2);if(/^\s*$/.test(r))e.text="",e.raws.left=r,e.raws.right="";else{let t=r.match(/^(\s*)([^]*\S)(\s*)$/);e.text=t[2],e.raws.left=t[1],e.raws.right=t[3]}}emptyRule(t){let e=new ur;this.init(e,t[2]),e.selector="",e.raws.between="",this.current=e}other(t){let e=!1,r=null,n=!1,s=null,i=[],o=t[1].startsWith("--"),a=[],l=t;for(;l;){if(r=l[0],a.push(l),"("===r||"["===r)s||(s=l),i.push("("===r?")":"]");else if(o&&n&&"{"===r)s||(s=l),i.push("}");else if(0===i.length){if(";"===r){if(n)return void this.decl(a,o);break}if("{"===r)return void this.rule(a);if("}"===r){this.tokenizer.back(a.pop()),e=!0;break}":"===r&&(n=!0)}else r===i[i.length-1]&&(i.pop(),0===i.length&&(s=null));l=this.tokenizer.nextToken()}if(this.tokenizer.endOfFile()&&(e=!0),i.length>0&&this.unclosedBracket(s),e&&n){for(;a.length&&(l=a[a.length-1][0],"space"===l||"comment"===l);)this.tokenizer.back(a.pop());this.decl(a,o)}else this.unknownWord(a)}rule(t){t.pop();let e=new ur;this.init(e,t[0][2]),e.raws.between=this.spacesAndCommentsFromEnd(t),this.raw(e,"selector",t),this.current=e}decl(t,e){let r=new sr;this.init(r,t[0][2]);let n,s=t[t.length-1];for(";"===s[0]&&(this.semicolon=!0,t.pop()),r.source.end=this.getPosition(s[3]||s[2]);"word"!==t[0][0];)1===t.length&&this.unknownWord(t),r.raws.before+=t.shift()[1];for(r.source.start=this.getPosition(t[0][2]),r.prop="";t.length;){let e=t[0][0];if(":"===e||"space"===e||"comment"===e)break;r.prop+=t.shift()[1]}for(r.raws.between="";t.length;){if(n=t.shift(),":"===n[0]){r.raws.between+=n[1];break}"word"===n[0]&&/\w/.test(n[1])&&this.unknownWord([n]),r.raws.between+=n[1]}"_"!==r.prop[0]&&"*"!==r.prop[0]||(r.raws.before+=r.prop[0],r.prop=r.prop.slice(1));let i=this.spacesAndCommentsFromStart(t);this.precheckMissedSemicolon(t);for(let e=t.length-1;e>=0;e--){if(n=t[e],"!important"===n[1].toLowerCase()){r.important=!0;let n=this.stringFrom(t,e);n=this.spacesFromEnd(t)+n," !important"!==n&&(r.raws.important=n);break}if("important"===n[1].toLowerCase()){let n=t.slice(0),s="";for(let t=e;t>0;t--){let e=n[t][0];if(0===s.trim().indexOf("!")&&"space"!==e)break;s=n.pop()[1]+s}0===s.trim().indexOf("!")&&(r.important=!0,r.raws.important=s,t=n)}if("space"!==n[0]&&"comment"!==n[0])break}let o=t.some((t=>"space"!==t[0]&&"comment"!==t[0]));this.raw(r,"value",t),o?r.raws.between+=i:r.value=i+r.value,r.value.includes(":")&&!e&&this.checkMissedSemicolon(t)}atrule(t){let e,r,n,s=new ar;s.name=t[1].slice(1),""===s.name&&this.unnamedAtrule(s,t),this.init(s,t[2]);let i=!1,o=!1,a=[],l=[];for(;!this.tokenizer.endOfFile();){if(e=(t=this.tokenizer.nextToken())[0],"("===e||"["===e?l.push("("===e?")":"]"):"{"===e&&l.length>0?l.push("}"):e===l[l.length-1]&&l.pop(),0===l.length){if(";"===e){s.source.end=this.getPosition(t[2]),this.semicolon=!0;break}if("{"===e){o=!0;break}if("}"===e){if(a.length>0){for(n=a.length-1,r=a[n];r&&"space"===r[0];)r=a[--n];r&&(s.source.end=this.getPosition(r[3]||r[2]))}this.end(t);break}a.push(t)}else a.push(t);if(this.tokenizer.endOfFile()){i=!0;break}}s.raws.between=this.spacesAndCommentsFromEnd(a),a.length?(s.raws.afterName=this.spacesAndCommentsFromStart(a),this.raw(s,"params",a),i&&(t=a[a.length-1],s.source.end=this.getPosition(t[3]||t[2]),this.spaces=s.raws.between,s.raws.between="")):(s.raws.afterName="",s.params=""),o&&(s.nodes=[],this.current=s)}end(t){this.current.nodes&&this.current.nodes.length&&(this.current.raws.semicolon=this.semicolon),this.semicolon=!1,this.current.raws.after=(this.current.raws.after||"")+this.spaces,this.spaces="",this.current.parent?(this.current.source.end=this.getPosition(t[2]),this.current=this.current.parent):this.unexpectedClose(t)}endFile(){this.current.parent&&this.unclosedBlock(),this.current.nodes&&this.current.nodes.length&&(this.current.raws.semicolon=this.semicolon),this.current.raws.after=(this.current.raws.after||"")+this.spaces}freeSemicolon(t){if(this.spaces+=t[1],this.current.nodes){let t=this.current.nodes[this.current.nodes.length-1];t&&"rule"===t.type&&!t.raws.ownSemicolon&&(t.raws.ownSemicolon=this.spaces,this.spaces="")}}getPosition(t){let e=this.input.fromOffset(t);return{offset:t,line:e.line,column:e.col}}init(t,e){this.current.push(t),t.source={start:this.getPosition(e),input:this.input},t.raws.before=this.spaces,this.spaces="","comment"!==t.type&&(this.semicolon=!1)}raw(t,e,r){let n,s,i,o,a=r.length,l="",u=!0,c=/^([#.|])?(\w)+/i;for(let e=0;e<a;e+=1)n=r[e],s=n[0],"comment"!==s||"rule"!==t.type?"comment"===s||"space"===s&&e===a-1?u=!1:l+=n[1]:(o=r[e-1],i=r[e+1],"space"!==o[0]&&"space"!==i[0]&&c.test(o[1])&&c.test(i[1])?l+=n[1]:u=!1);if(!u){let n=r.reduce(((t,e)=>t+e[1]),"");t.raws[e]={value:l,raw:n}}t[e]=l}spacesAndCommentsFromEnd(t){let e,r="";for(;t.length&&(e=t[t.length-1][0],"space"===e||"comment"===e);)r=t.pop()[1]+r;return r}spacesAndCommentsFromStart(t){let e,r="";for(;t.length&&(e=t[0][0],"space"===e||"comment"===e);)r+=t.shift()[1];return r}spacesFromEnd(t){let e,r="";for(;t.length&&(e=t[t.length-1][0],"space"===e);)r=t.pop()[1]+r;return r}stringFrom(t,e){let r="";for(let n=e;n<t.length;n++)r+=t[n][1];return t.splice(e,t.length-e),r}colon(t){let e,r,n,s=0;for(let[i,o]of t.entries()){if(e=o,r=e[0],"("===r&&(s+=1),")"===r&&(s-=1),0===s&&":"===r){if(n){if("word"===n[0]&&"progid"===n[1])continue;return i}this.doubleColon(e)}n=e}return!1}unclosedBracket(t){throw this.input.error("Unclosed bracket",t[2])}unknownWord(t){throw this.input.error("Unknown word",t[0][2])}unexpectedClose(t){throw this.input.error("Unexpected }",t[2])}unclosedBlock(){let t=this.current.source.start;throw this.input.error("Unclosed block",t.line,t.column)}doubleColon(t){throw this.input.error("Double colon",t[2])}unnamedAtrule(t,e){throw this.input.error("At-rule without name",e[2])}precheckMissedSemicolon(){}checkMissedSemicolon(t){let e=this.colon(t);if(!1===e)return;let r,n=0;for(let s=e-1;s>=0&&(r=t[s],"space"===r[0]||(n+=1,2!==n));s--);throw this.input.error("Missed semicolon","word"===r[0]?r[3]+1:r[2])}};var hr={nanoid:(t=21)=>{let e="",r=t;for(;r--;)e+="ModuleSymbhasOwnPr-0123456789ABCDEFGHNRVfgctiUvz_KqYTJkLxpZXIjQW"[64*Math.random()|0];return e},customAlphabet:(t,e)=>()=>{let r="",n=e;for(;n--;)r+=t[Math.random()*t.length|0];return r}};let{SourceMapConsumer:pr,SourceMapGenerator:fr}=dt,{existsSync:dr,readFileSync:mr}=dt,{dirname:gr,join:wr}=dt;class yr{constructor(t,e){if(!1===e.map)return;this.loadAnnotation(t),this.inline=this.startWith(this.annotation,"data:");let r=e.map?e.map.prev:void 0,n=this.loadMap(e.from,r);!this.mapFile&&e.from&&(this.mapFile=e.from),this.mapFile&&(this.root=gr(this.mapFile)),n&&(this.text=n)}consumer(){return this.consumerCache||(this.consumerCache=new pr(this.text)),this.consumerCache}withContent(){return!!(this.consumer().sourcesContent&&this.consumer().sourcesContent.length>0)}startWith(t,e){return!!t&&t.substr(0,e.length)===e}getAnnotationURL(t){return t.match(/\/\*\s*# sourceMappingURL=((?:(?!sourceMappingURL=).)*)\*\//)[1].trim()}loadAnnotation(t){let e=t.match(/\/\*\s*# sourceMappingURL=(?:(?!sourceMappingURL=).)*\*\//gm);if(e&&e.length>0){let t=e[e.length-1];t&&(this.annotation=this.getAnnotationURL(t))}}decodeInline(t){if(/^data:application\/json;charset=utf-?8,/.test(t)||/^data:application\/json,/.test(t))return decodeURIComponent(t.substr(RegExp.lastMatch.length));if(/^data:application\/json;charset=utf-?8;base64,/.test(t)||/^data:application\/json;base64,/.test(t))return e=t.substr(RegExp.lastMatch.length),Buffer?Buffer.from(e,"base64").toString():window.atob(e);var e;let r=t.match(/data:application\/json;([^,]+),/)[1];throw new Error("Unsupported source map encoding "+r)}loadFile(t){if(this.root=gr(t),dr(t))return this.mapFile=t,mr(t,"utf-8").toString().trim()}loadMap(t,e){if(!1===e)return!1;if(e){if("string"==typeof e)return e;if("function"!=typeof e){if(e instanceof pr)return fr.fromSourceMap(e).toString();if(e instanceof fr)return e.toString();if(this.isMap(e))return JSON.stringify(e);throw new Error("Unsupported previous source map format: "+e.toString())}{let r=e(t);if(r){let t=this.loadFile(r);if(!t)throw new Error("Unable to load previous source map: "+r.toString());return t}}}else{if(this.inline)return this.decodeInline(this.annotation);if(this.annotation){let e=this.annotation;return t&&(e=wr(gr(t),e)),this.loadFile(e)}}}isMap(t){return"object"==typeof t&&("string"==typeof t.mappings||"string"==typeof t._mappings||Array.isArray(t.sections))}}var vr=yr;yr.default=yr;let{SourceMapConsumer:br,SourceMapGenerator:xr}=dt,{fileURLToPath:Or,pathToFileURL:Cr}=dt,{resolve:Sr,isAbsolute:kr}=dt,{nanoid:Er}=hr,Pr=dt,Ar=xt,$r=vr,jr=Symbol("fromOffsetCache"),Rr=Boolean(br&&xr),Mr=Boolean(Sr&&kr);class _r{constructor(t,e={}){if(null==t||"object"==typeof t&&!t.toString)throw new Error(`PostCSS received ${t} instead of CSS string`);if(this.css=t.toString(),"\ufeff"===this.css[0]||"￾"===this.css[0]?(this.hasBOM=!0,this.css=this.css.slice(1)):this.hasBOM=!1,e.from&&(!Mr||/^\w+:\/\//.test(e.from)||kr(e.from)?this.file=e.from:this.file=Sr(e.from)),Mr&&Rr){let t=new $r(this.css,e);if(t.text){this.map=t;let e=t.consumer().file;!this.file&&e&&(this.file=this.mapResolve(e))}}this.file||(this.id="<input css "+Er(6)+">"),this.map&&(this.map.file=this.from)}fromOffset(t){let e,r;if(this[jr])r=this[jr];else{let t=this.css.split("\n");r=new Array(t.length);let e=0;for(let n=0,s=t.length;n<s;n++)r[n]=e,e+=t[n].length+1;this[jr]=r}e=r[r.length-1];let n=0;if(t>=e)n=r.length-1;else{let e,s=r.length-2;for(;n<s;)if(e=n+(s-n>>1),t<r[e])s=e-1;else{if(!(t>=r[e+1])){n=e;break}n=e+1}}return{line:n+1,col:t-r[n]+1}}error(t,e,r,n={}){let s;if(!r){let t=this.fromOffset(e);e=t.line,r=t.col}let i=this.origin(e,r);return s=i?new Ar(t,i.line,i.column,i.source,i.file,n.plugin):new Ar(t,e,r,this.css,this.file,n.plugin),s.input={line:e,column:r,source:this.css},this.file&&(Cr&&(s.input.url=Cr(this.file).toString()),s.input.file=this.file),s}origin(t,e){if(!this.map)return!1;let r,n=this.map.consumer(),s=n.originalPositionFor({line:t,column:e});if(!s.source)return!1;r=kr(s.source)?Cr(s.source):new URL(s.source,this.map.consumer().sourceRoot||Cr(this.map.mapFile));let i={url:r.toString(),line:s.line,column:s.column};if("file:"===r.protocol){if(!Or)throw new Error("file: protocol is not available in this PostCSS build");i.file=Or(r)}let o=n.sourceContentFor(s.source);return o&&(i.source=o),i}mapResolve(t){return/^\w+:\/\//.test(t)?t:Sr(this.map.consumer().sourceRoot||this.map.root||".",t)}get from(){return this.file||this.id}toJSON(){let t={};for(let e of["hasBOM","css","file","id"])null!=this[e]&&(t[e]=this[e]);return this.map&&(t.map={...this.map},t.map.consumerCache&&(t.map.consumerCache=void 0)),t}}var Ur=_r;_r.default=_r,Pr&&Pr.registerInput&&Pr.registerInput(_r);let Ir=ue,Tr=cr,Fr=Ur;function Br(t,e){let r=new Fr(t,e),n=new Tr(r);try{n.parse()}catch(t){throw"CssSyntaxError"===t.name&&e&&e.from&&(/\.scss$/i.test(e.from)?t.message+="\nYou tried to parse SCSS with the standard CSS parser; try again with the postcss-scss parser":/\.sass/i.test(e.from)?t.message+="\nYou tried to parse Sass with the standard CSS parser; try again with the postcss-sass parser":/\.less$/i.test(e.from)&&(t.message+="\nYou tried to parse Less with the standard CSS parser; try again with the postcss-less parser")),t}return n.root}var Wr=Br;Br.default=Br,Ir.registerParse(Br);let{isClean:Lr,my:zr}=Ot,Nr=Yt,Dr=Pt,Vr=ue,Jr=de,Gr=function(t){me[t]||(me[t]=!0,"undefined"!=typeof console&&console.warn&&console.warn(t))},qr=be,Yr=Wr,Qr=Ke;const Hr={document:"Document",root:"Root",atrule:"AtRule",rule:"Rule",decl:"Declaration",comment:"Comment"},Kr={postcssPlugin:!0,prepare:!0,Once:!0,Document:!0,Root:!0,Declaration:!0,Rule:!0,AtRule:!0,Comment:!0,DeclarationExit:!0,RuleExit:!0,AtRuleExit:!0,CommentExit:!0,RootExit:!0,DocumentExit:!0,OnceExit:!0},Xr={postcssPlugin:!0,prepare:!0,Once:!0};function Zr(t){return"object"==typeof t&&"function"==typeof t.then}function tn(t){let e=!1,r=Hr[t.type];return"decl"===t.type?e=t.prop.toLowerCase():"atrule"===t.type&&(e=t.name.toLowerCase()),e&&t.append?[r,r+"-"+e,0,r+"Exit",r+"Exit-"+e]:e?[r,r+"-"+e,r+"Exit",r+"Exit-"+e]:t.append?[r,0,r+"Exit"]:[r,r+"Exit"]}function en(t){let e;return e="document"===t.type?["Document",0,"DocumentExit"]:"root"===t.type?["Root",0,"RootExit"]:tn(t),{node:t,events:e,eventIndex:0,visitors:[],visitorIndex:0,iterator:0}}function rn(t){return t[Lr]=!1,t.nodes&&t.nodes.forEach((t=>rn(t))),t}let nn={};class sn{constructor(t,e,r){let n;if(this.stringified=!1,this.processed=!1,"object"!=typeof e||null===e||"root"!==e.type&&"document"!==e.type)if(e instanceof sn||e instanceof qr)n=rn(e.root),e.map&&(void 0===r.map&&(r.map={}),r.map.inline||(r.map.inline=!1),r.map.prev=e.map);else{let t=Yr;r.syntax&&(t=r.syntax.parse),r.parser&&(t=r.parser),t.parse&&(t=t.parse);try{n=t(e,r)}catch(t){this.processed=!0,this.error=t}n&&!n[zr]&&Vr.rebuild(n)}else n=rn(e);this.result=new qr(t,n,r),this.helpers={...nn,result:this.result,postcss:nn},this.plugins=this.processor.plugins.map((t=>"object"==typeof t&&t.prepare?{...t,...t.prepare(this.result)}:t))}get[Symbol.toStringTag](){return"LazyResult"}get processor(){return this.result.processor}get opts(){return this.result.opts}get css(){return this.stringify().css}get content(){return this.stringify().content}get map(){return this.stringify().map}get root(){return this.sync().root}get messages(){return this.sync().messages}warnings(){return this.sync().warnings()}toString(){return this.css}then(t,e){return"from"in this.opts||Gr("Without `from` option PostCSS could generate wrong source map and will not find Browserslist config. Set it to CSS file path or to `undefined` to prevent this warning."),this.async().then(t,e)}catch(t){return this.async().catch(t)}finally(t){return this.async().then(t,t)}async(){return this.error?Promise.reject(this.error):this.processed?Promise.resolve(this.result):(this.processing||(this.processing=this.runAsync()),this.processing)}sync(){if(this.error)throw this.error;if(this.processed)return this.result;if(this.processed=!0,this.processing)throw this.getAsyncError();for(let t of this.plugins){if(Zr(this.runOnRoot(t)))throw this.getAsyncError()}if(this.prepareVisitors(),this.hasListener){let t=this.result.root;for(;!t[Lr];)t[Lr]=!0,this.walkSync(t);if(this.listeners.OnceExit)if("document"===t.type)for(let e of t.nodes)this.visitSync(this.listeners.OnceExit,e);else this.visitSync(this.listeners.OnceExit,t)}return this.result}stringify(){if(this.error)throw this.error;if(this.stringified)return this.result;this.stringified=!0,this.sync();let t=this.result.opts,e=Dr;t.syntax&&(e=t.syntax.stringify),t.stringifier&&(e=t.stringifier),e.stringify&&(e=e.stringify);let r=new Nr(e,this.result.root,this.result.opts).generate();return this.result.css=r[0],this.result.map=r[1],this.result}walkSync(t){t[Lr]=!0;let e=tn(t);for(let r of e)if(0===r)t.nodes&&t.each((t=>{t[Lr]||this.walkSync(t)}));else{let e=this.listeners[r];if(e&&this.visitSync(e,t.toProxy()))return}}visitSync(t,e){for(let[r,n]of t){let t;this.result.lastPlugin=r;try{t=n(e,this.helpers)}catch(t){throw this.handleError(t,e.proxyOf)}if("root"!==e.type&&"document"!==e.type&&!e.parent)return!0;if(Zr(t))throw this.getAsyncError()}}runOnRoot(t){this.result.lastPlugin=t;try{if("object"==typeof t&&t.Once){if("document"===this.result.root.type){let e=this.result.root.nodes.map((e=>t.Once(e,this.helpers)));return Zr(e[0])?Promise.all(e):e}return t.Once(this.result.root,this.helpers)}if("function"==typeof t)return t(this.result.root,this.result)}catch(t){throw this.handleError(t)}}getAsyncError(){throw new Error("Use process(css).then(cb) to work with async plugins")}handleError(t,e){let r=this.result.lastPlugin;try{if(e&&e.addToError(t),this.error=t,"CssSyntaxError"!==t.name||t.plugin){if(r.postcssVersion){let t=r.postcssPlugin,e=r.postcssVersion,n=this.result.processor.version,s=e.split("."),i=n.split(".");(s[0]!==i[0]||parseInt(s[1])>parseInt(i[1]))&&console.error("Unknown error from PostCSS plugin. Your current PostCSS version is "+n+", but "+t+" uses "+e+". Perhaps this is the source of the error below.")}}else t.plugin=r.postcssPlugin,t.setMessage()}catch(t){console&&console.error&&console.error(t)}return t}async runAsync(){this.plugin=0;for(let t=0;t<this.plugins.length;t++){let e=this.plugins[t],r=this.runOnRoot(e);if(Zr(r))try{await r}catch(t){throw this.handleError(t)}}if(this.prepareVisitors(),this.hasListener){let t=this.result.root;for(;!t[Lr];){t[Lr]=!0;let e=[en(t)];for(;e.length>0;){let t=this.visitTick(e);if(Zr(t))try{await t}catch(t){let r=e[e.length-1].node;throw this.handleError(t,r)}}}if(this.listeners.OnceExit)for(let[e,r]of this.listeners.OnceExit){this.result.lastPlugin=e;try{if("document"===t.type){let e=t.nodes.map((t=>r(t,this.helpers)));await Promise.all(e)}else await r(t,this.helpers)}catch(t){throw this.handleError(t)}}}return this.processed=!0,this.stringify()}prepareVisitors(){this.listeners={};let t=(t,e,r)=>{this.listeners[e]||(this.listeners[e]=[]),this.listeners[e].push([t,r])};for(let e of this.plugins)if("object"==typeof e)for(let r in e){if(!Kr[r]&&/^[A-Z]/.test(r))throw new Error(`Unknown event ${r} in ${e.postcssPlugin}. Try to update PostCSS (${this.processor.version} now).`);if(!Xr[r])if("object"==typeof e[r])for(let n in e[r])t(e,"*"===n?r:r+"-"+n.toLowerCase(),e[r][n]);else"function"==typeof e[r]&&t(e,r,e[r])}this.hasListener=Object.keys(this.listeners).length>0}visitTick(t){let e=t[t.length-1],{node:r,visitors:n}=e;if("root"!==r.type&&"document"!==r.type&&!r.parent)return void t.pop();if(n.length>0&&e.visitorIndex<n.length){let[t,s]=n[e.visitorIndex];e.visitorIndex+=1,e.visitorIndex===n.length&&(e.visitors=[],e.visitorIndex=0),this.result.lastPlugin=t;try{return s(r.toProxy(),this.helpers)}catch(t){throw this.handleError(t,r)}}if(0!==e.iterator){let n,s=e.iterator;for(;n=r.nodes[r.indexes[s]];)if(r.indexes[s]+=1,!n[Lr])return n[Lr]=!0,void t.push(en(n));e.iterator=0,delete r.indexes[s]}let s=e.events;for(;e.eventIndex<s.length;){let t=s[e.eventIndex];if(e.eventIndex+=1,0===t)return void(r.nodes&&r.nodes.length&&(r[Lr]=!0,e.iterator=r.getIterator()));if(this.listeners[t])return void(e.visitors=this.listeners[t])}t.pop()}}sn.registerPostcss=t=>{nn=t};var on=sn;sn.default=sn,Qr.registerLazyResult(sn),Jr.registerLazyResult(sn);let an=on,ln=de,un=Ke;class cn{constructor(t=[]){this.version="8.3.6",this.plugins=this.normalize(t)}use(t){return this.plugins=this.plugins.concat(this.normalize([t])),this}process(t,e={}){return 0!==this.plugins.length||void 0!==e.parser||void 0!==e.stringifier||void 0!==e.syntax||e.hideNothingWarning||"undefined"!=typeof console&&console.warn&&console.warn("You did not set any plugins, parser, or stringifier. Right now, PostCSS does nothing. Pick plugins for your case on https://www.postcss.parts/ and use them in postcss.config.js."),new an(this,t,e)}normalize(t){let e=[];for(let r of t)if(!0===r.postcss?r=r():r.postcss&&(r=r.postcss),"object"==typeof r&&Array.isArray(r.plugins))e=e.concat(r.plugins);else if("object"==typeof r&&r.postcssPlugin)e.push(r);else{if("function"!=typeof r)throw"object"==typeof r&&(r.parse||r.stringify)?new Error("PostCSS syntaxes cannot be used as plugins. Instead, please use one of the syntax/parser/stringifier options as outlined in your PostCSS runner documentation."):new Error(r+" is not a PostCSS plugin");e.push(r)}return e}}var hn=cn;cn.default=cn,un.registerProcessor(cn),ln.registerProcessor(cn);let pn=Bt,fn=vr,dn=Kt,mn=Ge,gn=Ur,wn=Ke,yn=nr;function vn(t,e){if(Array.isArray(t))return t.map((t=>vn(t)));let{inputs:r,...n}=t;if(r){e=[];for(let t of r){let r={...t,__proto__:gn.prototype};r.map&&(r.map={...r.map,__proto__:fn.prototype}),e.push(r)}}if(n.nodes&&(n.nodes=t.nodes.map((t=>vn(t,e)))),n.source){let{inputId:t,...r}=n.source;n.source=r,null!=t&&(n.source.input=e[t])}if("root"===n.type)return new wn(n);if("decl"===n.type)return new pn(n);if("rule"===n.type)return new yn(n);if("comment"===n.type)return new dn(n);if("atrule"===n.type)return new mn(n);throw new Error("Unknown node type: "+t.type)}var bn=vn;vn.default=vn;let xn=xt,On=Bt,Cn=on,Sn=ue,kn=hn,En=Pt,Pn=bn,An=de,$n=we,jn=Kt,Rn=Ge,Mn=be,_n=Ur,Un=Wr,In=Ze,Tn=nr,Fn=Ke,Bn=It;function Wn(...t){return 1===t.length&&Array.isArray(t[0])&&(t=t[0]),new kn(t)}Wn.plugin=function(t,e){function r(...r){let n=e(...r);return n.postcssPlugin=t,n.postcssVersion=(new kn).version,n}let n;return console&&console.warn&&(console.warn(t+": postcss.plugin was deprecated. Migration guide:\nhttps://evilmartians.com/chronicles/postcss-8-plugin-migration"),"cn".startsWith("cn")&&console.warn(t+": 里面 postcss.plugin 被弃用. 迁移指南:\nhttps://www.w3ctech.com/topic/2226")),Object.defineProperty(r,"postcss",{get:()=>(n||(n=r()),n)}),r.process=function(t,e,n){return Wn([r(n)]).process(t,e)},r},Wn.stringify=En,Wn.parse=Un,Wn.fromJSON=Pn,Wn.list=In,Wn.comment=t=>new jn(t),Wn.atRule=t=>new Rn(t),Wn.decl=t=>new On(t),Wn.rule=t=>new Tn(t),Wn.root=t=>new Fn(t),Wn.document=t=>new An(t),Wn.CssSyntaxError=xn,Wn.Declaration=On,Wn.Container=Sn,Wn.Document=An,Wn.Comment=jn,Wn.Warning=$n,Wn.AtRule=Rn,Wn.Result=Mn,Wn.Input=_n,Wn.Rule=Tn,Wn.Root=Fn,Wn.Node=Bn,Cn.registerPostcss(Wn);var Ln=Wn;Wn.default=Wn;
-/*
+!function() {
+    "use strict";
+    var freeGlobal = "object" == typeof global && global && global.Object === Object && global, freeSelf = "object" == typeof self && self && self.Object === Object && self, root$1 = freeGlobal || freeSelf || Function("return this")(), Symbol$1 = root$1.Symbol, objectProto$1 = Object.prototype, hasOwnProperty$1 = objectProto$1.hasOwnProperty, nativeObjectToString$1 = objectProto$1.toString, symToStringTag$1 = Symbol$1 ? Symbol$1.toStringTag : void 0;
+    var nativeObjectToString = Object.prototype.toString;
+    var symToStringTag = Symbol$1 ? Symbol$1.toStringTag : void 0;
+    function baseGetTag(value) {
+        return null == value ? void 0 === value ? "[object Undefined]" : "[object Null]" : symToStringTag && symToStringTag in Object(value) ? function getRawTag(value) {
+            var isOwn = hasOwnProperty$1.call(value, symToStringTag$1), tag = value[symToStringTag$1];
+            try {
+                value[symToStringTag$1] = void 0;
+                var unmasked = !0;
+            } catch (e) {}
+            var result = nativeObjectToString$1.call(value);
+            return unmasked && (isOwn ? value[symToStringTag$1] = tag : delete value[symToStringTag$1]), 
+            result;
+        }(value) : function objectToString(value) {
+            return nativeObjectToString.call(value);
+        }(value);
+    }
+    var reWhitespace = /\s/;
+    var reTrimStart = /^\s+/;
+    function baseTrim(string) {
+        return string ? string.slice(0, function trimmedEndIndex(string) {
+            for (var index = string.length; index-- && reWhitespace.test(string.charAt(index)); ) ;
+            return index;
+        }(string) + 1).replace(reTrimStart, "") : string;
+    }
+    function isObject(value) {
+        var type = typeof value;
+        return null != value && ("object" == type || "function" == type);
+    }
+    var reIsBadHex = /^[-+]0x[0-9a-f]+$/i, reIsBinary = /^0b[01]+$/i, reIsOctal = /^0o[0-7]+$/i, freeParseInt = parseInt;
+    function toNumber(value) {
+        if ("number" == typeof value) return value;
+        if (function isSymbol(value) {
+            return "symbol" == typeof value || function isObjectLike(value) {
+                return null != value && "object" == typeof value;
+            }(value) && "[object Symbol]" == baseGetTag(value);
+        }(value)) return NaN;
+        if (isObject(value)) {
+            var other = "function" == typeof value.valueOf ? value.valueOf() : value;
+            value = isObject(other) ? other + "" : other;
+        }
+        if ("string" != typeof value) return 0 === value ? value : +value;
+        value = baseTrim(value);
+        var isBinary = reIsBinary.test(value);
+        return isBinary || reIsOctal.test(value) ? freeParseInt(value.slice(2), isBinary ? 2 : 8) : reIsBadHex.test(value) ? NaN : +value;
+    }
+    var now = function() {
+        return root$1.Date.now();
+    }, nativeMax = Math.max, nativeMin = Math.min;
+    function debounce(func, wait, options) {
+        var lastArgs, lastThis, maxWait, result, timerId, lastCallTime, lastInvokeTime = 0, leading = !1, maxing = !1, trailing = !0;
+        if ("function" != typeof func) throw new TypeError("Expected a function");
+        function invokeFunc(time) {
+            var args = lastArgs, thisArg = lastThis;
+            return lastArgs = lastThis = void 0, lastInvokeTime = time, result = func.apply(thisArg, args);
+        }
+        function leadingEdge(time) {
+            return lastInvokeTime = time, timerId = setTimeout(timerExpired, wait), leading ? invokeFunc(time) : result;
+        }
+        function shouldInvoke(time) {
+            var timeSinceLastCall = time - lastCallTime;
+            return void 0 === lastCallTime || timeSinceLastCall >= wait || timeSinceLastCall < 0 || maxing && time - lastInvokeTime >= maxWait;
+        }
+        function timerExpired() {
+            var time = now();
+            if (shouldInvoke(time)) return trailingEdge(time);
+            timerId = setTimeout(timerExpired, function remainingWait(time) {
+                var timeWaiting = wait - (time - lastCallTime);
+                return maxing ? nativeMin(timeWaiting, maxWait - (time - lastInvokeTime)) : timeWaiting;
+            }(time));
+        }
+        function trailingEdge(time) {
+            return timerId = void 0, trailing && lastArgs ? invokeFunc(time) : (lastArgs = lastThis = void 0, 
+            result);
+        }
+        function debounced() {
+            var time = now(), isInvoking = shouldInvoke(time);
+            if (lastArgs = arguments, lastThis = this, lastCallTime = time, isInvoking) {
+                if (void 0 === timerId) return leadingEdge(lastCallTime);
+                if (maxing) return clearTimeout(timerId), timerId = setTimeout(timerExpired, wait), 
+                invokeFunc(lastCallTime);
+            }
+            return void 0 === timerId && (timerId = setTimeout(timerExpired, wait)), result;
+        }
+        return wait = toNumber(wait) || 0, isObject(options) && (leading = !!options.leading, 
+        maxWait = (maxing = "maxWait" in options) ? nativeMax(toNumber(options.maxWait) || 0, wait) : maxWait, 
+        trailing = "trailing" in options ? !!options.trailing : trailing), debounced.cancel = function cancel() {
+            void 0 !== timerId && clearTimeout(timerId), lastInvokeTime = 0, lastArgs = lastCallTime = lastThis = timerId = void 0;
+        }, debounced.flush = function flush() {
+            return void 0 === timerId ? result : trailingEdge(now());
+        }, debounced;
+    }
+    function noop() {}
+    function run(fn) {
+        return fn();
+    }
+    function blank_object() {
+        return Object.create(null);
+    }
+    function run_all(fns) {
+        fns.forEach(run);
+    }
+    function is_function(thing) {
+        return "function" == typeof thing;
+    }
+    function safe_not_equal(a, b) {
+        return a != a ? b == b : a !== b || a && "object" == typeof a || "function" == typeof a;
+    }
+    function append(target, node) {
+        target.appendChild(node);
+    }
+    function insert(target, node, anchor) {
+        target.insertBefore(node, anchor || null);
+    }
+    function detach(node) {
+        node.parentNode.removeChild(node);
+    }
+    function element(name) {
+        return document.createElement(name);
+    }
+    function text(data) {
+        return document.createTextNode(data);
+    }
+    function space() {
+        return text(" ");
+    }
+    function listen(node, event, handler, options) {
+        return node.addEventListener(event, handler, options), () => node.removeEventListener(event, handler, options);
+    }
+    function attr(node, attribute, value) {
+        null == value ? node.removeAttribute(attribute) : node.getAttribute(attribute) !== value && node.setAttribute(attribute, value);
+    }
+    function set_input_value(input, value) {
+        input.value = null == value ? "" : value;
+    }
+    let current_component;
+    function set_current_component(component) {
+        current_component = component;
+    }
+    const dirty_components = [], binding_callbacks = [], render_callbacks = [], flush_callbacks = [], resolved_promise = Promise.resolve();
+    let update_scheduled = !1;
+    function add_render_callback(fn) {
+        render_callbacks.push(fn);
+    }
+    let flushing = !1;
+    const seen_callbacks = new Set;
+    function flush() {
+        if (!flushing) {
+            flushing = !0;
+            do {
+                for (let i = 0; i < dirty_components.length; i += 1) {
+                    const component = dirty_components[i];
+                    set_current_component(component), update(component.$$);
+                }
+                for (set_current_component(null), dirty_components.length = 0; binding_callbacks.length; ) binding_callbacks.pop()();
+                for (let i = 0; i < render_callbacks.length; i += 1) {
+                    const callback = render_callbacks[i];
+                    seen_callbacks.has(callback) || (seen_callbacks.add(callback), callback());
+                }
+                render_callbacks.length = 0;
+            } while (dirty_components.length);
+            for (;flush_callbacks.length; ) flush_callbacks.pop()();
+            update_scheduled = !1, flushing = !1, seen_callbacks.clear();
+        }
+    }
+    function update($$) {
+        if (null !== $$.fragment) {
+            $$.update(), run_all($$.before_update);
+            const dirty = $$.dirty;
+            $$.dirty = [ -1 ], $$.fragment && $$.fragment.p($$.ctx, dirty), $$.after_update.forEach(add_render_callback);
+        }
+    }
+    const outroing = new Set;
+    function transition_in(block, local) {
+        block && block.i && (outroing.delete(block), block.i(local));
+    }
+    function transition_out(block, local, detach, callback) {
+        if (block && block.o) {
+            if (outroing.has(block)) return;
+            outroing.add(block), undefined.c.push((() => {
+                outroing.delete(block), callback && (detach && block.d(1), callback());
+            })), block.o(local);
+        }
+    }
+    function create_component(block) {
+        block && block.c();
+    }
+    function mount_component(component, target, anchor, customElement) {
+        const {fragment: fragment, on_mount: on_mount, on_destroy: on_destroy, after_update: after_update} = component.$$;
+        fragment && fragment.m(target, anchor), customElement || add_render_callback((() => {
+            const new_on_destroy = on_mount.map(run).filter(is_function);
+            on_destroy ? on_destroy.push(...new_on_destroy) : run_all(new_on_destroy), component.$$.on_mount = [];
+        })), after_update.forEach(add_render_callback);
+    }
+    function destroy_component(component, detaching) {
+        const $$ = component.$$;
+        null !== $$.fragment && (run_all($$.on_destroy), $$.fragment && $$.fragment.d(detaching), 
+        $$.on_destroy = $$.fragment = null, $$.ctx = []);
+    }
+    function make_dirty(component, i) {
+        -1 === component.$$.dirty[0] && (dirty_components.push(component), function schedule_update() {
+            update_scheduled || (update_scheduled = !0, resolved_promise.then(flush));
+        }(), component.$$.dirty.fill(0)), component.$$.dirty[i / 31 | 0] |= 1 << i % 31;
+    }
+    function init(component, options, instance, create_fragment, not_equal, props, append_styles, dirty = [ -1 ]) {
+        const parent_component = current_component;
+        set_current_component(component);
+        const $$ = component.$$ = {
+            fragment: null,
+            ctx: null,
+            props: props,
+            update: noop,
+            not_equal: not_equal,
+            bound: blank_object(),
+            on_mount: [],
+            on_destroy: [],
+            on_disconnect: [],
+            before_update: [],
+            after_update: [],
+            context: new Map(parent_component ? parent_component.$$.context : options.context || []),
+            callbacks: blank_object(),
+            dirty: dirty,
+            skip_bound: !1,
+            root: options.target || parent_component.$$.root
+        };
+        append_styles && append_styles($$.root);
+        let ready = !1;
+        if ($$.ctx = instance ? instance(component, options.props || {}, ((i, ret, ...rest) => {
+            const value = rest.length ? rest[0] : ret;
+            return $$.ctx && not_equal($$.ctx[i], $$.ctx[i] = value) && (!$$.skip_bound && $$.bound[i] && $$.bound[i](value), 
+            ready && make_dirty(component, i)), ret;
+        })) : [], $$.update(), ready = !0, run_all($$.before_update), $$.fragment = !!create_fragment && create_fragment($$.ctx), 
+        options.target) {
+            if (options.hydrate) {
+                const nodes = function children(element) {
+                    return Array.from(element.childNodes);
+                }(options.target);
+                $$.fragment && $$.fragment.l(nodes), nodes.forEach(detach);
+            } else $$.fragment && $$.fragment.c();
+            options.intro && transition_in(component.$$.fragment), mount_component(component, options.target, options.anchor, options.customElement), 
+            flush();
+        }
+        set_current_component(parent_component);
+    }
+    class SvelteComponent {
+        $destroy() {
+            destroy_component(this, 1), this.$destroy = noop;
+        }
+        $on(type, callback) {
+            const callbacks = this.$$.callbacks[type] || (this.$$.callbacks[type] = []);
+            return callbacks.push(callback), () => {
+                const index = callbacks.indexOf(callback);
+                -1 !== index && callbacks.splice(index, 1);
+            };
+        }
+        $set($$props) {
+            this.$$set && !function is_empty(obj) {
+                return 0 === Object.keys(obj).length;
+            }($$props) && (this.$$.skip_bound = !0, this.$$set($$props), this.$$.skip_bound = !1);
+        }
+    }
+    function styleInject(css, ref) {
+        void 0 === ref && (ref = {});
+        var insertAt = ref.insertAt;
+        if (css && "undefined" != typeof document) {
+            var head = document.head || document.getElementsByTagName("head")[0], style = document.createElement("style");
+            style.type = "text/css", "top" === insertAt && head.firstChild ? head.insertBefore(style, head.firstChild) : head.appendChild(style), 
+            style.styleSheet ? style.styleSheet.cssText = css : style.appendChild(document.createTextNode(css));
+        }
+    }
+    function create_fragment$4(ctx) {
+        let div, t, div_class_value;
+        return {
+            c() {
+                div = element("div"), t = text(ctx[2]), attr(div, "class", div_class_value = "lbb-toast " + (ctx[1] ? "" : "lbb-toast--hide") + " svelte-6z5ekl");
+            },
+            m(target, anchor) {
+                insert(target, div, anchor), append(div, t), ctx[4](div);
+            },
+            p(ctx, [dirty]) {
+                4 & dirty && function set_data(text, data) {
+                    data = "" + data, text.wholeText !== data && (text.data = data);
+                }(t, ctx[2]), 2 & dirty && div_class_value !== (div_class_value = "lbb-toast " + (ctx[1] ? "" : "lbb-toast--hide") + " svelte-6z5ekl") && attr(div, "class", div_class_value);
+            },
+            i: noop,
+            o: noop,
+            d(detaching) {
+                detaching && detach(div), ctx[4](null);
+            }
+        };
+    }
+    function instance$3($$self, $$props, $$invalidate) {
+        let toast, content, visiable = !1, closeTimer = null;
+        return [ toast, visiable, content, function show({title: title, duration: duration = 1500}) {
+            $$invalidate(2, content = title), closeTimer && clearTimeout(closeTimer), $$invalidate(1, visiable = !0), 
+            closeTimer = setTimeout((() => {
+                $$invalidate(1, visiable = !1), closeTimer = null;
+            }), duration);
+        }, function div_binding($$value) {
+            binding_callbacks[$$value ? "unshift" : "push"]((() => {
+                toast = $$value, $$invalidate(0, toast);
+            }));
+        } ];
+    }
+    styleInject(".lbb-toast.svelte-6z5ekl{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);border-radius:4px;background-color:rgba(0,0,0,.8);padding:12px 24px;max-width:200px;color:#eee;font-size:16px;z-index:9999999}.lbb-toast--hide.svelte-6z5ekl{z-index:-1;visibility:hidden}");
+    class Toast extends SvelteComponent {
+        constructor(options) {
+            super(), init(this, options, instance$3, create_fragment$4, safe_not_equal, {
+                show: 3
+            });
+        }
+        get show() {
+            return this.$$.ctx[3];
+        }
+    }
+    const toast = function(createInstance, {withKey: withKey = !1, immediate: immediate = !1} = {}) {
+        const UNDEFINED_INSTANCE = {};
+        let _key, _instance = UNDEFINED_INSTANCE;
+        function getSingleton(key) {
+            return _instance !== UNDEFINED_INSTANCE && function checkSameKey(key) {
+                return !withKey || void 0 === key || key === _key;
+            }(key) || (_key = key, _instance = createInstance(_key)), _instance;
+        }
+        return immediate && getSingleton(), getSingleton;
+    }((() => {
+        const toastEl = new Toast({
+            target: document.body,
+            props: {
+                content: ""
+            }
+        });
+        return ({title: title, duration: duration = 1500}) => {
+            toastEl.show({
+                title: title,
+                duration: duration
+            });
+        };
+    }))();
+    function getDefaultExportFromCjs(x) {
+        return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, "default") ? x.default : x;
+    }
+    function getAugmentedNamespace(n) {
+        if (n.__esModule) return n;
+        var a = Object.defineProperty({}, "__esModule", {
+            value: !0
+        });
+        return Object.keys(n).forEach((function(k) {
+            var d = Object.getOwnPropertyDescriptor(n, k);
+            Object.defineProperty(a, k, d.get ? d : {
+                enumerable: !0,
+                get: function() {
+                    return n[k];
+                }
+            });
+        })), a;
+    }
+    var require$$4 = getAugmentedNamespace(Object.freeze({
+        __proto__: null,
+        default: {}
+    }));
+    let {red: red, bold: bold, gray: gray, options: colorette} = require$$4, terminalHighlight$1 = require$$4;
+    class CssSyntaxError$3 extends Error {
+        constructor(message, line, column, source, file, plugin) {
+            super(message), this.name = "CssSyntaxError", this.reason = message, file && (this.file = file), 
+            source && (this.source = source), plugin && (this.plugin = plugin), void 0 !== line && void 0 !== column && (this.line = line, 
+            this.column = column), this.setMessage(), Error.captureStackTrace && Error.captureStackTrace(this, CssSyntaxError$3);
+        }
+        setMessage() {
+            this.message = this.plugin ? this.plugin + ": " : "", this.message += this.file ? this.file : "<css input>", 
+            void 0 !== this.line && (this.message += ":" + this.line + ":" + this.column), this.message += ": " + this.reason;
+        }
+        showSourceCode(color) {
+            if (!this.source) return "";
+            let css = this.source;
+            null == color && (color = colorette.enabled), terminalHighlight$1 && color && (css = terminalHighlight$1(css));
+            let mark, aside, lines = css.split(/\r?\n/), start = Math.max(this.line - 3, 0), end = Math.min(this.line + 2, lines.length), maxWidth = String(end).length;
+            return color ? (mark = text => bold(red(text)), aside = text => gray(text)) : mark = aside = str => str, 
+            lines.slice(start, end).map(((line, index) => {
+                let number = start + 1 + index, gutter = " " + (" " + number).slice(-maxWidth) + " | ";
+                if (number === this.line) {
+                    let spacing = aside(gutter.replace(/\d/g, " ")) + line.slice(0, this.column - 1).replace(/[^\t]/g, " ");
+                    return mark(">") + aside(gutter) + line + "\n " + spacing + mark("^");
+                }
+                return " " + aside(gutter) + line;
+            })).join("\n");
+        }
+        toString() {
+            let code = this.showSourceCode();
+            return code && (code = "\n\n" + code + "\n"), this.name + ": " + this.message + code;
+        }
+    }
+    var cssSyntaxError = CssSyntaxError$3;
+    CssSyntaxError$3.default = CssSyntaxError$3;
+    var symbols = {};
+    symbols.isClean = Symbol("isClean"), symbols.my = Symbol("my");
+    const DEFAULT_RAW = {
+        colon: ": ",
+        indent: "    ",
+        beforeDecl: "\n",
+        beforeRule: "\n",
+        beforeOpen: " ",
+        beforeClose: "\n",
+        beforeComment: "\n",
+        after: "\n",
+        emptyBody: "",
+        commentLeft: " ",
+        commentRight: " ",
+        semicolon: !1
+    };
+    var stringifier = class Stringifier$2 {
+        constructor(builder) {
+            this.builder = builder;
+        }
+        stringify(node, semicolon) {
+            if (!this[node.type]) throw new Error("Unknown AST node type " + node.type + ". Maybe you need to change PostCSS stringifier.");
+            this[node.type](node, semicolon);
+        }
+        document(node) {
+            this.body(node);
+        }
+        root(node) {
+            this.body(node), node.raws.after && this.builder(node.raws.after);
+        }
+        comment(node) {
+            let left = this.raw(node, "left", "commentLeft"), right = this.raw(node, "right", "commentRight");
+            this.builder("/*" + left + node.text + right + "*/", node);
+        }
+        decl(node, semicolon) {
+            let between = this.raw(node, "between", "colon"), string = node.prop + between + this.rawValue(node, "value");
+            node.important && (string += node.raws.important || " !important"), semicolon && (string += ";"), 
+            this.builder(string, node);
+        }
+        rule(node) {
+            this.block(node, this.rawValue(node, "selector")), node.raws.ownSemicolon && this.builder(node.raws.ownSemicolon, node, "end");
+        }
+        atrule(node, semicolon) {
+            let name = "@" + node.name, params = node.params ? this.rawValue(node, "params") : "";
+            if (void 0 !== node.raws.afterName ? name += node.raws.afterName : params && (name += " "), 
+            node.nodes) this.block(node, name + params); else {
+                let end = (node.raws.between || "") + (semicolon ? ";" : "");
+                this.builder(name + params + end, node);
+            }
+        }
+        body(node) {
+            let last = node.nodes.length - 1;
+            for (;last > 0 && "comment" === node.nodes[last].type; ) last -= 1;
+            let semicolon = this.raw(node, "semicolon");
+            for (let i = 0; i < node.nodes.length; i++) {
+                let child = node.nodes[i], before = this.raw(child, "before");
+                before && this.builder(before), this.stringify(child, last !== i || semicolon);
+            }
+        }
+        block(node, start) {
+            let after, between = this.raw(node, "between", "beforeOpen");
+            this.builder(start + between + "{", node, "start"), node.nodes && node.nodes.length ? (this.body(node), 
+            after = this.raw(node, "after")) : after = this.raw(node, "after", "emptyBody"), 
+            after && this.builder(after), this.builder("}", node, "end");
+        }
+        raw(node, own, detect) {
+            let value;
+            if (detect || (detect = own), own && (value = node.raws[own], void 0 !== value)) return value;
+            let parent = node.parent;
+            if ("before" === detect) {
+                if (!parent || "root" === parent.type && parent.first === node) return "";
+                if (parent && "document" === parent.type) return "";
+            }
+            if (!parent) return DEFAULT_RAW[detect];
+            let root = node.root();
+            if (root.rawCache || (root.rawCache = {}), void 0 !== root.rawCache[detect]) return root.rawCache[detect];
+            if ("before" === detect || "after" === detect) return this.beforeAfter(node, detect);
+            {
+                let method = "raw" + function capitalize(str) {
+                    return str[0].toUpperCase() + str.slice(1);
+                }(detect);
+                this[method] ? value = this[method](root, node) : root.walk((i => {
+                    if (value = i.raws[own], void 0 !== value) return !1;
+                }));
+            }
+            return void 0 === value && (value = DEFAULT_RAW[detect]), root.rawCache[detect] = value, 
+            value;
+        }
+        rawSemicolon(root) {
+            let value;
+            return root.walk((i => {
+                if (i.nodes && i.nodes.length && "decl" === i.last.type && (value = i.raws.semicolon, 
+                void 0 !== value)) return !1;
+            })), value;
+        }
+        rawEmptyBody(root) {
+            let value;
+            return root.walk((i => {
+                if (i.nodes && 0 === i.nodes.length && (value = i.raws.after, void 0 !== value)) return !1;
+            })), value;
+        }
+        rawIndent(root) {
+            if (root.raws.indent) return root.raws.indent;
+            let value;
+            return root.walk((i => {
+                let p = i.parent;
+                if (p && p !== root && p.parent && p.parent === root && void 0 !== i.raws.before) {
+                    let parts = i.raws.before.split("\n");
+                    return value = parts[parts.length - 1], value = value.replace(/\S/g, ""), !1;
+                }
+            })), value;
+        }
+        rawBeforeComment(root, node) {
+            let value;
+            return root.walkComments((i => {
+                if (void 0 !== i.raws.before) return value = i.raws.before, value.includes("\n") && (value = value.replace(/[^\n]+$/, "")), 
+                !1;
+            })), void 0 === value ? value = this.raw(node, null, "beforeDecl") : value && (value = value.replace(/\S/g, "")), 
+            value;
+        }
+        rawBeforeDecl(root, node) {
+            let value;
+            return root.walkDecls((i => {
+                if (void 0 !== i.raws.before) return value = i.raws.before, value.includes("\n") && (value = value.replace(/[^\n]+$/, "")), 
+                !1;
+            })), void 0 === value ? value = this.raw(node, null, "beforeRule") : value && (value = value.replace(/\S/g, "")), 
+            value;
+        }
+        rawBeforeRule(root) {
+            let value;
+            return root.walk((i => {
+                if (i.nodes && (i.parent !== root || root.first !== i) && void 0 !== i.raws.before) return value = i.raws.before, 
+                value.includes("\n") && (value = value.replace(/[^\n]+$/, "")), !1;
+            })), value && (value = value.replace(/\S/g, "")), value;
+        }
+        rawBeforeClose(root) {
+            let value;
+            return root.walk((i => {
+                if (i.nodes && i.nodes.length > 0 && void 0 !== i.raws.after) return value = i.raws.after, 
+                value.includes("\n") && (value = value.replace(/[^\n]+$/, "")), !1;
+            })), value && (value = value.replace(/\S/g, "")), value;
+        }
+        rawBeforeOpen(root) {
+            let value;
+            return root.walk((i => {
+                if ("decl" !== i.type && (value = i.raws.between, void 0 !== value)) return !1;
+            })), value;
+        }
+        rawColon(root) {
+            let value;
+            return root.walkDecls((i => {
+                if (void 0 !== i.raws.between) return value = i.raws.between.replace(/[^\s:]/g, ""), 
+                !1;
+            })), value;
+        }
+        beforeAfter(node, detect) {
+            let value;
+            value = "decl" === node.type ? this.raw(node, null, "beforeDecl") : "comment" === node.type ? this.raw(node, null, "beforeComment") : "before" === detect ? this.raw(node, null, "beforeRule") : this.raw(node, null, "beforeClose");
+            let buf = node.parent, depth = 0;
+            for (;buf && "root" !== buf.type; ) depth += 1, buf = buf.parent;
+            if (value.includes("\n")) {
+                let indent = this.raw(node, null, "indent");
+                if (indent.length) for (let step = 0; step < depth; step++) value += indent;
+            }
+            return value;
+        }
+        rawValue(node, prop) {
+            let value = node[prop], raw = node.raws[prop];
+            return raw && raw.value === value ? raw.raw : value;
+        }
+    };
+    let Stringifier$1 = stringifier;
+    function stringify$3(node, builder) {
+        new Stringifier$1(builder).stringify(node);
+    }
+    var stringify_1 = stringify$3;
+    stringify$3.default = stringify$3;
+    let {isClean: isClean$2, my: my$2} = symbols, CssSyntaxError$2 = cssSyntaxError, Stringifier = stringifier, stringify$2 = stringify_1;
+    function cloneNode(obj, parent) {
+        let cloned = new obj.constructor;
+        for (let i in obj) {
+            if (!Object.prototype.hasOwnProperty.call(obj, i)) continue;
+            if ("proxyCache" === i) continue;
+            let value = obj[i], type = typeof value;
+            "parent" === i && "object" === type ? parent && (cloned[i] = parent) : "source" === i ? cloned[i] = value : Array.isArray(value) ? cloned[i] = value.map((j => cloneNode(j, cloned))) : ("object" === type && null !== value && (value = cloneNode(value)), 
+            cloned[i] = value);
+        }
+        return cloned;
+    }
+    class Node$4 {
+        constructor(defaults = {}) {
+            this.raws = {}, this[isClean$2] = !1, this[my$2] = !0;
+            for (let name in defaults) if ("nodes" === name) {
+                this.nodes = [];
+                for (let node of defaults[name]) "function" == typeof node.clone ? this.append(node.clone()) : this.append(node);
+            } else this[name] = defaults[name];
+        }
+        error(message, opts = {}) {
+            if (this.source) {
+                let pos = this.positionBy(opts);
+                return this.source.input.error(message, pos.line, pos.column, opts);
+            }
+            return new CssSyntaxError$2(message);
+        }
+        warn(result, text, opts) {
+            let data = {
+                node: this
+            };
+            for (let i in opts) data[i] = opts[i];
+            return result.warn(text, data);
+        }
+        remove() {
+            return this.parent && this.parent.removeChild(this), this.parent = void 0, this;
+        }
+        toString(stringifier = stringify$2) {
+            stringifier.stringify && (stringifier = stringifier.stringify);
+            let result = "";
+            return stringifier(this, (i => {
+                result += i;
+            })), result;
+        }
+        assign(overrides = {}) {
+            for (let name in overrides) this[name] = overrides[name];
+            return this;
+        }
+        clone(overrides = {}) {
+            let cloned = cloneNode(this);
+            for (let name in overrides) cloned[name] = overrides[name];
+            return cloned;
+        }
+        cloneBefore(overrides = {}) {
+            let cloned = this.clone(overrides);
+            return this.parent.insertBefore(this, cloned), cloned;
+        }
+        cloneAfter(overrides = {}) {
+            let cloned = this.clone(overrides);
+            return this.parent.insertAfter(this, cloned), cloned;
+        }
+        replaceWith(...nodes) {
+            if (this.parent) {
+                let bookmark = this, foundSelf = !1;
+                for (let node of nodes) node === this ? foundSelf = !0 : foundSelf ? (this.parent.insertAfter(bookmark, node), 
+                bookmark = node) : this.parent.insertBefore(bookmark, node);
+                foundSelf || this.remove();
+            }
+            return this;
+        }
+        next() {
+            if (!this.parent) return;
+            let index = this.parent.index(this);
+            return this.parent.nodes[index + 1];
+        }
+        prev() {
+            if (!this.parent) return;
+            let index = this.parent.index(this);
+            return this.parent.nodes[index - 1];
+        }
+        before(add) {
+            return this.parent.insertBefore(this, add), this;
+        }
+        after(add) {
+            return this.parent.insertAfter(this, add), this;
+        }
+        root() {
+            let result = this;
+            for (;result.parent && "document" !== result.parent.type; ) result = result.parent;
+            return result;
+        }
+        raw(prop, defaultType) {
+            return (new Stringifier).raw(this, prop, defaultType);
+        }
+        cleanRaws(keepBetween) {
+            delete this.raws.before, delete this.raws.after, keepBetween || delete this.raws.between;
+        }
+        toJSON(_, inputs) {
+            let fixed = {}, emitInputs = null == inputs;
+            inputs = inputs || new Map;
+            let inputsNextIndex = 0;
+            for (let name in this) {
+                if (!Object.prototype.hasOwnProperty.call(this, name)) continue;
+                if ("parent" === name || "proxyCache" === name) continue;
+                let value = this[name];
+                if (Array.isArray(value)) fixed[name] = value.map((i => "object" == typeof i && i.toJSON ? i.toJSON(null, inputs) : i)); else if ("object" == typeof value && value.toJSON) fixed[name] = value.toJSON(null, inputs); else if ("source" === name) {
+                    let inputId = inputs.get(value.input);
+                    null == inputId && (inputId = inputsNextIndex, inputs.set(value.input, inputsNextIndex), 
+                    inputsNextIndex++), fixed[name] = {
+                        inputId: inputId,
+                        start: value.start,
+                        end: value.end
+                    };
+                } else fixed[name] = value;
+            }
+            return emitInputs && (fixed.inputs = [ ...inputs.keys() ].map((input => input.toJSON()))), 
+            fixed;
+        }
+        positionInside(index) {
+            let string = this.toString(), column = this.source.start.column, line = this.source.start.line;
+            for (let i = 0; i < index; i++) "\n" === string[i] ? (column = 1, line += 1) : column += 1;
+            return {
+                line: line,
+                column: column
+            };
+        }
+        positionBy(opts) {
+            let pos = this.source.start;
+            if (opts.index) pos = this.positionInside(opts.index); else if (opts.word) {
+                let index = this.toString().indexOf(opts.word);
+                -1 !== index && (pos = this.positionInside(index));
+            }
+            return pos;
+        }
+        getProxyProcessor() {
+            return {
+                set: (node, prop, value) => (node[prop] === value || (node[prop] = value, "prop" !== prop && "value" !== prop && "name" !== prop && "params" !== prop && "important" !== prop && "text" !== prop || node.markDirty()), 
+                !0),
+                get: (node, prop) => "proxyOf" === prop ? node : "root" === prop ? () => node.root().toProxy() : node[prop]
+            };
+        }
+        toProxy() {
+            return this.proxyCache || (this.proxyCache = new Proxy(this, this.getProxyProcessor())), 
+            this.proxyCache;
+        }
+        addToError(error) {
+            if (error.postcssNode = this, error.stack && this.source && /\n\s{4}at /.test(error.stack)) {
+                let s = this.source;
+                error.stack = error.stack.replace(/\n\s{4}at /, `$&${s.input.from}:${s.start.line}:${s.start.column}$&`);
+            }
+            return error;
+        }
+        markDirty() {
+            if (this[isClean$2]) {
+                this[isClean$2] = !1;
+                let next = this;
+                for (;next = next.parent; ) next[isClean$2] = !1;
+            }
+        }
+        get proxyOf() {
+            return this;
+        }
+    }
+    var node_1 = Node$4;
+    Node$4.default = Node$4;
+    let Node$3 = node_1;
+    class Declaration$4 extends Node$3 {
+        constructor(defaults) {
+            defaults && void 0 !== defaults.value && "string" != typeof defaults.value && (defaults = {
+                ...defaults,
+                value: String(defaults.value)
+            }), super(defaults), this.type = "decl";
+        }
+        get variable() {
+            return this.prop.startsWith("--") || "$" === this.prop[0];
+        }
+    }
+    var declaration = Declaration$4;
+    Declaration$4.default = Declaration$4;
+    let {SourceMapConsumer: SourceMapConsumer$2, SourceMapGenerator: SourceMapGenerator$2} = require$$4, {dirname: dirname$1, resolve: resolve$1, relative: relative, sep: sep} = require$$4, {pathToFileURL: pathToFileURL$1} = require$$4, sourceMapAvailable$1 = Boolean(SourceMapConsumer$2 && SourceMapGenerator$2), pathAvailable$1 = Boolean(dirname$1 && resolve$1 && relative && sep);
+    var mapGenerator = class MapGenerator$1 {
+        constructor(stringify, root, opts) {
+            this.stringify = stringify, this.mapOpts = opts.map || {}, this.root = root, this.opts = opts;
+        }
+        isMap() {
+            return void 0 !== this.opts.map ? !!this.opts.map : this.previous().length > 0;
+        }
+        previous() {
+            return this.previousMaps || (this.previousMaps = [], this.root.walk((node => {
+                if (node.source && node.source.input.map) {
+                    let map = node.source.input.map;
+                    this.previousMaps.includes(map) || this.previousMaps.push(map);
+                }
+            }))), this.previousMaps;
+        }
+        isInline() {
+            if (void 0 !== this.mapOpts.inline) return this.mapOpts.inline;
+            let annotation = this.mapOpts.annotation;
+            return (void 0 === annotation || !0 === annotation) && (!this.previous().length || this.previous().some((i => i.inline)));
+        }
+        isSourcesContent() {
+            return void 0 !== this.mapOpts.sourcesContent ? this.mapOpts.sourcesContent : !this.previous().length || this.previous().some((i => i.withContent()));
+        }
+        clearAnnotation() {
+            if (!1 === this.mapOpts.annotation) return;
+            let node;
+            for (let i = this.root.nodes.length - 1; i >= 0; i--) node = this.root.nodes[i], 
+            "comment" === node.type && 0 === node.text.indexOf("# sourceMappingURL=") && this.root.removeChild(i);
+        }
+        setSourcesContent() {
+            let already = {};
+            this.root.walk((node => {
+                if (node.source) {
+                    let from = node.source.input.from;
+                    from && !already[from] && (already[from] = !0, this.map.setSourceContent(this.toUrl(this.path(from)), node.source.input.css));
+                }
+            }));
+        }
+        applyPrevMaps() {
+            for (let prev of this.previous()) {
+                let map, from = this.toUrl(this.path(prev.file)), root = prev.root || dirname$1(prev.file);
+                !1 === this.mapOpts.sourcesContent ? (map = new SourceMapConsumer$2(prev.text), 
+                map.sourcesContent && (map.sourcesContent = map.sourcesContent.map((() => null)))) : map = prev.consumer(), 
+                this.map.applySourceMap(map, from, this.toUrl(this.path(root)));
+            }
+        }
+        isAnnotation() {
+            return !!this.isInline() || (void 0 !== this.mapOpts.annotation ? this.mapOpts.annotation : !this.previous().length || this.previous().some((i => i.annotation)));
+        }
+        toBase64(str) {
+            return Buffer ? Buffer.from(str).toString("base64") : window.btoa(unescape(encodeURIComponent(str)));
+        }
+        addAnnotation() {
+            let content;
+            content = this.isInline() ? "data:application/json;base64," + this.toBase64(this.map.toString()) : "string" == typeof this.mapOpts.annotation ? this.mapOpts.annotation : "function" == typeof this.mapOpts.annotation ? this.mapOpts.annotation(this.opts.to, this.root) : this.outputFile() + ".map";
+            let eol = "\n";
+            this.css.includes("\r\n") && (eol = "\r\n"), this.css += eol + "/*# sourceMappingURL=" + content + " */";
+        }
+        outputFile() {
+            return this.opts.to ? this.path(this.opts.to) : this.opts.from ? this.path(this.opts.from) : "to.css";
+        }
+        generateMap() {
+            return this.generateString(), this.isSourcesContent() && this.setSourcesContent(), 
+            this.previous().length > 0 && this.applyPrevMaps(), this.isAnnotation() && this.addAnnotation(), 
+            this.isInline() ? [ this.css ] : [ this.css, this.map ];
+        }
+        path(file) {
+            if (0 === file.indexOf("<")) return file;
+            if (/^\w+:\/\//.test(file)) return file;
+            if (this.mapOpts.absolute) return file;
+            let from = this.opts.to ? dirname$1(this.opts.to) : ".";
+            return "string" == typeof this.mapOpts.annotation && (from = dirname$1(resolve$1(from, this.mapOpts.annotation))), 
+            file = relative(from, file);
+        }
+        toUrl(path) {
+            return "\\" === sep && (path = path.replace(/\\/g, "/")), encodeURI(path).replace(/[#?]/g, encodeURIComponent);
+        }
+        sourcePath(node) {
+            if (this.mapOpts.from) return this.toUrl(this.mapOpts.from);
+            if (this.mapOpts.absolute) {
+                if (pathToFileURL$1) return pathToFileURL$1(node.source.input.from).toString();
+                throw new Error("`map.absolute` option is not available in this PostCSS build");
+            }
+            return this.toUrl(this.path(node.source.input.from));
+        }
+        generateString() {
+            this.css = "", this.map = new SourceMapGenerator$2({
+                file: this.outputFile()
+            });
+            let lines, last, line = 1, column = 1, mapping = {
+                source: "",
+                generated: {
+                    line: 0,
+                    column: 0
+                },
+                original: {
+                    line: 0,
+                    column: 0
+                }
+            };
+            this.stringify(this.root, ((str, node, type) => {
+                if (this.css += str, node && "end" !== type && (mapping.generated.line = line, mapping.generated.column = column - 1, 
+                node.source && node.source.start ? (mapping.source = this.sourcePath(node), mapping.original.line = node.source.start.line, 
+                mapping.original.column = node.source.start.column - 1, this.map.addMapping(mapping)) : (mapping.source = "<no source>", 
+                mapping.original.line = 1, mapping.original.column = 0, this.map.addMapping(mapping))), 
+                lines = str.match(/\n/g), lines ? (line += lines.length, last = str.lastIndexOf("\n"), 
+                column = str.length - last) : column += str.length, node && "start" !== type) {
+                    let p = node.parent || {
+                        raws: {}
+                    };
+                    ("decl" !== node.type || node !== p.last || p.raws.semicolon) && (node.source && node.source.end ? (mapping.source = this.sourcePath(node), 
+                    mapping.original.line = node.source.end.line, mapping.original.column = node.source.end.column - 1, 
+                    mapping.generated.line = line, mapping.generated.column = column - 2, this.map.addMapping(mapping)) : (mapping.source = "<no source>", 
+                    mapping.original.line = 1, mapping.original.column = 0, mapping.generated.line = line, 
+                    mapping.generated.column = column - 1, this.map.addMapping(mapping)));
+                }
+            }));
+        }
+        generate() {
+            if (this.clearAnnotation(), pathAvailable$1 && sourceMapAvailable$1 && this.isMap()) return this.generateMap();
+            let result = "";
+            return this.stringify(this.root, (i => {
+                result += i;
+            })), [ result ];
+        }
+    };
+    let Node$2 = node_1;
+    class Comment$4 extends Node$2 {
+        constructor(defaults) {
+            super(defaults), this.type = "comment";
+        }
+    }
+    var comment = Comment$4;
+    Comment$4.default = Comment$4;
+    let parse$3, Rule$4, AtRule$4, {isClean: isClean$1, my: my$1} = symbols, Declaration$3 = declaration, Comment$3 = comment, Node$1 = node_1;
+    function cleanSource(nodes) {
+        return nodes.map((i => (i.nodes && (i.nodes = cleanSource(i.nodes)), delete i.source, 
+        i)));
+    }
+    function markDirtyUp(node) {
+        if (node[isClean$1] = !1, node.proxyOf.nodes) for (let i of node.proxyOf.nodes) markDirtyUp(i);
+    }
+    class Container$7 extends Node$1 {
+        push(child) {
+            return child.parent = this, this.proxyOf.nodes.push(child), this;
+        }
+        each(callback) {
+            if (!this.proxyOf.nodes) return;
+            let index, result, iterator = this.getIterator();
+            for (;this.indexes[iterator] < this.proxyOf.nodes.length && (index = this.indexes[iterator], 
+            result = callback(this.proxyOf.nodes[index], index), !1 !== result); ) this.indexes[iterator] += 1;
+            return delete this.indexes[iterator], result;
+        }
+        walk(callback) {
+            return this.each(((child, i) => {
+                let result;
+                try {
+                    result = callback(child, i);
+                } catch (e) {
+                    throw child.addToError(e);
+                }
+                return !1 !== result && child.walk && (result = child.walk(callback)), result;
+            }));
+        }
+        walkDecls(prop, callback) {
+            return callback ? prop instanceof RegExp ? this.walk(((child, i) => {
+                if ("decl" === child.type && prop.test(child.prop)) return callback(child, i);
+            })) : this.walk(((child, i) => {
+                if ("decl" === child.type && child.prop === prop) return callback(child, i);
+            })) : (callback = prop, this.walk(((child, i) => {
+                if ("decl" === child.type) return callback(child, i);
+            })));
+        }
+        walkRules(selector, callback) {
+            return callback ? selector instanceof RegExp ? this.walk(((child, i) => {
+                if ("rule" === child.type && selector.test(child.selector)) return callback(child, i);
+            })) : this.walk(((child, i) => {
+                if ("rule" === child.type && child.selector === selector) return callback(child, i);
+            })) : (callback = selector, this.walk(((child, i) => {
+                if ("rule" === child.type) return callback(child, i);
+            })));
+        }
+        walkAtRules(name, callback) {
+            return callback ? name instanceof RegExp ? this.walk(((child, i) => {
+                if ("atrule" === child.type && name.test(child.name)) return callback(child, i);
+            })) : this.walk(((child, i) => {
+                if ("atrule" === child.type && child.name === name) return callback(child, i);
+            })) : (callback = name, this.walk(((child, i) => {
+                if ("atrule" === child.type) return callback(child, i);
+            })));
+        }
+        walkComments(callback) {
+            return this.walk(((child, i) => {
+                if ("comment" === child.type) return callback(child, i);
+            }));
+        }
+        append(...children) {
+            for (let child of children) {
+                let nodes = this.normalize(child, this.last);
+                for (let node of nodes) this.proxyOf.nodes.push(node);
+            }
+            return this.markDirty(), this;
+        }
+        prepend(...children) {
+            children = children.reverse();
+            for (let child of children) {
+                let nodes = this.normalize(child, this.first, "prepend").reverse();
+                for (let node of nodes) this.proxyOf.nodes.unshift(node);
+                for (let id in this.indexes) this.indexes[id] = this.indexes[id] + nodes.length;
+            }
+            return this.markDirty(), this;
+        }
+        cleanRaws(keepBetween) {
+            if (super.cleanRaws(keepBetween), this.nodes) for (let node of this.nodes) node.cleanRaws(keepBetween);
+        }
+        insertBefore(exist, add) {
+            let index, type = 0 === (exist = this.index(exist)) && "prepend", nodes = this.normalize(add, this.proxyOf.nodes[exist], type).reverse();
+            for (let node of nodes) this.proxyOf.nodes.splice(exist, 0, node);
+            for (let id in this.indexes) index = this.indexes[id], exist <= index && (this.indexes[id] = index + nodes.length);
+            return this.markDirty(), this;
+        }
+        insertAfter(exist, add) {
+            exist = this.index(exist);
+            let index, nodes = this.normalize(add, this.proxyOf.nodes[exist]).reverse();
+            for (let node of nodes) this.proxyOf.nodes.splice(exist + 1, 0, node);
+            for (let id in this.indexes) index = this.indexes[id], exist < index && (this.indexes[id] = index + nodes.length);
+            return this.markDirty(), this;
+        }
+        removeChild(child) {
+            let index;
+            child = this.index(child), this.proxyOf.nodes[child].parent = void 0, this.proxyOf.nodes.splice(child, 1);
+            for (let id in this.indexes) index = this.indexes[id], index >= child && (this.indexes[id] = index - 1);
+            return this.markDirty(), this;
+        }
+        removeAll() {
+            for (let node of this.proxyOf.nodes) node.parent = void 0;
+            return this.proxyOf.nodes = [], this.markDirty(), this;
+        }
+        replaceValues(pattern, opts, callback) {
+            return callback || (callback = opts, opts = {}), this.walkDecls((decl => {
+                opts.props && !opts.props.includes(decl.prop) || opts.fast && !decl.value.includes(opts.fast) || (decl.value = decl.value.replace(pattern, callback));
+            })), this.markDirty(), this;
+        }
+        every(condition) {
+            return this.nodes.every(condition);
+        }
+        some(condition) {
+            return this.nodes.some(condition);
+        }
+        index(child) {
+            return "number" == typeof child ? child : (child.proxyOf && (child = child.proxyOf), 
+            this.proxyOf.nodes.indexOf(child));
+        }
+        get first() {
+            if (this.proxyOf.nodes) return this.proxyOf.nodes[0];
+        }
+        get last() {
+            if (this.proxyOf.nodes) return this.proxyOf.nodes[this.proxyOf.nodes.length - 1];
+        }
+        normalize(nodes, sample) {
+            if ("string" == typeof nodes) nodes = cleanSource(parse$3(nodes).nodes); else if (Array.isArray(nodes)) {
+                nodes = nodes.slice(0);
+                for (let i of nodes) i.parent && i.parent.removeChild(i, "ignore");
+            } else if ("root" === nodes.type && "document" !== this.type) {
+                nodes = nodes.nodes.slice(0);
+                for (let i of nodes) i.parent && i.parent.removeChild(i, "ignore");
+            } else if (nodes.type) nodes = [ nodes ]; else if (nodes.prop) {
+                if (void 0 === nodes.value) throw new Error("Value field is missed in node creation");
+                "string" != typeof nodes.value && (nodes.value = String(nodes.value)), nodes = [ new Declaration$3(nodes) ];
+            } else if (nodes.selector) nodes = [ new Rule$4(nodes) ]; else if (nodes.name) nodes = [ new AtRule$4(nodes) ]; else {
+                if (!nodes.text) throw new Error("Unknown node type in node creation");
+                nodes = [ new Comment$3(nodes) ];
+            }
+            return nodes.map((i => (i[my$1] || Container$7.rebuild(i), (i = i.proxyOf).parent && i.parent.removeChild(i), 
+            i[isClean$1] && markDirtyUp(i), void 0 === i.raws.before && sample && void 0 !== sample.raws.before && (i.raws.before = sample.raws.before.replace(/\S/g, "")), 
+            i.parent = this, i)));
+        }
+        getProxyProcessor() {
+            return {
+                set: (node, prop, value) => (node[prop] === value || (node[prop] = value, "name" !== prop && "params" !== prop && "selector" !== prop || node.markDirty()), 
+                !0),
+                get: (node, prop) => "proxyOf" === prop ? node : node[prop] ? "each" === prop || "string" == typeof prop && prop.startsWith("walk") ? (...args) => node[prop](...args.map((i => "function" == typeof i ? (child, index) => i(child.toProxy(), index) : i))) : "every" === prop || "some" === prop ? cb => node[prop](((child, ...other) => cb(child.toProxy(), ...other))) : "root" === prop ? () => node.root().toProxy() : "nodes" === prop ? node.nodes.map((i => i.toProxy())) : "first" === prop || "last" === prop ? node[prop].toProxy() : node[prop] : node[prop]
+            };
+        }
+        getIterator() {
+            this.lastEach || (this.lastEach = 0), this.indexes || (this.indexes = {}), this.lastEach += 1;
+            let iterator = this.lastEach;
+            return this.indexes[iterator] = 0, iterator;
+        }
+    }
+    Container$7.registerParse = dependant => {
+        parse$3 = dependant;
+    }, Container$7.registerRule = dependant => {
+        Rule$4 = dependant;
+    }, Container$7.registerAtRule = dependant => {
+        AtRule$4 = dependant;
+    };
+    var container = Container$7;
+    Container$7.default = Container$7, Container$7.rebuild = node => {
+        "atrule" === node.type ? Object.setPrototypeOf(node, AtRule$4.prototype) : "rule" === node.type ? Object.setPrototypeOf(node, Rule$4.prototype) : "decl" === node.type ? Object.setPrototypeOf(node, Declaration$3.prototype) : "comment" === node.type && Object.setPrototypeOf(node, Comment$3.prototype), 
+        node[my$1] = !0, node.nodes && node.nodes.forEach((child => {
+            Container$7.rebuild(child);
+        }));
+    };
+    let LazyResult$4, Processor$3, Container$6 = container;
+    class Document$3 extends Container$6 {
+        constructor(defaults) {
+            super({
+                type: "document",
+                ...defaults
+            }), this.nodes || (this.nodes = []);
+        }
+        toResult(opts = {}) {
+            return new LazyResult$4(new Processor$3, this, opts).stringify();
+        }
+    }
+    Document$3.registerLazyResult = dependant => {
+        LazyResult$4 = dependant;
+    }, Document$3.registerProcessor = dependant => {
+        Processor$3 = dependant;
+    };
+    var document$1 = Document$3;
+    Document$3.default = Document$3;
+    let printed = {};
+    class Warning$2 {
+        constructor(text, opts = {}) {
+            if (this.type = "warning", this.text = text, opts.node && opts.node.source) {
+                let pos = opts.node.positionBy(opts);
+                this.line = pos.line, this.column = pos.column;
+            }
+            for (let opt in opts) this[opt] = opts[opt];
+        }
+        toString() {
+            return this.node ? this.node.error(this.text, {
+                plugin: this.plugin,
+                index: this.index,
+                word: this.word
+            }).message : this.plugin ? this.plugin + ": " + this.text : this.text;
+        }
+    }
+    var warning = Warning$2;
+    Warning$2.default = Warning$2;
+    let Warning$1 = warning;
+    class Result$2 {
+        constructor(processor, root, opts) {
+            this.processor = processor, this.messages = [], this.root = root, this.opts = opts, 
+            this.css = void 0, this.map = void 0;
+        }
+        toString() {
+            return this.css;
+        }
+        warn(text, opts = {}) {
+            opts.plugin || this.lastPlugin && this.lastPlugin.postcssPlugin && (opts.plugin = this.lastPlugin.postcssPlugin);
+            let warning = new Warning$1(text, opts);
+            return this.messages.push(warning), warning;
+        }
+        warnings() {
+            return this.messages.filter((i => "warning" === i.type));
+        }
+        get content() {
+            return this.css;
+        }
+    }
+    var result = Result$2;
+    Result$2.default = Result$2;
+    const SINGLE_QUOTE = "'".charCodeAt(0), DOUBLE_QUOTE = '"'.charCodeAt(0), BACKSLASH = "\\".charCodeAt(0), SLASH = "/".charCodeAt(0), NEWLINE = "\n".charCodeAt(0), SPACE = " ".charCodeAt(0), FEED = "\f".charCodeAt(0), TAB = "\t".charCodeAt(0), CR = "\r".charCodeAt(0), OPEN_SQUARE = "[".charCodeAt(0), CLOSE_SQUARE = "]".charCodeAt(0), OPEN_PARENTHESES = "(".charCodeAt(0), CLOSE_PARENTHESES = ")".charCodeAt(0), OPEN_CURLY = "{".charCodeAt(0), CLOSE_CURLY = "}".charCodeAt(0), SEMICOLON = ";".charCodeAt(0), ASTERISK = "*".charCodeAt(0), COLON = ":".charCodeAt(0), AT = "@".charCodeAt(0), RE_AT_END = /[\t\n\f\r "#'()/;[\\\]{}]/g, RE_WORD_END = /[\t\n\f\r !"#'():;@[\\\]{}]|\/(?=\*)/g, RE_BAD_BRACKET = /.[\n"'(/\\]/, RE_HEX_ESCAPE = /[\da-f]/i;
+    let Container$5 = container;
+    class AtRule$3 extends Container$5 {
+        constructor(defaults) {
+            super(defaults), this.type = "atrule";
+        }
+        append(...children) {
+            return this.proxyOf.nodes || (this.nodes = []), super.append(...children);
+        }
+        prepend(...children) {
+            return this.proxyOf.nodes || (this.nodes = []), super.prepend(...children);
+        }
+    }
+    var atRule = AtRule$3;
+    AtRule$3.default = AtRule$3, Container$5.registerAtRule(AtRule$3);
+    let LazyResult$3, Processor$2, Container$4 = container;
+    class Root$5 extends Container$4 {
+        constructor(defaults) {
+            super(defaults), this.type = "root", this.nodes || (this.nodes = []);
+        }
+        removeChild(child, ignore) {
+            let index = this.index(child);
+            return !ignore && 0 === index && this.nodes.length > 1 && (this.nodes[1].raws.before = this.nodes[index].raws.before), 
+            super.removeChild(child);
+        }
+        normalize(child, sample, type) {
+            let nodes = super.normalize(child);
+            if (sample) if ("prepend" === type) this.nodes.length > 1 ? sample.raws.before = this.nodes[1].raws.before : delete sample.raws.before; else if (this.first !== sample) for (let node of nodes) node.raws.before = sample.raws.before;
+            return nodes;
+        }
+        toResult(opts = {}) {
+            return new LazyResult$3(new Processor$2, this, opts).stringify();
+        }
+    }
+    Root$5.registerLazyResult = dependant => {
+        LazyResult$3 = dependant;
+    }, Root$5.registerProcessor = dependant => {
+        Processor$2 = dependant;
+    };
+    var root = Root$5;
+    Root$5.default = Root$5;
+    let list$2 = {
+        split(string, separators, last) {
+            let array = [], current = "", split = !1, func = 0, quote = !1, escape = !1;
+            for (let letter of string) escape ? escape = !1 : "\\" === letter ? escape = !0 : quote ? letter === quote && (quote = !1) : '"' === letter || "'" === letter ? quote = letter : "(" === letter ? func += 1 : ")" === letter ? func > 0 && (func -= 1) : 0 === func && separators.includes(letter) && (split = !0), 
+            split ? ("" !== current && array.push(current.trim()), current = "", split = !1) : current += letter;
+            return (last || "" !== current) && array.push(current.trim()), array;
+        },
+        space: string => list$2.split(string, [ " ", "\n", "\t" ]),
+        comma: string => list$2.split(string, [ "," ], !0)
+    };
+    var list_1 = list$2;
+    list$2.default = list$2;
+    let Container$3 = container, list$1 = list_1;
+    class Rule$3 extends Container$3 {
+        constructor(defaults) {
+            super(defaults), this.type = "rule", this.nodes || (this.nodes = []);
+        }
+        get selectors() {
+            return list$1.comma(this.selector);
+        }
+        set selectors(values) {
+            let match = this.selector ? this.selector.match(/,\s*/) : null, sep = match ? match[0] : "," + this.raw("between", "beforeOpen");
+            this.selector = values.join(sep);
+        }
+    }
+    var rule = Rule$3;
+    Rule$3.default = Rule$3, Container$3.registerRule(Rule$3);
+    let Declaration$2 = declaration, tokenizer = function tokenizer(input, options = {}) {
+        let code, next, quote, content, escape, escaped, escapePos, prev, n, currentToken, css = input.css.valueOf(), ignore = options.ignoreErrors, length = css.length, pos = 0, buffer = [], returned = [];
+        function unclosed(what) {
+            throw input.error("Unclosed " + what, pos);
+        }
+        return {
+            back: function back(token) {
+                returned.push(token);
+            },
+            nextToken: function nextToken(opts) {
+                if (returned.length) return returned.pop();
+                if (pos >= length) return;
+                let ignoreUnclosed = !!opts && opts.ignoreUnclosed;
+                switch (code = css.charCodeAt(pos), code) {
+                  case NEWLINE:
+                  case SPACE:
+                  case TAB:
+                  case CR:
+                  case FEED:
+                    next = pos;
+                    do {
+                        next += 1, code = css.charCodeAt(next);
+                    } while (code === SPACE || code === NEWLINE || code === TAB || code === CR || code === FEED);
+                    currentToken = [ "space", css.slice(pos, next) ], pos = next - 1;
+                    break;
+
+                  case OPEN_SQUARE:
+                  case CLOSE_SQUARE:
+                  case OPEN_CURLY:
+                  case CLOSE_CURLY:
+                  case COLON:
+                  case SEMICOLON:
+                  case CLOSE_PARENTHESES:
+                    {
+                        let controlChar = String.fromCharCode(code);
+                        currentToken = [ controlChar, controlChar, pos ];
+                        break;
+                    }
+
+                  case OPEN_PARENTHESES:
+                    if (prev = buffer.length ? buffer.pop()[1] : "", n = css.charCodeAt(pos + 1), "url" === prev && n !== SINGLE_QUOTE && n !== DOUBLE_QUOTE && n !== SPACE && n !== NEWLINE && n !== TAB && n !== FEED && n !== CR) {
+                        next = pos;
+                        do {
+                            if (escaped = !1, next = css.indexOf(")", next + 1), -1 === next) {
+                                if (ignore || ignoreUnclosed) {
+                                    next = pos;
+                                    break;
+                                }
+                                unclosed("bracket");
+                            }
+                            for (escapePos = next; css.charCodeAt(escapePos - 1) === BACKSLASH; ) escapePos -= 1, 
+                            escaped = !escaped;
+                        } while (escaped);
+                        currentToken = [ "brackets", css.slice(pos, next + 1), pos, next ], pos = next;
+                    } else next = css.indexOf(")", pos + 1), content = css.slice(pos, next + 1), -1 === next || RE_BAD_BRACKET.test(content) ? currentToken = [ "(", "(", pos ] : (currentToken = [ "brackets", content, pos, next ], 
+                    pos = next);
+                    break;
+
+                  case SINGLE_QUOTE:
+                  case DOUBLE_QUOTE:
+                    quote = code === SINGLE_QUOTE ? "'" : '"', next = pos;
+                    do {
+                        if (escaped = !1, next = css.indexOf(quote, next + 1), -1 === next) {
+                            if (ignore || ignoreUnclosed) {
+                                next = pos + 1;
+                                break;
+                            }
+                            unclosed("string");
+                        }
+                        for (escapePos = next; css.charCodeAt(escapePos - 1) === BACKSLASH; ) escapePos -= 1, 
+                        escaped = !escaped;
+                    } while (escaped);
+                    currentToken = [ "string", css.slice(pos, next + 1), pos, next ], pos = next;
+                    break;
+
+                  case AT:
+                    RE_AT_END.lastIndex = pos + 1, RE_AT_END.test(css), next = 0 === RE_AT_END.lastIndex ? css.length - 1 : RE_AT_END.lastIndex - 2, 
+                    currentToken = [ "at-word", css.slice(pos, next + 1), pos, next ], pos = next;
+                    break;
+
+                  case BACKSLASH:
+                    for (next = pos, escape = !0; css.charCodeAt(next + 1) === BACKSLASH; ) next += 1, 
+                    escape = !escape;
+                    if (code = css.charCodeAt(next + 1), escape && code !== SLASH && code !== SPACE && code !== NEWLINE && code !== TAB && code !== CR && code !== FEED && (next += 1, 
+                    RE_HEX_ESCAPE.test(css.charAt(next)))) {
+                        for (;RE_HEX_ESCAPE.test(css.charAt(next + 1)); ) next += 1;
+                        css.charCodeAt(next + 1) === SPACE && (next += 1);
+                    }
+                    currentToken = [ "word", css.slice(pos, next + 1), pos, next ], pos = next;
+                    break;
+
+                  default:
+                    code === SLASH && css.charCodeAt(pos + 1) === ASTERISK ? (next = css.indexOf("*/", pos + 2) + 1, 
+                    0 === next && (ignore || ignoreUnclosed ? next = css.length : unclosed("comment")), 
+                    currentToken = [ "comment", css.slice(pos, next + 1), pos, next ], pos = next) : (RE_WORD_END.lastIndex = pos + 1, 
+                    RE_WORD_END.test(css), next = 0 === RE_WORD_END.lastIndex ? css.length - 1 : RE_WORD_END.lastIndex - 2, 
+                    currentToken = [ "word", css.slice(pos, next + 1), pos, next ], buffer.push(currentToken), 
+                    pos = next);
+                }
+                return pos++, currentToken;
+            },
+            endOfFile: function endOfFile() {
+                return 0 === returned.length && pos >= length;
+            },
+            position: function position() {
+                return pos;
+            }
+        };
+    }, Comment$2 = comment, AtRule$2 = atRule, Root$4 = root, Rule$2 = rule;
+    var parser = class Parser$1 {
+        constructor(input) {
+            this.input = input, this.root = new Root$4, this.current = this.root, this.spaces = "", 
+            this.semicolon = !1, this.customProperty = !1, this.createTokenizer(), this.root.source = {
+                input: input,
+                start: {
+                    offset: 0,
+                    line: 1,
+                    column: 1
+                }
+            };
+        }
+        createTokenizer() {
+            this.tokenizer = tokenizer(this.input);
+        }
+        parse() {
+            let token;
+            for (;!this.tokenizer.endOfFile(); ) switch (token = this.tokenizer.nextToken(), 
+            token[0]) {
+              case "space":
+                this.spaces += token[1];
+                break;
+
+              case ";":
+                this.freeSemicolon(token);
+                break;
+
+              case "}":
+                this.end(token);
+                break;
+
+              case "comment":
+                this.comment(token);
+                break;
+
+              case "at-word":
+                this.atrule(token);
+                break;
+
+              case "{":
+                this.emptyRule(token);
+                break;
+
+              default:
+                this.other(token);
+            }
+            this.endFile();
+        }
+        comment(token) {
+            let node = new Comment$2;
+            this.init(node, token[2]), node.source.end = this.getPosition(token[3] || token[2]);
+            let text = token[1].slice(2, -2);
+            if (/^\s*$/.test(text)) node.text = "", node.raws.left = text, node.raws.right = ""; else {
+                let match = text.match(/^(\s*)([^]*\S)(\s*)$/);
+                node.text = match[2], node.raws.left = match[1], node.raws.right = match[3];
+            }
+        }
+        emptyRule(token) {
+            let node = new Rule$2;
+            this.init(node, token[2]), node.selector = "", node.raws.between = "", this.current = node;
+        }
+        other(start) {
+            let end = !1, type = null, colon = !1, bracket = null, brackets = [], customProperty = start[1].startsWith("--"), tokens = [], token = start;
+            for (;token; ) {
+                if (type = token[0], tokens.push(token), "(" === type || "[" === type) bracket || (bracket = token), 
+                brackets.push("(" === type ? ")" : "]"); else if (customProperty && colon && "{" === type) bracket || (bracket = token), 
+                brackets.push("}"); else if (0 === brackets.length) {
+                    if (";" === type) {
+                        if (colon) return void this.decl(tokens, customProperty);
+                        break;
+                    }
+                    if ("{" === type) return void this.rule(tokens);
+                    if ("}" === type) {
+                        this.tokenizer.back(tokens.pop()), end = !0;
+                        break;
+                    }
+                    ":" === type && (colon = !0);
+                } else type === brackets[brackets.length - 1] && (brackets.pop(), 0 === brackets.length && (bracket = null));
+                token = this.tokenizer.nextToken();
+            }
+            if (this.tokenizer.endOfFile() && (end = !0), brackets.length > 0 && this.unclosedBracket(bracket), 
+            end && colon) {
+                for (;tokens.length && (token = tokens[tokens.length - 1][0], "space" === token || "comment" === token); ) this.tokenizer.back(tokens.pop());
+                this.decl(tokens, customProperty);
+            } else this.unknownWord(tokens);
+        }
+        rule(tokens) {
+            tokens.pop();
+            let node = new Rule$2;
+            this.init(node, tokens[0][2]), node.raws.between = this.spacesAndCommentsFromEnd(tokens), 
+            this.raw(node, "selector", tokens), this.current = node;
+        }
+        decl(tokens, customProperty) {
+            let node = new Declaration$2;
+            this.init(node, tokens[0][2]);
+            let token, last = tokens[tokens.length - 1];
+            for (";" === last[0] && (this.semicolon = !0, tokens.pop()), node.source.end = this.getPosition(last[3] || last[2]); "word" !== tokens[0][0]; ) 1 === tokens.length && this.unknownWord(tokens), 
+            node.raws.before += tokens.shift()[1];
+            for (node.source.start = this.getPosition(tokens[0][2]), node.prop = ""; tokens.length; ) {
+                let type = tokens[0][0];
+                if (":" === type || "space" === type || "comment" === type) break;
+                node.prop += tokens.shift()[1];
+            }
+            for (node.raws.between = ""; tokens.length; ) {
+                if (token = tokens.shift(), ":" === token[0]) {
+                    node.raws.between += token[1];
+                    break;
+                }
+                "word" === token[0] && /\w/.test(token[1]) && this.unknownWord([ token ]), node.raws.between += token[1];
+            }
+            "_" !== node.prop[0] && "*" !== node.prop[0] || (node.raws.before += node.prop[0], 
+            node.prop = node.prop.slice(1));
+            let firstSpaces = this.spacesAndCommentsFromStart(tokens);
+            this.precheckMissedSemicolon(tokens);
+            for (let i = tokens.length - 1; i >= 0; i--) {
+                if (token = tokens[i], "!important" === token[1].toLowerCase()) {
+                    node.important = !0;
+                    let string = this.stringFrom(tokens, i);
+                    string = this.spacesFromEnd(tokens) + string, " !important" !== string && (node.raws.important = string);
+                    break;
+                }
+                if ("important" === token[1].toLowerCase()) {
+                    let cache = tokens.slice(0), str = "";
+                    for (let j = i; j > 0; j--) {
+                        let type = cache[j][0];
+                        if (0 === str.trim().indexOf("!") && "space" !== type) break;
+                        str = cache.pop()[1] + str;
+                    }
+                    0 === str.trim().indexOf("!") && (node.important = !0, node.raws.important = str, 
+                    tokens = cache);
+                }
+                if ("space" !== token[0] && "comment" !== token[0]) break;
+            }
+            let hasWord = tokens.some((i => "space" !== i[0] && "comment" !== i[0]));
+            this.raw(node, "value", tokens), hasWord ? node.raws.between += firstSpaces : node.value = firstSpaces + node.value, 
+            node.value.includes(":") && !customProperty && this.checkMissedSemicolon(tokens);
+        }
+        atrule(token) {
+            let type, prev, shift, node = new AtRule$2;
+            node.name = token[1].slice(1), "" === node.name && this.unnamedAtrule(node, token), 
+            this.init(node, token[2]);
+            let last = !1, open = !1, params = [], brackets = [];
+            for (;!this.tokenizer.endOfFile(); ) {
+                if (type = (token = this.tokenizer.nextToken())[0], "(" === type || "[" === type ? brackets.push("(" === type ? ")" : "]") : "{" === type && brackets.length > 0 ? brackets.push("}") : type === brackets[brackets.length - 1] && brackets.pop(), 
+                0 === brackets.length) {
+                    if (";" === type) {
+                        node.source.end = this.getPosition(token[2]), this.semicolon = !0;
+                        break;
+                    }
+                    if ("{" === type) {
+                        open = !0;
+                        break;
+                    }
+                    if ("}" === type) {
+                        if (params.length > 0) {
+                            for (shift = params.length - 1, prev = params[shift]; prev && "space" === prev[0]; ) prev = params[--shift];
+                            prev && (node.source.end = this.getPosition(prev[3] || prev[2]));
+                        }
+                        this.end(token);
+                        break;
+                    }
+                    params.push(token);
+                } else params.push(token);
+                if (this.tokenizer.endOfFile()) {
+                    last = !0;
+                    break;
+                }
+            }
+            node.raws.between = this.spacesAndCommentsFromEnd(params), params.length ? (node.raws.afterName = this.spacesAndCommentsFromStart(params), 
+            this.raw(node, "params", params), last && (token = params[params.length - 1], node.source.end = this.getPosition(token[3] || token[2]), 
+            this.spaces = node.raws.between, node.raws.between = "")) : (node.raws.afterName = "", 
+            node.params = ""), open && (node.nodes = [], this.current = node);
+        }
+        end(token) {
+            this.current.nodes && this.current.nodes.length && (this.current.raws.semicolon = this.semicolon), 
+            this.semicolon = !1, this.current.raws.after = (this.current.raws.after || "") + this.spaces, 
+            this.spaces = "", this.current.parent ? (this.current.source.end = this.getPosition(token[2]), 
+            this.current = this.current.parent) : this.unexpectedClose(token);
+        }
+        endFile() {
+            this.current.parent && this.unclosedBlock(), this.current.nodes && this.current.nodes.length && (this.current.raws.semicolon = this.semicolon), 
+            this.current.raws.after = (this.current.raws.after || "") + this.spaces;
+        }
+        freeSemicolon(token) {
+            if (this.spaces += token[1], this.current.nodes) {
+                let prev = this.current.nodes[this.current.nodes.length - 1];
+                prev && "rule" === prev.type && !prev.raws.ownSemicolon && (prev.raws.ownSemicolon = this.spaces, 
+                this.spaces = "");
+            }
+        }
+        getPosition(offset) {
+            let pos = this.input.fromOffset(offset);
+            return {
+                offset: offset,
+                line: pos.line,
+                column: pos.col
+            };
+        }
+        init(node, offset) {
+            this.current.push(node), node.source = {
+                start: this.getPosition(offset),
+                input: this.input
+            }, node.raws.before = this.spaces, this.spaces = "", "comment" !== node.type && (this.semicolon = !1);
+        }
+        raw(node, prop, tokens) {
+            let token, type, next, prev, length = tokens.length, value = "", clean = !0, pattern = /^([#.|])?(\w)+/i;
+            for (let i = 0; i < length; i += 1) token = tokens[i], type = token[0], "comment" !== type || "rule" !== node.type ? "comment" === type || "space" === type && i === length - 1 ? clean = !1 : value += token[1] : (prev = tokens[i - 1], 
+            next = tokens[i + 1], "space" !== prev[0] && "space" !== next[0] && pattern.test(prev[1]) && pattern.test(next[1]) ? value += token[1] : clean = !1);
+            if (!clean) {
+                let raw = tokens.reduce(((all, i) => all + i[1]), "");
+                node.raws[prop] = {
+                    value: value,
+                    raw: raw
+                };
+            }
+            node[prop] = value;
+        }
+        spacesAndCommentsFromEnd(tokens) {
+            let lastTokenType, spaces = "";
+            for (;tokens.length && (lastTokenType = tokens[tokens.length - 1][0], "space" === lastTokenType || "comment" === lastTokenType); ) spaces = tokens.pop()[1] + spaces;
+            return spaces;
+        }
+        spacesAndCommentsFromStart(tokens) {
+            let next, spaces = "";
+            for (;tokens.length && (next = tokens[0][0], "space" === next || "comment" === next); ) spaces += tokens.shift()[1];
+            return spaces;
+        }
+        spacesFromEnd(tokens) {
+            let lastTokenType, spaces = "";
+            for (;tokens.length && (lastTokenType = tokens[tokens.length - 1][0], "space" === lastTokenType); ) spaces = tokens.pop()[1] + spaces;
+            return spaces;
+        }
+        stringFrom(tokens, from) {
+            let result = "";
+            for (let i = from; i < tokens.length; i++) result += tokens[i][1];
+            return tokens.splice(from, tokens.length - from), result;
+        }
+        colon(tokens) {
+            let token, type, prev, brackets = 0;
+            for (let [i, element] of tokens.entries()) {
+                if (token = element, type = token[0], "(" === type && (brackets += 1), ")" === type && (brackets -= 1), 
+                0 === brackets && ":" === type) {
+                    if (prev) {
+                        if ("word" === prev[0] && "progid" === prev[1]) continue;
+                        return i;
+                    }
+                    this.doubleColon(token);
+                }
+                prev = token;
+            }
+            return !1;
+        }
+        unclosedBracket(bracket) {
+            throw this.input.error("Unclosed bracket", bracket[2]);
+        }
+        unknownWord(tokens) {
+            throw this.input.error("Unknown word", tokens[0][2]);
+        }
+        unexpectedClose(token) {
+            throw this.input.error("Unexpected }", token[2]);
+        }
+        unclosedBlock() {
+            let pos = this.current.source.start;
+            throw this.input.error("Unclosed block", pos.line, pos.column);
+        }
+        doubleColon(token) {
+            throw this.input.error("Double colon", token[2]);
+        }
+        unnamedAtrule(node, token) {
+            throw this.input.error("At-rule without name", token[2]);
+        }
+        precheckMissedSemicolon() {}
+        checkMissedSemicolon(tokens) {
+            let colon = this.colon(tokens);
+            if (!1 === colon) return;
+            let token, founded = 0;
+            for (let j = colon - 1; j >= 0 && (token = tokens[j], "space" === token[0] || (founded += 1, 
+            2 !== founded)); j--) ;
+            throw this.input.error("Missed semicolon", "word" === token[0] ? token[3] + 1 : token[2]);
+        }
+    };
+    var nonSecure = {
+        nanoid: (size = 21) => {
+            let id = "", i = size;
+            for (;i--; ) id += "ModuleSymbhasOwnPr-0123456789ABCDEFGHNRVfgctiUvz_KqYTJkLxpZXIjQW"[64 * Math.random() | 0];
+            return id;
+        },
+        customAlphabet: (alphabet, size) => () => {
+            let id = "", i = size;
+            for (;i--; ) id += alphabet[Math.random() * alphabet.length | 0];
+            return id;
+        }
+    };
+    let {SourceMapConsumer: SourceMapConsumer$1, SourceMapGenerator: SourceMapGenerator$1} = require$$4, {existsSync: existsSync, readFileSync: readFileSync} = require$$4, {dirname: dirname, join: join} = require$$4;
+    class PreviousMap$2 {
+        constructor(css, opts) {
+            if (!1 === opts.map) return;
+            this.loadAnnotation(css), this.inline = this.startWith(this.annotation, "data:");
+            let prev = opts.map ? opts.map.prev : void 0, text = this.loadMap(opts.from, prev);
+            !this.mapFile && opts.from && (this.mapFile = opts.from), this.mapFile && (this.root = dirname(this.mapFile)), 
+            text && (this.text = text);
+        }
+        consumer() {
+            return this.consumerCache || (this.consumerCache = new SourceMapConsumer$1(this.text)), 
+            this.consumerCache;
+        }
+        withContent() {
+            return !!(this.consumer().sourcesContent && this.consumer().sourcesContent.length > 0);
+        }
+        startWith(string, start) {
+            return !!string && string.substr(0, start.length) === start;
+        }
+        getAnnotationURL(sourceMapString) {
+            return sourceMapString.match(/\/\*\s*# sourceMappingURL=((?:(?!sourceMappingURL=).)*)\*\//)[1].trim();
+        }
+        loadAnnotation(css) {
+            let annotations = css.match(/\/\*\s*# sourceMappingURL=(?:(?!sourceMappingURL=).)*\*\//gm);
+            if (annotations && annotations.length > 0) {
+                let lastAnnotation = annotations[annotations.length - 1];
+                lastAnnotation && (this.annotation = this.getAnnotationURL(lastAnnotation));
+            }
+        }
+        decodeInline(text) {
+            if (/^data:application\/json;charset=utf-?8,/.test(text) || /^data:application\/json,/.test(text)) return decodeURIComponent(text.substr(RegExp.lastMatch.length));
+            if (/^data:application\/json;charset=utf-?8;base64,/.test(text) || /^data:application\/json;base64,/.test(text)) return function fromBase64(str) {
+                return Buffer ? Buffer.from(str, "base64").toString() : window.atob(str);
+            }(text.substr(RegExp.lastMatch.length));
+            let encoding = text.match(/data:application\/json;([^,]+),/)[1];
+            throw new Error("Unsupported source map encoding " + encoding);
+        }
+        loadFile(path) {
+            if (this.root = dirname(path), existsSync(path)) return this.mapFile = path, readFileSync(path, "utf-8").toString().trim();
+        }
+        loadMap(file, prev) {
+            if (!1 === prev) return !1;
+            if (prev) {
+                if ("string" == typeof prev) return prev;
+                if ("function" != typeof prev) {
+                    if (prev instanceof SourceMapConsumer$1) return SourceMapGenerator$1.fromSourceMap(prev).toString();
+                    if (prev instanceof SourceMapGenerator$1) return prev.toString();
+                    if (this.isMap(prev)) return JSON.stringify(prev);
+                    throw new Error("Unsupported previous source map format: " + prev.toString());
+                }
+                {
+                    let prevPath = prev(file);
+                    if (prevPath) {
+                        let map = this.loadFile(prevPath);
+                        if (!map) throw new Error("Unable to load previous source map: " + prevPath.toString());
+                        return map;
+                    }
+                }
+            } else {
+                if (this.inline) return this.decodeInline(this.annotation);
+                if (this.annotation) {
+                    let map = this.annotation;
+                    return file && (map = join(dirname(file), map)), this.loadFile(map);
+                }
+            }
+        }
+        isMap(map) {
+            return "object" == typeof map && ("string" == typeof map.mappings || "string" == typeof map._mappings || Array.isArray(map.sections));
+        }
+    }
+    var previousMap = PreviousMap$2;
+    PreviousMap$2.default = PreviousMap$2;
+    let {SourceMapConsumer: SourceMapConsumer, SourceMapGenerator: SourceMapGenerator} = require$$4, {fileURLToPath: fileURLToPath, pathToFileURL: pathToFileURL} = require$$4, {resolve: resolve, isAbsolute: isAbsolute} = require$$4, {nanoid: nanoid} = nonSecure, terminalHighlight = require$$4, CssSyntaxError$1 = cssSyntaxError, PreviousMap$1 = previousMap, fromOffsetCache = Symbol("fromOffsetCache"), sourceMapAvailable = Boolean(SourceMapConsumer && SourceMapGenerator), pathAvailable = Boolean(resolve && isAbsolute);
+    class Input$3 {
+        constructor(css, opts = {}) {
+            if (null == css || "object" == typeof css && !css.toString) throw new Error(`PostCSS received ${css} instead of CSS string`);
+            if (this.css = css.toString(), "\ufeff" === this.css[0] || "￾" === this.css[0] ? (this.hasBOM = !0, 
+            this.css = this.css.slice(1)) : this.hasBOM = !1, opts.from && (!pathAvailable || /^\w+:\/\//.test(opts.from) || isAbsolute(opts.from) ? this.file = opts.from : this.file = resolve(opts.from)), 
+            pathAvailable && sourceMapAvailable) {
+                let map = new PreviousMap$1(this.css, opts);
+                if (map.text) {
+                    this.map = map;
+                    let file = map.consumer().file;
+                    !this.file && file && (this.file = this.mapResolve(file));
+                }
+            }
+            this.file || (this.id = "<input css " + nanoid(6) + ">"), this.map && (this.map.file = this.from);
+        }
+        fromOffset(offset) {
+            let lastLine, lineToIndex;
+            if (this[fromOffsetCache]) lineToIndex = this[fromOffsetCache]; else {
+                let lines = this.css.split("\n");
+                lineToIndex = new Array(lines.length);
+                let prevIndex = 0;
+                for (let i = 0, l = lines.length; i < l; i++) lineToIndex[i] = prevIndex, prevIndex += lines[i].length + 1;
+                this[fromOffsetCache] = lineToIndex;
+            }
+            lastLine = lineToIndex[lineToIndex.length - 1];
+            let min = 0;
+            if (offset >= lastLine) min = lineToIndex.length - 1; else {
+                let mid, max = lineToIndex.length - 2;
+                for (;min < max; ) if (mid = min + (max - min >> 1), offset < lineToIndex[mid]) max = mid - 1; else {
+                    if (!(offset >= lineToIndex[mid + 1])) {
+                        min = mid;
+                        break;
+                    }
+                    min = mid + 1;
+                }
+            }
+            return {
+                line: min + 1,
+                col: offset - lineToIndex[min] + 1
+            };
+        }
+        error(message, line, column, opts = {}) {
+            let result;
+            if (!column) {
+                let pos = this.fromOffset(line);
+                line = pos.line, column = pos.col;
+            }
+            let origin = this.origin(line, column);
+            return result = origin ? new CssSyntaxError$1(message, origin.line, origin.column, origin.source, origin.file, opts.plugin) : new CssSyntaxError$1(message, line, column, this.css, this.file, opts.plugin), 
+            result.input = {
+                line: line,
+                column: column,
+                source: this.css
+            }, this.file && (pathToFileURL && (result.input.url = pathToFileURL(this.file).toString()), 
+            result.input.file = this.file), result;
+        }
+        origin(line, column) {
+            if (!this.map) return !1;
+            let fromUrl, consumer = this.map.consumer(), from = consumer.originalPositionFor({
+                line: line,
+                column: column
+            });
+            if (!from.source) return !1;
+            fromUrl = isAbsolute(from.source) ? pathToFileURL(from.source) : new URL(from.source, this.map.consumer().sourceRoot || pathToFileURL(this.map.mapFile));
+            let result = {
+                url: fromUrl.toString(),
+                line: from.line,
+                column: from.column
+            };
+            if ("file:" === fromUrl.protocol) {
+                if (!fileURLToPath) throw new Error("file: protocol is not available in this PostCSS build");
+                result.file = fileURLToPath(fromUrl);
+            }
+            let source = consumer.sourceContentFor(from.source);
+            return source && (result.source = source), result;
+        }
+        mapResolve(file) {
+            return /^\w+:\/\//.test(file) ? file : resolve(this.map.consumer().sourceRoot || this.map.root || ".", file);
+        }
+        get from() {
+            return this.file || this.id;
+        }
+        toJSON() {
+            let json = {};
+            for (let name of [ "hasBOM", "css", "file", "id" ]) null != this[name] && (json[name] = this[name]);
+            return this.map && (json.map = {
+                ...this.map
+            }, json.map.consumerCache && (json.map.consumerCache = void 0)), json;
+        }
+    }
+    var input = Input$3;
+    Input$3.default = Input$3, terminalHighlight && terminalHighlight.registerInput && terminalHighlight.registerInput(Input$3);
+    let Container$2 = container, Parser = parser, Input$2 = input;
+    function parse$2(css, opts) {
+        let input = new Input$2(css, opts), parser = new Parser(input);
+        try {
+            parser.parse();
+        } catch (e) {
+            throw "CssSyntaxError" === e.name && opts && opts.from && (/\.scss$/i.test(opts.from) ? e.message += "\nYou tried to parse SCSS with the standard CSS parser; try again with the postcss-scss parser" : /\.sass/i.test(opts.from) ? e.message += "\nYou tried to parse Sass with the standard CSS parser; try again with the postcss-sass parser" : /\.less$/i.test(opts.from) && (e.message += "\nYou tried to parse Less with the standard CSS parser; try again with the postcss-less parser")), 
+            e;
+        }
+        return parser.root;
+    }
+    var parse_1 = parse$2;
+    parse$2.default = parse$2, Container$2.registerParse(parse$2);
+    let {isClean: isClean, my: my} = symbols, MapGenerator = mapGenerator, stringify$1 = stringify_1, Container$1 = container, Document$2 = document$1, warnOnce = function warnOnce(message) {
+        printed[message] || (printed[message] = !0, "undefined" != typeof console && console.warn && console.warn(message));
+    }, Result$1 = result, parse$1 = parse_1, Root$3 = root;
+    const TYPE_TO_CLASS_NAME = {
+        document: "Document",
+        root: "Root",
+        atrule: "AtRule",
+        rule: "Rule",
+        decl: "Declaration",
+        comment: "Comment"
+    }, PLUGIN_PROPS = {
+        postcssPlugin: !0,
+        prepare: !0,
+        Once: !0,
+        Document: !0,
+        Root: !0,
+        Declaration: !0,
+        Rule: !0,
+        AtRule: !0,
+        Comment: !0,
+        DeclarationExit: !0,
+        RuleExit: !0,
+        AtRuleExit: !0,
+        CommentExit: !0,
+        RootExit: !0,
+        DocumentExit: !0,
+        OnceExit: !0
+    }, NOT_VISITORS = {
+        postcssPlugin: !0,
+        prepare: !0,
+        Once: !0
+    };
+    function isPromise(obj) {
+        return "object" == typeof obj && "function" == typeof obj.then;
+    }
+    function getEvents(node) {
+        let key = !1, type = TYPE_TO_CLASS_NAME[node.type];
+        return "decl" === node.type ? key = node.prop.toLowerCase() : "atrule" === node.type && (key = node.name.toLowerCase()), 
+        key && node.append ? [ type, type + "-" + key, 0, type + "Exit", type + "Exit-" + key ] : key ? [ type, type + "-" + key, type + "Exit", type + "Exit-" + key ] : node.append ? [ type, 0, type + "Exit" ] : [ type, type + "Exit" ];
+    }
+    function toStack(node) {
+        let events;
+        return events = "document" === node.type ? [ "Document", 0, "DocumentExit" ] : "root" === node.type ? [ "Root", 0, "RootExit" ] : getEvents(node), 
+        {
+            node: node,
+            events: events,
+            eventIndex: 0,
+            visitors: [],
+            visitorIndex: 0,
+            iterator: 0
+        };
+    }
+    function cleanMarks(node) {
+        return node[isClean] = !1, node.nodes && node.nodes.forEach((i => cleanMarks(i))), 
+        node;
+    }
+    let postcss$2 = {};
+    class LazyResult$2 {
+        constructor(processor, css, opts) {
+            let root;
+            if (this.stringified = !1, this.processed = !1, "object" != typeof css || null === css || "root" !== css.type && "document" !== css.type) if (css instanceof LazyResult$2 || css instanceof Result$1) root = cleanMarks(css.root), 
+            css.map && (void 0 === opts.map && (opts.map = {}), opts.map.inline || (opts.map.inline = !1), 
+            opts.map.prev = css.map); else {
+                let parser = parse$1;
+                opts.syntax && (parser = opts.syntax.parse), opts.parser && (parser = opts.parser), 
+                parser.parse && (parser = parser.parse);
+                try {
+                    root = parser(css, opts);
+                } catch (error) {
+                    this.processed = !0, this.error = error;
+                }
+                root && !root[my] && Container$1.rebuild(root);
+            } else root = cleanMarks(css);
+            this.result = new Result$1(processor, root, opts), this.helpers = {
+                ...postcss$2,
+                result: this.result,
+                postcss: postcss$2
+            }, this.plugins = this.processor.plugins.map((plugin => "object" == typeof plugin && plugin.prepare ? {
+                ...plugin,
+                ...plugin.prepare(this.result)
+            } : plugin));
+        }
+        get [Symbol.toStringTag]() {
+            return "LazyResult";
+        }
+        get processor() {
+            return this.result.processor;
+        }
+        get opts() {
+            return this.result.opts;
+        }
+        get css() {
+            return this.stringify().css;
+        }
+        get content() {
+            return this.stringify().content;
+        }
+        get map() {
+            return this.stringify().map;
+        }
+        get root() {
+            return this.sync().root;
+        }
+        get messages() {
+            return this.sync().messages;
+        }
+        warnings() {
+            return this.sync().warnings();
+        }
+        toString() {
+            return this.css;
+        }
+        then(onFulfilled, onRejected) {
+            return "from" in this.opts || warnOnce("Without `from` option PostCSS could generate wrong source map and will not find Browserslist config. Set it to CSS file path or to `undefined` to prevent this warning."), 
+            this.async().then(onFulfilled, onRejected);
+        }
+        catch(onRejected) {
+            return this.async().catch(onRejected);
+        }
+        finally(onFinally) {
+            return this.async().then(onFinally, onFinally);
+        }
+        async() {
+            return this.error ? Promise.reject(this.error) : this.processed ? Promise.resolve(this.result) : (this.processing || (this.processing = this.runAsync()), 
+            this.processing);
+        }
+        sync() {
+            if (this.error) throw this.error;
+            if (this.processed) return this.result;
+            if (this.processed = !0, this.processing) throw this.getAsyncError();
+            for (let plugin of this.plugins) {
+                if (isPromise(this.runOnRoot(plugin))) throw this.getAsyncError();
+            }
+            if (this.prepareVisitors(), this.hasListener) {
+                let root = this.result.root;
+                for (;!root[isClean]; ) root[isClean] = !0, this.walkSync(root);
+                if (this.listeners.OnceExit) if ("document" === root.type) for (let subRoot of root.nodes) this.visitSync(this.listeners.OnceExit, subRoot); else this.visitSync(this.listeners.OnceExit, root);
+            }
+            return this.result;
+        }
+        stringify() {
+            if (this.error) throw this.error;
+            if (this.stringified) return this.result;
+            this.stringified = !0, this.sync();
+            let opts = this.result.opts, str = stringify$1;
+            opts.syntax && (str = opts.syntax.stringify), opts.stringifier && (str = opts.stringifier), 
+            str.stringify && (str = str.stringify);
+            let data = new MapGenerator(str, this.result.root, this.result.opts).generate();
+            return this.result.css = data[0], this.result.map = data[1], this.result;
+        }
+        walkSync(node) {
+            node[isClean] = !0;
+            let events = getEvents(node);
+            for (let event of events) if (0 === event) node.nodes && node.each((child => {
+                child[isClean] || this.walkSync(child);
+            })); else {
+                let visitors = this.listeners[event];
+                if (visitors && this.visitSync(visitors, node.toProxy())) return;
+            }
+        }
+        visitSync(visitors, node) {
+            for (let [plugin, visitor] of visitors) {
+                let promise;
+                this.result.lastPlugin = plugin;
+                try {
+                    promise = visitor(node, this.helpers);
+                } catch (e) {
+                    throw this.handleError(e, node.proxyOf);
+                }
+                if ("root" !== node.type && "document" !== node.type && !node.parent) return !0;
+                if (isPromise(promise)) throw this.getAsyncError();
+            }
+        }
+        runOnRoot(plugin) {
+            this.result.lastPlugin = plugin;
+            try {
+                if ("object" == typeof plugin && plugin.Once) {
+                    if ("document" === this.result.root.type) {
+                        let roots = this.result.root.nodes.map((root => plugin.Once(root, this.helpers)));
+                        return isPromise(roots[0]) ? Promise.all(roots) : roots;
+                    }
+                    return plugin.Once(this.result.root, this.helpers);
+                }
+                if ("function" == typeof plugin) return plugin(this.result.root, this.result);
+            } catch (error) {
+                throw this.handleError(error);
+            }
+        }
+        getAsyncError() {
+            throw new Error("Use process(css).then(cb) to work with async plugins");
+        }
+        handleError(error, node) {
+            let plugin = this.result.lastPlugin;
+            try {
+                if (node && node.addToError(error), this.error = error, "CssSyntaxError" !== error.name || error.plugin) {
+                    if (plugin.postcssVersion) {
+                        let pluginName = plugin.postcssPlugin, pluginVer = plugin.postcssVersion, runtimeVer = this.result.processor.version, a = pluginVer.split("."), b = runtimeVer.split(".");
+                        (a[0] !== b[0] || parseInt(a[1]) > parseInt(b[1])) && console.error("Unknown error from PostCSS plugin. Your current PostCSS version is " + runtimeVer + ", but " + pluginName + " uses " + pluginVer + ". Perhaps this is the source of the error below.");
+                    }
+                } else error.plugin = plugin.postcssPlugin, error.setMessage();
+            } catch (err) {
+                console && console.error && console.error(err);
+            }
+            return error;
+        }
+        async runAsync() {
+            this.plugin = 0;
+            for (let i = 0; i < this.plugins.length; i++) {
+                let plugin = this.plugins[i], promise = this.runOnRoot(plugin);
+                if (isPromise(promise)) try {
+                    await promise;
+                } catch (error) {
+                    throw this.handleError(error);
+                }
+            }
+            if (this.prepareVisitors(), this.hasListener) {
+                let root = this.result.root;
+                for (;!root[isClean]; ) {
+                    root[isClean] = !0;
+                    let stack = [ toStack(root) ];
+                    for (;stack.length > 0; ) {
+                        let promise = this.visitTick(stack);
+                        if (isPromise(promise)) try {
+                            await promise;
+                        } catch (e) {
+                            let node = stack[stack.length - 1].node;
+                            throw this.handleError(e, node);
+                        }
+                    }
+                }
+                if (this.listeners.OnceExit) for (let [plugin, visitor] of this.listeners.OnceExit) {
+                    this.result.lastPlugin = plugin;
+                    try {
+                        if ("document" === root.type) {
+                            let roots = root.nodes.map((subRoot => visitor(subRoot, this.helpers)));
+                            await Promise.all(roots);
+                        } else await visitor(root, this.helpers);
+                    } catch (e) {
+                        throw this.handleError(e);
+                    }
+                }
+            }
+            return this.processed = !0, this.stringify();
+        }
+        prepareVisitors() {
+            this.listeners = {};
+            let add = (plugin, type, cb) => {
+                this.listeners[type] || (this.listeners[type] = []), this.listeners[type].push([ plugin, cb ]);
+            };
+            for (let plugin of this.plugins) if ("object" == typeof plugin) for (let event in plugin) {
+                if (!PLUGIN_PROPS[event] && /^[A-Z]/.test(event)) throw new Error(`Unknown event ${event} in ${plugin.postcssPlugin}. Try to update PostCSS (${this.processor.version} now).`);
+                if (!NOT_VISITORS[event]) if ("object" == typeof plugin[event]) for (let filter in plugin[event]) add(plugin, "*" === filter ? event : event + "-" + filter.toLowerCase(), plugin[event][filter]); else "function" == typeof plugin[event] && add(plugin, event, plugin[event]);
+            }
+            this.hasListener = Object.keys(this.listeners).length > 0;
+        }
+        visitTick(stack) {
+            let visit = stack[stack.length - 1], {node: node, visitors: visitors} = visit;
+            if ("root" !== node.type && "document" !== node.type && !node.parent) return void stack.pop();
+            if (visitors.length > 0 && visit.visitorIndex < visitors.length) {
+                let [plugin, visitor] = visitors[visit.visitorIndex];
+                visit.visitorIndex += 1, visit.visitorIndex === visitors.length && (visit.visitors = [], 
+                visit.visitorIndex = 0), this.result.lastPlugin = plugin;
+                try {
+                    return visitor(node.toProxy(), this.helpers);
+                } catch (e) {
+                    throw this.handleError(e, node);
+                }
+            }
+            if (0 !== visit.iterator) {
+                let child, iterator = visit.iterator;
+                for (;child = node.nodes[node.indexes[iterator]]; ) if (node.indexes[iterator] += 1, 
+                !child[isClean]) return child[isClean] = !0, void stack.push(toStack(child));
+                visit.iterator = 0, delete node.indexes[iterator];
+            }
+            let events = visit.events;
+            for (;visit.eventIndex < events.length; ) {
+                let event = events[visit.eventIndex];
+                if (visit.eventIndex += 1, 0 === event) return void (node.nodes && node.nodes.length && (node[isClean] = !0, 
+                visit.iterator = node.getIterator()));
+                if (this.listeners[event]) return void (visit.visitors = this.listeners[event]);
+            }
+            stack.pop();
+        }
+    }
+    LazyResult$2.registerPostcss = dependant => {
+        postcss$2 = dependant;
+    };
+    var lazyResult = LazyResult$2;
+    LazyResult$2.default = LazyResult$2, Root$3.registerLazyResult(LazyResult$2), Document$2.registerLazyResult(LazyResult$2);
+    let LazyResult$1 = lazyResult, Document$1 = document$1, Root$2 = root;
+    class Processor$1 {
+        constructor(plugins = []) {
+            this.version = "8.3.6", this.plugins = this.normalize(plugins);
+        }
+        use(plugin) {
+            return this.plugins = this.plugins.concat(this.normalize([ plugin ])), this;
+        }
+        process(css, opts = {}) {
+            return 0 !== this.plugins.length || void 0 !== opts.parser || void 0 !== opts.stringifier || void 0 !== opts.syntax || opts.hideNothingWarning || "undefined" != typeof console && console.warn && console.warn("You did not set any plugins, parser, or stringifier. Right now, PostCSS does nothing. Pick plugins for your case on https://www.postcss.parts/ and use them in postcss.config.js."), 
+            new LazyResult$1(this, css, opts);
+        }
+        normalize(plugins) {
+            let normalized = [];
+            for (let i of plugins) if (!0 === i.postcss ? i = i() : i.postcss && (i = i.postcss), 
+            "object" == typeof i && Array.isArray(i.plugins)) normalized = normalized.concat(i.plugins); else if ("object" == typeof i && i.postcssPlugin) normalized.push(i); else {
+                if ("function" != typeof i) throw "object" == typeof i && (i.parse || i.stringify) ? new Error("PostCSS syntaxes cannot be used as plugins. Instead, please use one of the syntax/parser/stringifier options as outlined in your PostCSS runner documentation.") : new Error(i + " is not a PostCSS plugin");
+                normalized.push(i);
+            }
+            return normalized;
+        }
+    }
+    var processor = Processor$1;
+    Processor$1.default = Processor$1, Root$2.registerProcessor(Processor$1), Document$1.registerProcessor(Processor$1);
+    let Declaration$1 = declaration, PreviousMap = previousMap, Comment$1 = comment, AtRule$1 = atRule, Input$1 = input, Root$1 = root, Rule$1 = rule;
+    function fromJSON$1(json, inputs) {
+        if (Array.isArray(json)) return json.map((n => fromJSON$1(n)));
+        let {inputs: ownInputs, ...defaults} = json;
+        if (ownInputs) {
+            inputs = [];
+            for (let input of ownInputs) {
+                let inputHydrated = {
+                    ...input,
+                    __proto__: Input$1.prototype
+                };
+                inputHydrated.map && (inputHydrated.map = {
+                    ...inputHydrated.map,
+                    __proto__: PreviousMap.prototype
+                }), inputs.push(inputHydrated);
+            }
+        }
+        if (defaults.nodes && (defaults.nodes = json.nodes.map((n => fromJSON$1(n, inputs)))), 
+        defaults.source) {
+            let {inputId: inputId, ...source} = defaults.source;
+            defaults.source = source, null != inputId && (defaults.source.input = inputs[inputId]);
+        }
+        if ("root" === defaults.type) return new Root$1(defaults);
+        if ("decl" === defaults.type) return new Declaration$1(defaults);
+        if ("rule" === defaults.type) return new Rule$1(defaults);
+        if ("comment" === defaults.type) return new Comment$1(defaults);
+        if ("atrule" === defaults.type) return new AtRule$1(defaults);
+        throw new Error("Unknown node type: " + json.type);
+    }
+    var fromJSON_1 = fromJSON$1;
+    fromJSON$1.default = fromJSON$1;
+    let CssSyntaxError = cssSyntaxError, Declaration = declaration, LazyResult = lazyResult, Container = container, Processor = processor, stringify = stringify_1, fromJSON = fromJSON_1, Document = document$1, Warning = warning, Comment = comment, AtRule = atRule, Result = result, Input = input, parse = parse_1, list = list_1, Rule = rule, Root = root, Node = node_1;
+    function postcss$1(...plugins) {
+        return 1 === plugins.length && Array.isArray(plugins[0]) && (plugins = plugins[0]), 
+        new Processor(plugins);
+    }
+    postcss$1.plugin = function plugin(name, initializer) {
+        function creator(...args) {
+            let transformer = initializer(...args);
+            return transformer.postcssPlugin = name, transformer.postcssVersion = (new Processor).version, 
+            transformer;
+        }
+        let cache;
+        return console && console.warn && (console.warn(name + ": postcss.plugin was deprecated. Migration guide:\nhttps://evilmartians.com/chronicles/postcss-8-plugin-migration"), 
+        "cn".startsWith("cn") && console.warn(name + ": 里面 postcss.plugin 被弃用. 迁移指南:\nhttps://www.w3ctech.com/topic/2226")), 
+        Object.defineProperty(creator, "postcss", {
+            get: () => (cache || (cache = creator()), cache)
+        }), creator.process = function(css, processOpts, pluginOpts) {
+            return postcss$1([ creator(pluginOpts) ]).process(css, processOpts);
+        }, creator;
+    }, postcss$1.stringify = stringify, postcss$1.parse = parse, postcss$1.fromJSON = fromJSON, 
+    postcss$1.list = list, postcss$1.comment = defaults => new Comment(defaults), postcss$1.atRule = defaults => new AtRule(defaults), 
+    postcss$1.decl = defaults => new Declaration(defaults), postcss$1.rule = defaults => new Rule(defaults), 
+    postcss$1.root = defaults => new Root(defaults), postcss$1.document = defaults => new Document(defaults), 
+    postcss$1.CssSyntaxError = CssSyntaxError, postcss$1.Declaration = Declaration, 
+    postcss$1.Container = Container, postcss$1.Document = Document, postcss$1.Comment = Comment, 
+    postcss$1.Warning = Warning, postcss$1.AtRule = AtRule, postcss$1.Result = Result, 
+    postcss$1.Input = Input, postcss$1.Rule = Rule, postcss$1.Root = Root, postcss$1.Node = Node, 
+    LazyResult.registerPostcss(postcss$1);
+    var postcss_1 = postcss$1;
+    postcss$1.default = postcss$1;
+    /*
   object-assign
   (c) Sindre Sorhus
   @license MIT
   */
-var zn=Object.getOwnPropertySymbols,Nn=Object.prototype.hasOwnProperty,Dn=Object.prototype.propertyIsEnumerable;function Vn(t){if(null==t)throw new TypeError("Object.assign cannot be called with null or undefined");return Object(t)}var Jn=function(){try{if(!Object.assign)return!1;var t=new String("abc");if(t[5]="de","5"===Object.getOwnPropertyNames(t)[0])return!1;for(var e={},r=0;r<10;r++)e["_"+String.fromCharCode(r)]=r;if("0123456789"!==Object.getOwnPropertyNames(e).map((function(t){return e[t]})).join(""))return!1;var n={};return"abcdefghijklmnopqrst".split("").forEach((function(t){n[t]=t})),"abcdefghijklmnopqrst"===Object.keys(Object.assign({},n)).join("")}catch(t){return!1}}()?Object.assign:function(t,e){for(var r,n,s=Vn(t),i=1;i<arguments.length;i++){for(var o in r=Object(arguments[i]))Nn.call(r,o)&&(s[o]=r[o]);if(zn){n=zn(r);for(var a=0;a<n.length;a++)Dn.call(r,n[a])&&(s[n[a]]=r[n[a]])}}return s},Gn={exact:function(t){return t.filter((function(t){return t.match(/^[^\*\!]+$/)}))},contain:function(t){return t.filter((function(t){return t.match(/^\*.+\*$/)})).map((function(t){return t.substr(1,t.length-2)}))},endWith:function(t){return t.filter((function(t){return t.match(/^\*[^\*]+$/)})).map((function(t){return t.substr(1)}))},startWith:function(t){return t.filter((function(t){return t.match(/^[^\*\!]+\*$/)})).map((function(t){return t.substr(0,t.length-1)}))},notExact:function(t){return t.filter((function(t){return t.match(/^\![^\*].*$/)})).map((function(t){return t.substr(1)}))},notContain:function(t){return t.filter((function(t){return t.match(/^\!\*.+\*$/)})).map((function(t){return t.substr(2,t.length-3)}))},notEndWith:function(t){return t.filter((function(t){return t.match(/^\!\*[^\*]+$/)})).map((function(t){return t.substr(2)}))},notStartWith:function(t){return t.filter((function(t){return t.match(/^\![^\*]+\*$/)})).map((function(t){return t.substr(1,t.length-2)}))}};var qn={filterPropList:Gn,createPropListMatcher:function(t){var e=t.indexOf("*")>-1,r=e&&1===t.length,n={exact:Gn.exact(t),contain:Gn.contain(t),startWith:Gn.startWith(t),endWith:Gn.endWith(t),notExact:Gn.notExact(t),notContain:Gn.notContain(t),notStartWith:Gn.notStartWith(t),notEndWith:Gn.notEndWith(t)};return function(t){return!!r||(e||n.exact.indexOf(t)>-1||n.contain.some((function(e){return t.indexOf(e)>-1}))||n.startWith.some((function(e){return 0===t.indexOf(e)}))||n.endWith.some((function(e){return t.indexOf(e)===t.length-e.length})))&&!(n.notExact.indexOf(t)>-1||n.notContain.some((function(e){return t.indexOf(e)>-1}))||n.notStartWith.some((function(e){return 0===t.indexOf(e)}))||n.notEndWith.some((function(e){return t.indexOf(e)===t.length-e.length})))}}};var Yn={getUnitRegexp:function(t){return new RegExp("\"[^\"]+\"|'[^']+'|url\\([^\\)]+\\)|(\\d*\\.?\\d+)"+t,"g")}},Qn=Ln,Hn=Jn,{createPropListMatcher:Kn}=qn,{getUnitRegexp:Xn}=Yn,Zn={unitToConvert:"px",viewportWidth:320,viewportHeight:568,unitPrecision:5,viewportUnit:"vw",fontViewportUnit:"vw",selectorBlackList:[],propList:["*"],minPixelValue:1,mediaQuery:!1,replace:!0,landscape:!1,landscapeUnit:"vw",landscapeWidth:568},ts=Qn.plugin("postcss-px-to-viewport",(function(t){var e=Hn({},Zn,t),r=Xn(e.unitToConvert),n=Kn(e.propList),s=[];return function(t){if(t.walkRules((function(t){var i=t.source&&t.source.input.file;if(e.exclude&&i)if("[object RegExp]"===Object.prototype.toString.call(e.exclude)){if(rs(e.exclude,i))return}else{if("[object Array]"!==Object.prototype.toString.call(e.exclude))throw new Error("options.exclude should be RegExp or Array.");for(let t=0;t<e.exclude.length;t++)if(rs(e.exclude[t],i))return}if(!function(t,e){if("string"!=typeof e)return;return t.some((function(t){return"string"==typeof t?-1!==e.indexOf(t):e.match(t)}))}(e.selectorBlackList,t.selector)){if(e.landscape&&!t.parent.params){var o=t.clone().removeAll();t.walkDecls((function(t){-1!==t.value.indexOf(e.unitToConvert)&&n(t.prop)&&o.append(t.clone({value:t.value.replace(r,es(e,e.landscapeUnit,e.landscapeWidth))}))})),o.nodes.length>0&&s.push(o)}var a,l;if(a=t.parent.params,l=e.mediaQuery,!a||a&&l)t.walkDecls((function(s,i){if(-1!==s.value.indexOf(e.unitToConvert)&&n(s.prop)){var o,a,l=t.parent.params;e.landscape&&l&&-1!==l.indexOf("landscape")?(o=e.landscapeUnit,a=e.landscapeWidth):(o=function(t,e){return-1===t.indexOf("font")?e.viewportUnit:e.fontViewportUnit}(s.prop,e),a=e.viewportWidth);var u=s.value.replace(r,es(e,o,a));(function(t,e,r){return t.some((function(t){return t.prop===e&&t.value===r}))})(s.parent,s.prop,u)||(e.replace?s.value=u:s.parent.insertAfter(i,s.clone({value:u})))}}))}})),s.length>0){var i=new Qn.atRule({params:"(orientation: landscape)",name:"media"});s.forEach((function(t){i.append(t)})),t.append(i)}}}));function es(t,e,r){return function(n,s){if(!s)return n;var i=parseFloat(s);if(i<=t.minPixelValue)return n;var o,a,l,u,c=(o=i/r*100,a=t.unitPrecision,l=Math.pow(10,a+1),u=Math.floor(o*l),10*Math.round(u/10)/l);return 0===c?"0":c+e}}function rs(t,e){if("[object RegExp]"!==Object.prototype.toString.call(t))throw new Error("options.exclude should be RegExp.");return null!==e.match(t)}var ns={exports:{}},ss={exports:{}};!function(t,e){function r(t){this.options=t}Object.defineProperty(e,"__esModule",{value:!0}),e.default=void 0,r.prototype.canRemove=function(t){const e=this.options.remove;if(e)return e(t);if(!(0===t.indexOf("!")))return!0;if(this.options.removeAll||this._hasFirst)return!0;if(this.options.removeAllButFirst&&!this._hasFirst)return this._hasFirst=!0,!1};var n=r;e.default=n,t.exports=e.default}(ss,ss.exports);var is,os,as={exports:{}};is=as,os=as.exports,Object.defineProperty(os,"__esModule",{value:!0}),os.default=function(t){const e=[],r=t.length;let n,s=0;for(;s<r;)n=t.indexOf("/*",s),~n?(e.push([0,s,n]),s=n,n=t.indexOf("*/",s+2),e.push([1,s+2,n]),s=n+2):(e.push([0,s,r]),s=r);return e},is.exports=os.default,function(t,e){Object.defineProperty(e,"__esModule",{value:!0}),e.default=void 0;var r=s(ss.exports),n=s(as.exports);function s(t){return t&&t.__esModule?t:{default:t}}function i(t={}){const e=new r.default(t),s={},i={};function o(t,r,s=" "){const o=t+"@|@"+s;if(i[o])return i[o];const a=r((0,n.default)(t).reduce(((r,[n,i,o])=>{const a=t.slice(i,o);return n?e.canRemove(a)?r+s:`${r}/*${a}*/`:r+a}),"")).join(" ");return i[o]=a,a}return{postcssPlugin:"postcss-discard-comments",OnceExit(t,{list:r}){t.walk((t=>{if("comment"===t.type&&e.canRemove(t.text))t.remove();else if(t.raws.between&&(t.raws.between=o(t.raws.between,r.space)),"decl"!==t.type){if("rule"===t.type&&t.raws.selector&&t.raws.selector.raw)t.raws.selector.raw=o(t.raws.selector.raw,r.space,"");else if("atrule"===t.type){if(t.raws.afterName){const e=o(t.raws.afterName,r.space);e.length?t.raws.afterName=" "+e+" ":t.raws.afterName=e+" "}t.raws.params&&t.raws.params.raw&&(t.raws.params.raw=o(t.raws.params.raw,r.space))}}else if(t.raws.value&&t.raws.value.raw&&(t.raws.value.value===t.value?t.value=o(t.raws.value.raw,r.space):t.value=o(t.value,r.space),t.raws.value=null),t.raws.important){t.raws.important=o(t.raws.important,r.space);const e=function(t){if(s[t])return s[t];const e=(0,n.default)(t).filter((([t])=>t));return s[t]=e,e}(t.raws.important);t.raws.important=e.length?t.raws.important:"!important"}}))}}}i.postcss=!0;var o=i;e.default=o,t.exports=e.default}(ns,ns.exports);var ls=pt(ns.exports);const us="__PX_TO_VIEWPORT_CONFIG",cs="__FILTER_CONFIG",hs={unitToConvert:"px",viewportWidth:50,viewportHeight:1334,unitPrecision:3,viewportUnit:"rpx",fontViewportUnit:"rpx",selectorBlackList:[".ignore"],minPixelValue:1,mediaQuery:!1},ps=["width","height","border","border-radius","font-size: ?(?!normal).*","font-weight: ?(?!normal).*","word-spacing","line-height","color","opacity","background","background-image","box-shadow"];function fs(t){let e,r,n;return{c(){e=_("button"),e.textContent="🔥复制小程序样式",F(e,"id","fcb-copy-button"),F(e,"class","fcb-copy-button svelte-16mfo7u")},m(s,i){R(s,e,i),r||(n=T(e,"click",t[0]),r=!0)},p:S,i:S,o:S,d(t){t&&M(e),r=!1,n()}}}function ds(t){return[C((()=>{const t=document.querySelector("[name=propertiesPanelContainer]")?.querySelector("p.hljs-comment")?.parentElement?.innerText;t?async function(t){const e=await Ln([ts(GM_getValue(us,hs)),ls({})]).process(t),r=GM_getValue(cs,ps),n=e.css.replace(/(^\{)|(\}$)/g,"").split("\n").filter((t=>!!t&&r.findIndex((e=>new RegExp(e).test(t)))>-1));await navigator.clipboard.writeText(n.join("\n")),ht({title:"复制成功"})}(`{${t}}`):ht("从网页上获取css失败")}),500)]}at(".fcb-copy-button.svelte-16mfo7u{padding:4px 8px;border-radius:4px;background:#05bea9;outline:none;color:#fff;cursor:pointer;margin-bottom:10px;user-select:none}");class ms extends ot{constructor(t){super(),it(this,t,ds,fs,$,{})}}function gs(t){let e,r,n;return{c(){e=_("button"),e.textContent="设置"},m(t,s){R(t,e,s),r||(n=T(e,"click",ws),r=!0)},p:S,i:S,o:S,d(t){t&&M(e),r=!1,n()}}}function ws(){window.open("https://lbb00.github.io/figma-css-better/setting","target")}class ys extends ot{constructor(t){super(),it(this,t,null,gs,$,{})}}function vs(t){let e,r,n,s;return e=new ms({props:{codeEl:t[0]}}),n=new ys({}),{c(){et(e.$$.fragment),r=I(),et(n.$$.fragment)},m(t,i){rt(e,t,i),R(t,r,i),rt(n,t,i),s=!0},p(t,[r]){const n={};1&r&&(n.codeEl=t[0]),e.$set(n)},i(t){s||(Z(e.$$.fragment,t),Z(n.$$.fragment,t),s=!0)},o(t){tt(e.$$.fragment,t),tt(n.$$.fragment,t),s=!1},d(t){nt(e,t),t&&M(r),nt(n,t)}}}function bs(t,e,r){let{codeEl:n}=e;return t.$$set=t=>{"codeEl"in t&&r(0,n=t.codeEl)},[n]}class xs extends ot{constructor(t){super(),it(this,t,bs,vs,$,{codeEl:0})}}function Os(t){let e,r,n,s,i,o,a,l,u,c,h,p,f,d;return{c(){e=_("div"),r=_("div"),n=_("h2"),n.textContent="px-to-viewport 配置",s=I(),i=_("textarea"),o=I(),a=_("div"),l=_("h2"),l.textContent="filter rule 配置",u=I(),c=_("textarea"),h=I(),p=_("button"),p.textContent="保存",F(i,"class","fcb-setting-textarea svelte-1imlprz"),F(c,"class","fcb-setting-textarea svelte-1imlprz"),F(e,"class","fcb-setting")},m(m,g){R(m,e,g),j(e,r),j(r,n),j(r,s),j(r,i),B(i,t[0]),j(e,o),j(e,a),j(a,l),j(a,u),j(a,c),B(c,t[1]),j(e,h),j(e,p),f||(d=[T(i,"input",t[3]),T(c,"input",t[4]),T(p,"click",t[2])],f=!0)},p(t,[e]){1&e&&B(i,t[0]),2&e&&B(c,t[1])},i:S,o:S,d(t){t&&M(e),f=!1,P(d)}}}function Cs(t,e,r){let n=JSON.stringify(GM_getValue(us,hs)),s=JSON.stringify(GM_getValue(cs,ps));return[n,s,function(){try{GM_setValue(us,JSON.parse(n)),GM_setValue(cs,JSON.parse(s)),ht({title:"保存成功"})}catch(t){ht({title:t.message})}},function(){n=this.value,r(0,n)},function(){s=this.value,r(1,s)}]}at(".fcb-setting-textarea.svelte-1imlprz{width:100%;height:200px;background:#f4f4f4}");class Ss extends ot{constructor(t){super(),it(this,t,Cs,Os,$,{})}}const ks=C((function(t){const e=t.querySelector("#fcb-copy-button"),r=t.querySelector("p.hljs-comment");if(!e&&r){const t=document.createElement("div");r.parentElement.parentElement.prepend(t),new xs({target:t})}}),500);!function(){const t=unsafeWindow.console.log;unsafeWindow.console.log=function(...e){/\[Fullscreen\] loadtime/gi.test(e[0])&&setTimeout((()=>{const t=document.querySelector("[name=propertiesPanelContainer]");t?(ks(t),t.addEventListener("DOMSubtreeModified",ks.bind(null,t),!1)):ht({title:"FigmaCssBetter 初始化失败",duration:5e3})}),1e3),t(...e)}}(),/^https:\/\/lbb00.github.io\/figma-css-better\/setting/.test(window.location.href)&&window.onload((()=>{const t=document.querySelector("main");new Ss({target:t})}))}();
+    var getOwnPropertySymbols = Object.getOwnPropertySymbols, hasOwnProperty = Object.prototype.hasOwnProperty, propIsEnumerable = Object.prototype.propertyIsEnumerable;
+    function toObject(val) {
+        if (null == val) throw new TypeError("Object.assign cannot be called with null or undefined");
+        return Object(val);
+    }
+    var objectAssign$1 = function shouldUseNative() {
+        try {
+            if (!Object.assign) return !1;
+            var test1 = new String("abc");
+            if (test1[5] = "de", "5" === Object.getOwnPropertyNames(test1)[0]) return !1;
+            for (var test2 = {}, i = 0; i < 10; i++) test2["_" + String.fromCharCode(i)] = i;
+            if ("0123456789" !== Object.getOwnPropertyNames(test2).map((function(n) {
+                return test2[n];
+            })).join("")) return !1;
+            var test3 = {};
+            return "abcdefghijklmnopqrst".split("").forEach((function(letter) {
+                test3[letter] = letter;
+            })), "abcdefghijklmnopqrst" === Object.keys(Object.assign({}, test3)).join("");
+        } catch (err) {
+            return !1;
+        }
+    }() ? Object.assign : function(target, source) {
+        for (var from, symbols, to = toObject(target), s = 1; s < arguments.length; s++) {
+            for (var key in from = Object(arguments[s])) hasOwnProperty.call(from, key) && (to[key] = from[key]);
+            if (getOwnPropertySymbols) {
+                symbols = getOwnPropertySymbols(from);
+                for (var i = 0; i < symbols.length; i++) propIsEnumerable.call(from, symbols[i]) && (to[symbols[i]] = from[symbols[i]]);
+            }
+        }
+        return to;
+    }, filterPropList = {
+        exact: function(list) {
+            return list.filter((function(m) {
+                return m.match(/^[^\*\!]+$/);
+            }));
+        },
+        contain: function(list) {
+            return list.filter((function(m) {
+                return m.match(/^\*.+\*$/);
+            })).map((function(m) {
+                return m.substr(1, m.length - 2);
+            }));
+        },
+        endWith: function(list) {
+            return list.filter((function(m) {
+                return m.match(/^\*[^\*]+$/);
+            })).map((function(m) {
+                return m.substr(1);
+            }));
+        },
+        startWith: function(list) {
+            return list.filter((function(m) {
+                return m.match(/^[^\*\!]+\*$/);
+            })).map((function(m) {
+                return m.substr(0, m.length - 1);
+            }));
+        },
+        notExact: function(list) {
+            return list.filter((function(m) {
+                return m.match(/^\![^\*].*$/);
+            })).map((function(m) {
+                return m.substr(1);
+            }));
+        },
+        notContain: function(list) {
+            return list.filter((function(m) {
+                return m.match(/^\!\*.+\*$/);
+            })).map((function(m) {
+                return m.substr(2, m.length - 3);
+            }));
+        },
+        notEndWith: function(list) {
+            return list.filter((function(m) {
+                return m.match(/^\!\*[^\*]+$/);
+            })).map((function(m) {
+                return m.substr(2);
+            }));
+        },
+        notStartWith: function(list) {
+            return list.filter((function(m) {
+                return m.match(/^\![^\*]+\*$/);
+            })).map((function(m) {
+                return m.substr(1, m.length - 2);
+            }));
+        }
+    };
+    var propListMatcher = {
+        filterPropList: filterPropList,
+        createPropListMatcher: function createPropListMatcher$1(propList) {
+            var hasWild = propList.indexOf("*") > -1, matchAll = hasWild && 1 === propList.length, lists = {
+                exact: filterPropList.exact(propList),
+                contain: filterPropList.contain(propList),
+                startWith: filterPropList.startWith(propList),
+                endWith: filterPropList.endWith(propList),
+                notExact: filterPropList.notExact(propList),
+                notContain: filterPropList.notContain(propList),
+                notStartWith: filterPropList.notStartWith(propList),
+                notEndWith: filterPropList.notEndWith(propList)
+            };
+            return function(prop) {
+                return !!matchAll || (hasWild || lists.exact.indexOf(prop) > -1 || lists.contain.some((function(m) {
+                    return prop.indexOf(m) > -1;
+                })) || lists.startWith.some((function(m) {
+                    return 0 === prop.indexOf(m);
+                })) || lists.endWith.some((function(m) {
+                    return prop.indexOf(m) === prop.length - m.length;
+                }))) && !(lists.notExact.indexOf(prop) > -1 || lists.notContain.some((function(m) {
+                    return prop.indexOf(m) > -1;
+                })) || lists.notStartWith.some((function(m) {
+                    return 0 === prop.indexOf(m);
+                })) || lists.notEndWith.some((function(m) {
+                    return prop.indexOf(m) === prop.length - m.length;
+                })));
+            };
+        }
+    };
+    var pixelUnitRegexp = {
+        getUnitRegexp: function getUnitRegexp$1(unit) {
+            return new RegExp("\"[^\"]+\"|'[^']+'|url\\([^\\)]+\\)|(\\d*\\.?\\d+)" + unit, "g");
+        }
+    }, postcss = postcss_1, objectAssign = objectAssign$1, {createPropListMatcher: createPropListMatcher} = propListMatcher, {getUnitRegexp: getUnitRegexp} = pixelUnitRegexp, defaults = {
+        unitToConvert: "px",
+        viewportWidth: 320,
+        viewportHeight: 568,
+        unitPrecision: 5,
+        viewportUnit: "vw",
+        fontViewportUnit: "vw",
+        selectorBlackList: [],
+        propList: [ "*" ],
+        minPixelValue: 1,
+        mediaQuery: !1,
+        replace: !0,
+        landscape: !1,
+        landscapeUnit: "vw",
+        landscapeWidth: 568
+    }, postcssPxToViewport = postcss.plugin("postcss-px-to-viewport", (function(options) {
+        var opts = objectAssign({}, defaults, options), pxRegex = getUnitRegexp(opts.unitToConvert), satisfyPropList = createPropListMatcher(opts.propList), landscapeRules = [];
+        return function(css) {
+            if (css.walkRules((function(rule) {
+                var file = rule.source && rule.source.input.file;
+                if (opts.exclude && file) if ("[object RegExp]" === Object.prototype.toString.call(opts.exclude)) {
+                    if (isExclude(opts.exclude, file)) return;
+                } else {
+                    if ("[object Array]" !== Object.prototype.toString.call(opts.exclude)) throw new Error("options.exclude should be RegExp or Array.");
+                    for (let i = 0; i < opts.exclude.length; i++) if (isExclude(opts.exclude[i], file)) return;
+                }
+                if (!function blacklistedSelector(blacklist, selector) {
+                    if ("string" != typeof selector) return;
+                    return blacklist.some((function(regex) {
+                        return "string" == typeof regex ? -1 !== selector.indexOf(regex) : selector.match(regex);
+                    }));
+                }(opts.selectorBlackList, rule.selector)) {
+                    if (opts.landscape && !rule.parent.params) {
+                        var landscapeRule = rule.clone().removeAll();
+                        rule.walkDecls((function(decl) {
+                            -1 !== decl.value.indexOf(opts.unitToConvert) && satisfyPropList(decl.prop) && landscapeRule.append(decl.clone({
+                                value: decl.value.replace(pxRegex, createPxReplace(opts, opts.landscapeUnit, opts.landscapeWidth))
+                            }));
+                        })), landscapeRule.nodes.length > 0 && landscapeRules.push(landscapeRule);
+                    }
+                    (function validateParams(params, mediaQuery) {
+                        return !params || params && mediaQuery;
+                    })(rule.parent.params, opts.mediaQuery) && rule.walkDecls((function(decl, i) {
+                        if (-1 !== decl.value.indexOf(opts.unitToConvert) && satisfyPropList(decl.prop)) {
+                            var unit, size, params = rule.parent.params;
+                            opts.landscape && params && -1 !== params.indexOf("landscape") ? (unit = opts.landscapeUnit, 
+                            size = opts.landscapeWidth) : (unit = function getUnit(prop, opts) {
+                                return -1 === prop.indexOf("font") ? opts.viewportUnit : opts.fontViewportUnit;
+                            }(decl.prop, opts), size = opts.viewportWidth);
+                            var value = decl.value.replace(pxRegex, createPxReplace(opts, unit, size));
+                            (function declarationExists(decls, prop, value) {
+                                return decls.some((function(decl) {
+                                    return decl.prop === prop && decl.value === value;
+                                }));
+                            })(decl.parent, decl.prop, value) || (opts.replace ? decl.value = value : decl.parent.insertAfter(i, decl.clone({
+                                value: value
+                            })));
+                        }
+                    }));
+                }
+            })), landscapeRules.length > 0) {
+                var landscapeRoot = new postcss.atRule({
+                    params: "(orientation: landscape)",
+                    name: "media"
+                });
+                landscapeRules.forEach((function(rule) {
+                    landscapeRoot.append(rule);
+                })), css.append(landscapeRoot);
+            }
+        };
+    }));
+    function createPxReplace(opts, viewportUnit, viewportSize) {
+        return function(m, $1) {
+            if (!$1) return m;
+            var pixels = parseFloat($1);
+            if (pixels <= opts.minPixelValue) return m;
+            var parsedVal = function toFixed(number, precision) {
+                var multiplier = Math.pow(10, precision + 1), wholeNumber = Math.floor(number * multiplier);
+                return 10 * Math.round(wholeNumber / 10) / multiplier;
+            }(pixels / viewportSize * 100, opts.unitPrecision);
+            return 0 === parsedVal ? "0" : parsedVal + viewportUnit;
+        };
+    }
+    function isExclude(reg, file) {
+        if ("[object RegExp]" !== Object.prototype.toString.call(reg)) throw new Error("options.exclude should be RegExp.");
+        return null !== file.match(reg);
+    }
+    var dist = {
+        exports: {}
+    }, commentRemover = {
+        exports: {}
+    };
+    !function(module, exports) {
+        function CommentRemover(options) {
+            this.options = options;
+        }
+        Object.defineProperty(exports, "__esModule", {
+            value: !0
+        }), exports.default = void 0, CommentRemover.prototype.canRemove = function(comment) {
+            const remove = this.options.remove;
+            if (remove) return remove(comment);
+            if (!(0 === comment.indexOf("!"))) return !0;
+            if (this.options.removeAll || this._hasFirst) return !0;
+            if (this.options.removeAllButFirst && !this._hasFirst) return this._hasFirst = !0, 
+            !1;
+        };
+        var _default = CommentRemover;
+        exports.default = _default, module.exports = exports.default;
+    }(commentRemover, commentRemover.exports);
+    var module, exports, commentParser = {
+        exports: {}
+    };
+    module = commentParser, exports = commentParser.exports, Object.defineProperty(exports, "__esModule", {
+        value: !0
+    }), exports.default = function commentParser(input) {
+        const tokens = [], length = input.length;
+        let next, pos = 0;
+        for (;pos < length; ) next = input.indexOf("/*", pos), ~next ? (tokens.push([ 0, pos, next ]), 
+        pos = next, next = input.indexOf("*/", pos + 2), tokens.push([ 1, pos + 2, next ]), 
+        pos = next + 2) : (tokens.push([ 0, pos, length ]), pos = length);
+        return tokens;
+    }, module.exports = exports.default, function(module, exports) {
+        Object.defineProperty(exports, "__esModule", {
+            value: !0
+        }), exports.default = void 0;
+        var _commentRemover = _interopRequireDefault(commentRemover.exports), _commentParser = _interopRequireDefault(commentParser.exports);
+        function _interopRequireDefault(obj) {
+            return obj && obj.__esModule ? obj : {
+                default: obj
+            };
+        }
+        function pluginCreator(opts = {}) {
+            const remover = new _commentRemover.default(opts), matcherCache = {}, replacerCache = {};
+            function replaceComments(source, space, separator = " ") {
+                const key = source + "@|@" + separator;
+                if (replacerCache[key]) return replacerCache[key];
+                const result = space((0, _commentParser.default)(source).reduce(((value, [type, start, end]) => {
+                    const contents = source.slice(start, end);
+                    return type ? remover.canRemove(contents) ? value + separator : `${value}/*${contents}*/` : value + contents;
+                }), "")).join(" ");
+                return replacerCache[key] = result, result;
+            }
+            return {
+                postcssPlugin: "postcss-discard-comments",
+                OnceExit(css, {list: list}) {
+                    css.walk((node => {
+                        if ("comment" === node.type && remover.canRemove(node.text)) node.remove(); else if (node.raws.between && (node.raws.between = replaceComments(node.raws.between, list.space)), 
+                        "decl" !== node.type) {
+                            if ("rule" === node.type && node.raws.selector && node.raws.selector.raw) node.raws.selector.raw = replaceComments(node.raws.selector.raw, list.space, ""); else if ("atrule" === node.type) {
+                                if (node.raws.afterName) {
+                                    const commentsReplaced = replaceComments(node.raws.afterName, list.space);
+                                    commentsReplaced.length ? node.raws.afterName = " " + commentsReplaced + " " : node.raws.afterName = commentsReplaced + " ";
+                                }
+                                node.raws.params && node.raws.params.raw && (node.raws.params.raw = replaceComments(node.raws.params.raw, list.space));
+                            }
+                        } else if (node.raws.value && node.raws.value.raw && (node.raws.value.value === node.value ? node.value = replaceComments(node.raws.value.raw, list.space) : node.value = replaceComments(node.value, list.space), 
+                        node.raws.value = null), node.raws.important) {
+                            node.raws.important = replaceComments(node.raws.important, list.space);
+                            const b = function matchesComments(source) {
+                                if (matcherCache[source]) return matcherCache[source];
+                                const result = (0, _commentParser.default)(source).filter((([type]) => type));
+                                return matcherCache[source] = result, result;
+                            }(node.raws.important);
+                            node.raws.important = b.length ? node.raws.important : "!important";
+                        }
+                    }));
+                }
+            };
+        }
+        pluginCreator.postcss = !0;
+        var _default = pluginCreator;
+        exports.default = _default, module.exports = exports.default;
+    }(dist, dist.exports);
+    var postcssDiscardComments = getDefaultExportFromCjs(dist.exports);
+    const pxToViewportConfigDefault = {
+        unitToConvert: "px",
+        viewportWidth: 50,
+        viewportHeight: 1334,
+        unitPrecision: 3,
+        viewportUnit: "rpx",
+        fontViewportUnit: "rpx",
+        selectorBlackList: [ ".ignore" ],
+        minPixelValue: 1,
+        mediaQuery: !1
+    }, filterConfigDefault = [ "width", "height", "border", "border-radius", "font-size: ?(?!normal).*", "font-weight: ?(?!normal).*", "word-spacing", "line-height", "color", "opacity", "background", "background-image", "box-shadow" ];
+    function create_fragment$3(ctx) {
+        let button, mounted, dispose;
+        return {
+            c() {
+                button = element("button"), button.textContent = "🔥复制小程序样式", attr(button, "id", "fcb-copy-button"), 
+                attr(button, "class", "fcb-copy-button svelte-16mfo7u");
+            },
+            m(target, anchor) {
+                insert(target, button, anchor), mounted || (dispose = listen(button, "click", ctx[0]), 
+                mounted = !0);
+            },
+            p: noop,
+            i: noop,
+            o: noop,
+            d(detaching) {
+                detaching && detach(button), mounted = !1, dispose();
+            }
+        };
+    }
+    function instance$2($$self) {
+        return [ debounce((() => {
+            const codeEl = document.querySelector("[name=propertiesPanelContainer]")?.querySelector("p.hljs-comment")?.parentElement?.innerText;
+            codeEl ? async function getCSS(css) {
+                const content = await postcss_1([ postcssPxToViewport(GM_getValue("__PX_TO_VIEWPORT_CONFIG", pxToViewportConfigDefault)), postcssDiscardComments({}) ]).process(css), filters = GM_getValue("__FILTER_CONFIG", filterConfigDefault), styleArray = content.css.replace(/(^\{)|(\}$)/g, "").split("\n").filter((raw => !!raw && filters.findIndex((rule => new RegExp(rule).test(raw))) > -1));
+                await navigator.clipboard.writeText(styleArray.join("\n")), toast({
+                    title: "复制成功"
+                });
+            }(`{${codeEl}}`) : toast("从网页上获取css失败");
+        }), 500) ];
+    }
+    styleInject(".fcb-copy-button.svelte-16mfo7u{padding:4px 8px;border-radius:4px;background:#05bea9;outline:none;color:#fff;cursor:pointer;margin-bottom:10px;user-select:none}");
+    class CopyButton extends SvelteComponent {
+        constructor(options) {
+            super(), init(this, options, instance$2, create_fragment$3, safe_not_equal, {});
+        }
+    }
+    function create_fragment$2(ctx) {
+        let button, mounted, dispose;
+        return {
+            c() {
+                button = element("button"), button.textContent = "设置";
+            },
+            m(target, anchor) {
+                insert(target, button, anchor), mounted || (dispose = listen(button, "click", goToSetting), 
+                mounted = !0);
+            },
+            p: noop,
+            i: noop,
+            o: noop,
+            d(detaching) {
+                detaching && detach(button), mounted = !1, dispose();
+            }
+        };
+    }
+    function goToSetting() {
+        window.open("https://lbb00.github.io/figma-css-better/setting", "target");
+    }
+    class SettingButton extends SvelteComponent {
+        constructor(options) {
+            super(), init(this, options, null, create_fragment$2, safe_not_equal, {});
+        }
+    }
+    function create_fragment$1(ctx) {
+        let copybutton, t, settingbutton, current;
+        return copybutton = new CopyButton({
+            props: {
+                codeEl: ctx[0]
+            }
+        }), settingbutton = new SettingButton({}), {
+            c() {
+                create_component(copybutton.$$.fragment), t = space(), create_component(settingbutton.$$.fragment);
+            },
+            m(target, anchor) {
+                mount_component(copybutton, target, anchor), insert(target, t, anchor), mount_component(settingbutton, target, anchor), 
+                current = !0;
+            },
+            p(ctx, [dirty]) {
+                const copybutton_changes = {};
+                1 & dirty && (copybutton_changes.codeEl = ctx[0]), copybutton.$set(copybutton_changes);
+            },
+            i(local) {
+                current || (transition_in(copybutton.$$.fragment, local), transition_in(settingbutton.$$.fragment, local), 
+                current = !0);
+            },
+            o(local) {
+                transition_out(copybutton.$$.fragment, local), transition_out(settingbutton.$$.fragment, local), 
+                current = !1;
+            },
+            d(detaching) {
+                destroy_component(copybutton, detaching), detaching && detach(t), destroy_component(settingbutton, detaching);
+            }
+        };
+    }
+    function instance$1($$self, $$props, $$invalidate) {
+        let {codeEl: codeEl} = $$props;
+        return $$self.$$set = $$props => {
+            "codeEl" in $$props && $$invalidate(0, codeEl = $$props.codeEl);
+        }, [ codeEl ];
+    }
+    class Actions extends SvelteComponent {
+        constructor(options) {
+            super(), init(this, options, instance$1, create_fragment$1, safe_not_equal, {
+                codeEl: 0
+            });
+        }
+    }
+    function create_fragment(ctx) {
+        let div2, div0, h20, t1, textarea0, t2, div1, h21, t4, textarea1, t5, button, mounted, dispose;
+        return {
+            c() {
+                div2 = element("div"), div0 = element("div"), h20 = element("h2"), h20.textContent = "px-to-viewport 配置", 
+                t1 = space(), textarea0 = element("textarea"), t2 = space(), div1 = element("div"), 
+                h21 = element("h2"), h21.textContent = "filter rule 配置", t4 = space(), textarea1 = element("textarea"), 
+                t5 = space(), button = element("button"), button.textContent = "保存", attr(textarea0, "class", "fcb-setting-textarea svelte-1imlprz"), 
+                attr(textarea1, "class", "fcb-setting-textarea svelte-1imlprz"), attr(div2, "class", "fcb-setting");
+            },
+            m(target, anchor) {
+                insert(target, div2, anchor), append(div2, div0), append(div0, h20), append(div0, t1), 
+                append(div0, textarea0), set_input_value(textarea0, ctx[0]), append(div2, t2), append(div2, div1), 
+                append(div1, h21), append(div1, t4), append(div1, textarea1), set_input_value(textarea1, ctx[1]), 
+                append(div2, t5), append(div2, button), mounted || (dispose = [ listen(textarea0, "input", ctx[3]), listen(textarea1, "input", ctx[4]), listen(button, "click", ctx[2]) ], 
+                mounted = !0);
+            },
+            p(ctx, [dirty]) {
+                1 & dirty && set_input_value(textarea0, ctx[0]), 2 & dirty && set_input_value(textarea1, ctx[1]);
+            },
+            i: noop,
+            o: noop,
+            d(detaching) {
+                detaching && detach(div2), mounted = !1, run_all(dispose);
+            }
+        };
+    }
+    function instance($$self, $$props, $$invalidate) {
+        let pxToViewportConfig = JSON.stringify(GM_getValue("__PX_TO_VIEWPORT_CONFIG", pxToViewportConfigDefault)), filterConfig = JSON.stringify(GM_getValue("__FILTER_CONFIG", filterConfigDefault));
+        return [ pxToViewportConfig, filterConfig, function save() {
+            try {
+                GM_setValue("__PX_TO_VIEWPORT_CONFIG", JSON.parse(pxToViewportConfig)), GM_setValue("__FILTER_CONFIG", JSON.parse(filterConfig)), 
+                toast({
+                    title: "保存成功"
+                });
+            } catch (e) {
+                toast({
+                    title: e.message
+                });
+            }
+        }, function textarea0_input_handler() {
+            pxToViewportConfig = this.value, $$invalidate(0, pxToViewportConfig);
+        }, function textarea1_input_handler() {
+            filterConfig = this.value, $$invalidate(1, filterConfig);
+        } ];
+    }
+    styleInject(".fcb-setting-textarea.svelte-1imlprz{width:100%;height:200px;background:#f4f4f4}");
+    class SettingPanel extends SvelteComponent {
+        constructor(options) {
+            super(), init(this, options, instance, create_fragment, safe_not_equal, {});
+        }
+    }
+    const installFigmaPlugin = debounce((function(el) {
+        const btnEl = el.querySelector("#fcb-copy-button"), codeEl = el.querySelector("p.hljs-comment");
+        if (!btnEl && codeEl) {
+            const targetEl = document.createElement("div");
+            codeEl.parentElement.parentElement.prepend(targetEl), new Actions({
+                target: targetEl
+            });
+        }
+    }), 500);
+    !function main() {
+        !function checkFigma() {
+            const oldLog = unsafeWindow.console.log;
+            unsafeWindow.console.log = function(...args) {
+                /\[Fullscreen\] loadtime/gi.test(args[0]) && setTimeout((() => {
+                    const el = document.querySelector("[name=propertiesPanelContainer]");
+                    el ? (installFigmaPlugin(el), el.addEventListener("DOMSubtreeModified", installFigmaPlugin.bind(null, el), !1)) : toast({
+                        title: "FigmaCssBetter 初始化失败",
+                        duration: 5e3
+                    });
+                }), 1e3), oldLog(...args);
+            };
+        }(), function checkSetting() {
+            /^https:\/\/lbb00.github.io\/figma-css-better\/setting/.test(window.location.href) && window.onload((() => {
+                const mainEl = document.querySelector("main");
+                new SettingPanel({
+                    target: mainEl
+                });
+            }));
+        }();
+    }();
+}();
