@@ -42,7 +42,7 @@ module.exports = {
       const items = [
         ['name', 'Figma CSS Better'],
         ['namespace', 'https://github.com/lbb00'],
-        ['version', '1.2.2'],
+        ['version', '1.2.3'],
         ['description', 'Figma CSS 转为小程序样式'],
         ['encoding', 'utf-8'],
         ['author', 'lbb00'],
@@ -62,7 +62,7 @@ module.exports = {
         ['icon', 'https://www.google.com/s2/favicons?domain=figma.com'],
         [
           'license',
-          'https://github.com/lbb00/figma-css-better/blob/main/LICENSE'
+          'MIT; https://github.com/lbb00/figma-css-better/blob/main/LICENSE'
         ],
         ['grant', 'unsafeWindow'],
         ['grant', 'window.console'],
