@@ -47,14 +47,14 @@ function checkSetting () {
       window.location.href
     )
   ) {
-    window.onload(() => {
+    window.onload = () => {
       const mainEl = document.querySelector('main')
 
       // eslint-disable-next-line no-new
       new SettingPanel({
         target: mainEl
       })
-    })
+    }
   }
 }
 

@@ -2,7 +2,7 @@
 // @name        Figma CSS Better
 // @namespace   https://github.com/lbb00
 // @version     1.2.3
-// @description Figma CSS 转为小程序样式
+// @description Figma CSS 转为微信小程序样式,rpx,figma,微信,小程序
 // @encoding    utf-8
 // @author      lbb00
 // @homepage    https://github.com/lbb00/figma-css-better
@@ -2648,12 +2648,12 @@
                 }), 1e3), oldLog(...args);
             };
         }(), function checkSetting() {
-            /^https:\/\/lbb00.github.io\/figma-css-better\/setting/.test(window.location.href) && window.onload((() => {
+            /^https:\/\/lbb00.github.io\/figma-css-better\/setting/.test(window.location.href) && (window.onload = () => {
                 const mainEl = document.querySelector("main");
                 new SettingPanel({
                     target: mainEl
                 });
-            }));
+            });
         }();
     }();
 }();
