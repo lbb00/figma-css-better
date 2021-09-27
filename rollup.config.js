@@ -42,8 +42,8 @@ module.exports = {
       const items = [
         ['name', 'Figma CSS Better'],
         ['namespace', 'https://github.com/lbb00'],
-        ['version', '1.2.3'],
-        ['description', 'Figma CSS 转为小程序样式'],
+        ['version', '1.2.4'],
+        ['description', 'Figma CSS 转为微信小程序样式,rpx,figma,微信,小程序'],
         ['encoding', 'utf-8'],
         ['author', 'lbb00'],
         ['homepage', 'https://github.com/lbb00/figma-css-better'],
