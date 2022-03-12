@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Figma CSS Better
 // @namespace   https://github.com/lbb00
-// @version     1.2.3
+// @version     1.2.4
 // @description Figma CSS 转为微信小程序样式,rpx,figma,微信,小程序
 // @encoding    utf-8
 // @author      lbb00
@@ -11,7 +11,7 @@
 // @downloadURL https://github.com/lbb00/figma-css-better/raw/master/figma-css-better.user.js
 // @match       *://www.figma.com/file/*
 // @match       https://lbb00.github.io/figma-css-better/setting
-// @run-at      document-start
+// @run-at      document-end
 // @icon        https://www.google.com/s2/favicons?domain=figma.com
 // @license     MIT; https://github.com/lbb00/figma-css-better/blob/main/LICENSE
 // @grant       unsafeWindow
@@ -21,9 +21,9 @@
 // ==/UserScript==
 !function() {
     "use strict";
-    var freeGlobal = "object" == typeof global && global && global.Object === Object && global, freeSelf = "object" == typeof self && self && self.Object === Object && self, root$1 = freeGlobal || freeSelf || Function("return this")(), Symbol$1 = root$1.Symbol, objectProto$1 = Object.prototype, hasOwnProperty$1 = objectProto$1.hasOwnProperty, nativeObjectToString$1 = objectProto$1.toString, symToStringTag$1 = Symbol$1 ? Symbol$1.toStringTag : void 0;
+    var freeGlobal$1 = "object" == typeof global && global && global.Object === Object && global, freeSelf = "object" == typeof self && self && self.Object === Object && self, root$2 = freeGlobal$1 || freeSelf || Function("return this")(), Symbol$2 = root$2.Symbol, objectProto$1 = Object.prototype, hasOwnProperty$1 = objectProto$1.hasOwnProperty, nativeObjectToString$1 = objectProto$1.toString, symToStringTag$1 = Symbol$2 ? Symbol$2.toStringTag : void 0;
     var nativeObjectToString = Object.prototype.toString;
-    var symToStringTag = Symbol$1 ? Symbol$1.toStringTag : void 0;
+    var symToStringTag = Symbol$2 ? Symbol$2.toStringTag : void 0;
     function baseGetTag(value) {
         return null == value ? void 0 === value ? "[object Undefined]" : "[object Null]" : symToStringTag && symToStringTag in Object(value) ? function getRawTag(value) {
             var isOwn = hasOwnProperty$1.call(value, symToStringTag$1), tag = value[symToStringTag$1];
@@ -67,8 +67,8 @@
         var isBinary = reIsBinary.test(value);
         return isBinary || reIsOctal.test(value) ? freeParseInt(value.slice(2), isBinary ? 2 : 8) : reIsBadHex.test(value) ? NaN : +value;
     }
-    var now = function() {
-        return root$1.Date.now();
+    var now$1 = function() {
+        return root$2.Date.now();
     }, nativeMax = Math.max, nativeMin = Math.min;
     function debounce(func, wait, options) {
         var lastArgs, lastThis, maxWait, result, timerId, lastCallTime, lastInvokeTime = 0, leading = !1, maxing = !1, trailing = !0;
@@ -85,7 +85,7 @@
             return void 0 === lastCallTime || timeSinceLastCall >= wait || timeSinceLastCall < 0 || maxing && time - lastInvokeTime >= maxWait;
         }
         function timerExpired() {
-            var time = now();
+            var time = now$1();
             if (shouldInvoke(time)) return trailingEdge(time);
             timerId = setTimeout(timerExpired, function remainingWait(time) {
                 var timeWaiting = wait - (time - lastCallTime);
@@ -97,7 +97,7 @@
             result);
         }
         function debounced() {
-            var time = now(), isInvoking = shouldInvoke(time);
+            var time = now$1(), isInvoking = shouldInvoke(time);
             if (lastArgs = arguments, lastThis = this, lastCallTime = time, isInvoking) {
                 if (void 0 === timerId) return leadingEdge(lastCallTime);
                 if (maxing) return clearTimeout(timerId), timerId = setTimeout(timerExpired, wait), 
@@ -110,7 +110,7 @@
         trailing = "trailing" in options ? !!options.trailing : trailing), debounced.cancel = function cancel() {
             void 0 !== timerId && clearTimeout(timerId), lastInvokeTime = 0, lastArgs = lastCallTime = lastThis = timerId = void 0;
         }, debounced.flush = function flush() {
-            return void 0 === timerId ? result : trailingEdge(now());
+            return void 0 === timerId ? result : trailingEdge(now$1());
         }, debounced;
     }
     function noop() {}
@@ -165,26 +165,24 @@
     function add_render_callback(fn) {
         render_callbacks.push(fn);
     }
-    let flushing = !1;
     const seen_callbacks = new Set;
+    let flushidx = 0;
     function flush() {
-        if (!flushing) {
-            flushing = !0;
-            do {
-                for (let i = 0; i < dirty_components.length; i += 1) {
-                    const component = dirty_components[i];
-                    set_current_component(component), update(component.$$);
-                }
-                for (set_current_component(null), dirty_components.length = 0; binding_callbacks.length; ) binding_callbacks.pop()();
-                for (let i = 0; i < render_callbacks.length; i += 1) {
-                    const callback = render_callbacks[i];
-                    seen_callbacks.has(callback) || (seen_callbacks.add(callback), callback());
-                }
-                render_callbacks.length = 0;
-            } while (dirty_components.length);
-            for (;flush_callbacks.length; ) flush_callbacks.pop()();
-            update_scheduled = !1, flushing = !1, seen_callbacks.clear();
-        }
+        const saved_component = current_component;
+        do {
+            for (;flushidx < dirty_components.length; ) {
+                const component = dirty_components[flushidx];
+                flushidx++, set_current_component(component), update(component.$$);
+            }
+            for (set_current_component(null), dirty_components.length = 0, flushidx = 0; binding_callbacks.length; ) binding_callbacks.pop()();
+            for (let i = 0; i < render_callbacks.length; i += 1) {
+                const callback = render_callbacks[i];
+                seen_callbacks.has(callback) || (seen_callbacks.add(callback), callback());
+            }
+            render_callbacks.length = 0;
+        } while (dirty_components.length);
+        for (;flush_callbacks.length; ) flush_callbacks.pop()();
+        update_scheduled = !1, seen_callbacks.clear(), set_current_component(saved_component);
     }
     function update($$) {
         if (null !== $$.fragment) {
@@ -240,7 +238,7 @@
             on_disconnect: [],
             before_update: [],
             after_update: [],
-            context: new Map(parent_component ? parent_component.$$.context : options.context || []),
+            context: new Map(options.context || (parent_component ? parent_component.$$.context : [])),
             callbacks: blank_object(),
             dirty: dirty,
             skip_bound: !1,
@@ -282,6 +280,16 @@
             }($$props) && (this.$$.skip_bound = !0, this.$$set($$props), this.$$.skip_bound = !1);
         }
     }
+    var UseSingleton = function(createInstance, {withKey: withKey = !1, immediate: immediate = !1} = {}) {
+        const UNDEFINED_INSTANCE = {};
+        let _key, _instance = UNDEFINED_INSTANCE;
+        function getSingleton(key) {
+            return _instance !== UNDEFINED_INSTANCE && function checkSameKey(key) {
+                return !withKey || void 0 === key || key === _key;
+            }(key) || (_key = key, _instance = createInstance(_key)), _instance;
+        }
+        return immediate && getSingleton(), getSingleton;
+    };
     function styleInject(css, ref) {
         void 0 === ref && (ref = {});
         var insertAt = ref.insertAt;
@@ -325,7 +333,7 @@
             }));
         } ];
     }
-    styleInject(".lbb-toast.svelte-6z5ekl{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);border-radius:4px;background-color:rgba(0,0,0,.8);padding:12px 24px;max-width:200px;color:#eee;font-size:16px;z-index:9999999}.lbb-toast--hide.svelte-6z5ekl{z-index:-1;visibility:hidden}");
+    styleInject(".lbb-toast.svelte-6z5ekl{background-color:rgba(0,0,0,.8);border-radius:4px;color:#eee;font-size:16px;left:50%;max-width:200px;padding:12px 24px;position:fixed;top:50%;transform:translate(-50%,-50%);z-index:9999999}.lbb-toast--hide.svelte-6z5ekl{visibility:hidden;z-index:-1}");
     class Toast extends SvelteComponent {
         constructor(options) {
             super(), init(this, options, instance$3, create_fragment$4, safe_not_equal, {
@@ -336,16 +344,7 @@
             return this.$$.ctx[3];
         }
     }
-    const toast = function(createInstance, {withKey: withKey = !1, immediate: immediate = !1} = {}) {
-        const UNDEFINED_INSTANCE = {};
-        let _key, _instance = UNDEFINED_INSTANCE;
-        function getSingleton(key) {
-            return _instance !== UNDEFINED_INSTANCE && function checkSameKey(key) {
-                return !withKey || void 0 === key || key === _key;
-            }(key) || (_key = key, _instance = createInstance(_key)), _instance;
-        }
-        return immediate && getSingleton(), getSingleton;
-    }((() => {
+    const toast = UseSingleton((() => {
         const toastEl = new Toast({
             target: document.body,
             props: {
@@ -359,9 +358,6 @@
             });
         };
     }))();
-    function getDefaultExportFromCjs(x) {
-        return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, "default") ? x.default : x;
-    }
     function getAugmentedNamespace(n) {
         if (n.__esModule) return n;
         var a = Object.defineProperty({}, "__esModule", {
@@ -377,16 +373,50 @@
             });
         })), a;
     }
-    var require$$4 = getAugmentedNamespace(Object.freeze({
+    var picocolors_browser = {
+        exports: {}
+    }, x = String, create = function() {
+        return {
+            isColorSupported: !1,
+            reset: x,
+            bold: x,
+            dim: x,
+            italic: x,
+            underline: x,
+            inverse: x,
+            hidden: x,
+            strikethrough: x,
+            black: x,
+            red: x,
+            green: x,
+            yellow: x,
+            blue: x,
+            magenta: x,
+            cyan: x,
+            white: x,
+            gray: x,
+            bgBlack: x,
+            bgRed: x,
+            bgGreen: x,
+            bgYellow: x,
+            bgBlue: x,
+            bgMagenta: x,
+            bgCyan: x,
+            bgWhite: x
+        };
+    };
+    picocolors_browser.exports = create(), picocolors_browser.exports.createColors = create;
+    var require$$2 = getAugmentedNamespace(Object.freeze({
         __proto__: null,
         default: {}
     }));
-    let {red: red, bold: bold, gray: gray, options: colorette} = require$$4, terminalHighlight$1 = require$$4;
+    let pico = picocolors_browser.exports, terminalHighlight$1 = require$$2;
     class CssSyntaxError$3 extends Error {
         constructor(message, line, column, source, file, plugin) {
             super(message), this.name = "CssSyntaxError", this.reason = message, file && (this.file = file), 
-            source && (this.source = source), plugin && (this.plugin = plugin), void 0 !== line && void 0 !== column && (this.line = line, 
-            this.column = column), this.setMessage(), Error.captureStackTrace && Error.captureStackTrace(this, CssSyntaxError$3);
+            source && (this.source = source), plugin && (this.plugin = plugin), void 0 !== line && void 0 !== column && ("number" == typeof line ? (this.line = line, 
+            this.column = column) : (this.line = line.line, this.column = line.column, this.endLine = column.line, 
+            this.endColumn = column.column)), this.setMessage(), Error.captureStackTrace && Error.captureStackTrace(this, CssSyntaxError$3);
         }
         setMessage() {
             this.message = this.plugin ? this.plugin + ": " : "", this.message += this.file ? this.file : "<css input>", 
@@ -395,10 +425,13 @@
         showSourceCode(color) {
             if (!this.source) return "";
             let css = this.source;
-            null == color && (color = colorette.enabled), terminalHighlight$1 && color && (css = terminalHighlight$1(css));
+            null == color && (color = pico.isColorSupported), terminalHighlight$1 && color && (css = terminalHighlight$1(css));
             let mark, aside, lines = css.split(/\r?\n/), start = Math.max(this.line - 3, 0), end = Math.min(this.line + 2, lines.length), maxWidth = String(end).length;
-            return color ? (mark = text => bold(red(text)), aside = text => gray(text)) : mark = aside = str => str, 
-            lines.slice(start, end).map(((line, index) => {
+            if (color) {
+                let {bold: bold, red: red, gray: gray} = pico.createColors(!0);
+                mark = text => bold(red(text)), aside = text => gray(text);
+            } else mark = aside = str => str;
+            return lines.slice(start, end).map(((line, index) => {
                 let number = start + 1 + index, gutter = " " + (" " + number).slice(-maxWidth) + " | ";
                 if (number === this.line) {
                     let spacing = aside(gutter.replace(/\d/g, " ")) + line.slice(0, this.column - 1).replace(/[^\t]/g, " ");
@@ -430,7 +463,7 @@
         commentRight: " ",
         semicolon: !1
     };
-    var stringifier = class Stringifier$2 {
+    class Stringifier$2 {
         constructor(builder) {
             this.builder = builder;
         }
@@ -584,14 +617,16 @@
             let value = node[prop], raw = node.raws[prop];
             return raw && raw.value === value ? raw.raw : value;
         }
-    };
+    }
+    var stringifier = Stringifier$2;
+    Stringifier$2.default = Stringifier$2;
     let Stringifier$1 = stringifier;
-    function stringify$3(node, builder) {
+    function stringify$4(node, builder) {
         new Stringifier$1(builder).stringify(node);
     }
-    var stringify_1 = stringify$3;
-    stringify$3.default = stringify$3;
-    let {isClean: isClean$2, my: my$2} = symbols, CssSyntaxError$2 = cssSyntaxError, Stringifier = stringifier, stringify$2 = stringify_1;
+    var stringify_1 = stringify$4;
+    stringify$4.default = stringify$4;
+    let {isClean: isClean$2, my: my$2} = symbols, CssSyntaxError$2 = cssSyntaxError, Stringifier = stringifier, stringify$3 = stringify_1;
     function cloneNode(obj, parent) {
         let cloned = new obj.constructor;
         for (let i in obj) {
@@ -613,8 +648,14 @@
         }
         error(message, opts = {}) {
             if (this.source) {
-                let pos = this.positionBy(opts);
-                return this.source.input.error(message, pos.line, pos.column, opts);
+                let {start: start, end: end} = this.rangeBy(opts);
+                return this.source.input.error(message, {
+                    line: start.line,
+                    column: start.column
+                }, {
+                    line: end.line,
+                    column: end.column
+                }, opts);
             }
             return new CssSyntaxError$2(message);
         }
@@ -628,7 +669,7 @@
         remove() {
             return this.parent && this.parent.removeChild(this), this.parent = void 0, this;
         }
-        toString(stringifier = stringify$2) {
+        toString(stringifier = stringify$3) {
             stringifier.stringify && (stringifier = stringifier.stringify);
             let result = "";
             return stringifier(this, (i => {
@@ -725,6 +766,35 @@
             }
             return pos;
         }
+        rangeBy(opts) {
+            let start = {
+                line: this.source.start.line,
+                column: this.source.start.column
+            }, end = this.source.end ? {
+                line: this.source.end.line,
+                column: this.source.end.column + 1
+            } : {
+                line: start.line,
+                column: start.column + 1
+            };
+            if (opts.word) {
+                let index = this.toString().indexOf(opts.word);
+                -1 !== index && (start = this.positionInside(index), end = this.positionInside(index + opts.word.length));
+            } else opts.start ? start = {
+                line: opts.start.line,
+                column: opts.start.column
+            } : opts.index && (start = this.positionInside(opts.index)), opts.end ? end = {
+                line: opts.end.line,
+                column: opts.end.column
+            } : opts.endIndex ? end = this.positionInside(opts.endIndex) : opts.index && (end = this.positionInside(opts.index + 1));
+            return (end.line < start.line || end.line === start.line && end.column <= start.column) && (end = {
+                line: start.line,
+                column: start.column + 1
+            }), {
+                start: start,
+                end: end
+            };
+        }
         getProxyProcessor() {
             return {
                 set: (node, prop, value) => (node[prop] === value || (node[prop] = value, "prop" !== prop && "value" !== prop && "name" !== prop && "params" !== prop && "important" !== prop && "text" !== prop || node.markDirty()), 
@@ -770,21 +840,230 @@
     }
     var declaration = Declaration$4;
     Declaration$4.default = Declaration$4;
-    let {SourceMapConsumer: SourceMapConsumer$2, SourceMapGenerator: SourceMapGenerator$2} = require$$4, {dirname: dirname$1, resolve: resolve$1, relative: relative, sep: sep} = require$$4, {pathToFileURL: pathToFileURL$1} = require$$4, sourceMapAvailable$1 = Boolean(SourceMapConsumer$2 && SourceMapGenerator$2), pathAvailable$1 = Boolean(dirname$1 && resolve$1 && relative && sep);
-    var mapGenerator = class MapGenerator$1 {
-        constructor(stringify, root, opts) {
-            this.stringify = stringify, this.mapOpts = opts.map || {}, this.root = root, this.opts = opts;
+    var nonSecure = {
+        nanoid: (size = 21) => {
+            let id = "", i = size;
+            for (;i--; ) id += "useandom-26T198340PX75pxJACKVERYMINDBUSHWOLF_GQZbfghjklqvwyzrict"[64 * Math.random() | 0];
+            return id;
+        },
+        customAlphabet: (alphabet, defaultSize = 21) => (size = defaultSize) => {
+            let id = "", i = size;
+            for (;i--; ) id += alphabet[Math.random() * alphabet.length | 0];
+            return id;
+        }
+    };
+    let {SourceMapConsumer: SourceMapConsumer$2, SourceMapGenerator: SourceMapGenerator$2} = require$$2, {existsSync: existsSync, readFileSync: readFileSync} = require$$2, {dirname: dirname$1, join: join} = require$$2;
+    class PreviousMap$2 {
+        constructor(css, opts) {
+            if (!1 === opts.map) return;
+            this.loadAnnotation(css), this.inline = this.startWith(this.annotation, "data:");
+            let prev = opts.map ? opts.map.prev : void 0, text = this.loadMap(opts.from, prev);
+            !this.mapFile && opts.from && (this.mapFile = opts.from), this.mapFile && (this.root = dirname$1(this.mapFile)), 
+            text && (this.text = text);
+        }
+        consumer() {
+            return this.consumerCache || (this.consumerCache = new SourceMapConsumer$2(this.text)), 
+            this.consumerCache;
+        }
+        withContent() {
+            return !!(this.consumer().sourcesContent && this.consumer().sourcesContent.length > 0);
+        }
+        startWith(string, start) {
+            return !!string && string.substr(0, start.length) === start;
+        }
+        getAnnotationURL(sourceMapString) {
+            return sourceMapString.replace(/^\/\*\s*# sourceMappingURL=/, "").trim();
+        }
+        loadAnnotation(css) {
+            let comments = css.match(/\/\*\s*# sourceMappingURL=/gm);
+            if (!comments) return;
+            let start = css.lastIndexOf(comments.pop()), end = css.indexOf("*/", start);
+            start > -1 && end > -1 && (this.annotation = this.getAnnotationURL(css.substring(start, end)));
+        }
+        decodeInline(text) {
+            if (/^data:application\/json;charset=utf-?8,/.test(text) || /^data:application\/json,/.test(text)) return decodeURIComponent(text.substr(RegExp.lastMatch.length));
+            if (/^data:application\/json;charset=utf-?8;base64,/.test(text) || /^data:application\/json;base64,/.test(text)) return function fromBase64(str) {
+                return Buffer ? Buffer.from(str, "base64").toString() : window.atob(str);
+            }(text.substr(RegExp.lastMatch.length));
+            let encoding = text.match(/data:application\/json;([^,]+),/)[1];
+            throw new Error("Unsupported source map encoding " + encoding);
+        }
+        loadFile(path) {
+            if (this.root = dirname$1(path), existsSync(path)) return this.mapFile = path, readFileSync(path, "utf-8").toString().trim();
+        }
+        loadMap(file, prev) {
+            if (!1 === prev) return !1;
+            if (prev) {
+                if ("string" == typeof prev) return prev;
+                if ("function" != typeof prev) {
+                    if (prev instanceof SourceMapConsumer$2) return SourceMapGenerator$2.fromSourceMap(prev).toString();
+                    if (prev instanceof SourceMapGenerator$2) return prev.toString();
+                    if (this.isMap(prev)) return JSON.stringify(prev);
+                    throw new Error("Unsupported previous source map format: " + prev.toString());
+                }
+                {
+                    let prevPath = prev(file);
+                    if (prevPath) {
+                        let map = this.loadFile(prevPath);
+                        if (!map) throw new Error("Unable to load previous source map: " + prevPath.toString());
+                        return map;
+                    }
+                }
+            } else {
+                if (this.inline) return this.decodeInline(this.annotation);
+                if (this.annotation) {
+                    let map = this.annotation;
+                    return file && (map = join(dirname$1(file), map)), this.loadFile(map);
+                }
+            }
+        }
+        isMap(map) {
+            return "object" == typeof map && ("string" == typeof map.mappings || "string" == typeof map._mappings || Array.isArray(map.sections));
+        }
+    }
+    var previousMap = PreviousMap$2;
+    PreviousMap$2.default = PreviousMap$2;
+    let {SourceMapConsumer: SourceMapConsumer$1, SourceMapGenerator: SourceMapGenerator$1} = require$$2, {fileURLToPath: fileURLToPath, pathToFileURL: pathToFileURL$1} = require$$2, {resolve: resolve$1, isAbsolute: isAbsolute} = require$$2, {nanoid: nanoid} = nonSecure, terminalHighlight = require$$2, CssSyntaxError$1 = cssSyntaxError, PreviousMap$1 = previousMap, fromOffsetCache = Symbol("fromOffsetCache"), sourceMapAvailable$1 = Boolean(SourceMapConsumer$1 && SourceMapGenerator$1), pathAvailable$1 = Boolean(resolve$1 && isAbsolute);
+    class Input$4 {
+        constructor(css, opts = {}) {
+            if (null == css || "object" == typeof css && !css.toString) throw new Error(`PostCSS received ${css} instead of CSS string`);
+            if (this.css = css.toString(), "\ufeff" === this.css[0] || "￾" === this.css[0] ? (this.hasBOM = !0, 
+            this.css = this.css.slice(1)) : this.hasBOM = !1, opts.from && (!pathAvailable$1 || /^\w+:\/\//.test(opts.from) || isAbsolute(opts.from) ? this.file = opts.from : this.file = resolve$1(opts.from)), 
+            pathAvailable$1 && sourceMapAvailable$1) {
+                let map = new PreviousMap$1(this.css, opts);
+                if (map.text) {
+                    this.map = map;
+                    let file = map.consumer().file;
+                    !this.file && file && (this.file = this.mapResolve(file));
+                }
+            }
+            this.file || (this.id = "<input css " + nanoid(6) + ">"), this.map && (this.map.file = this.from);
+        }
+        fromOffset(offset) {
+            let lastLine, lineToIndex;
+            if (this[fromOffsetCache]) lineToIndex = this[fromOffsetCache]; else {
+                let lines = this.css.split("\n");
+                lineToIndex = new Array(lines.length);
+                let prevIndex = 0;
+                for (let i = 0, l = lines.length; i < l; i++) lineToIndex[i] = prevIndex, prevIndex += lines[i].length + 1;
+                this[fromOffsetCache] = lineToIndex;
+            }
+            lastLine = lineToIndex[lineToIndex.length - 1];
+            let min = 0;
+            if (offset >= lastLine) min = lineToIndex.length - 1; else {
+                let mid, max = lineToIndex.length - 2;
+                for (;min < max; ) if (mid = min + (max - min >> 1), offset < lineToIndex[mid]) max = mid - 1; else {
+                    if (!(offset >= lineToIndex[mid + 1])) {
+                        min = mid;
+                        break;
+                    }
+                    min = mid + 1;
+                }
+            }
+            return {
+                line: min + 1,
+                col: offset - lineToIndex[min] + 1
+            };
+        }
+        error(message, line, column, opts = {}) {
+            let result, endLine, endColumn;
+            if (line && "object" == typeof line) {
+                let start = line, end = column;
+                if ("number" == typeof line.offset) {
+                    let pos = this.fromOffset(start.offset);
+                    line = pos.line, column = pos.col;
+                } else line = start.line, column = start.column;
+                if ("number" == typeof end.offset) {
+                    let pos = this.fromOffset(end.offset);
+                    endLine = pos.line, endColumn = pos.col;
+                } else endLine = end.line, endColumn = end.column;
+            } else if (!column) {
+                let pos = this.fromOffset(line);
+                line = pos.line, column = pos.col;
+            }
+            let origin = this.origin(line, column, endLine, endColumn);
+            return result = origin ? new CssSyntaxError$1(message, void 0 === origin.endLine ? origin.line : {
+                line: origin.line,
+                column: origin.column
+            }, void 0 === origin.endLine ? origin.column : {
+                line: origin.endLine,
+                column: origin.endColumn
+            }, origin.source, origin.file, opts.plugin) : new CssSyntaxError$1(message, void 0 === endLine ? line : {
+                line: line,
+                column: column
+            }, void 0 === endLine ? column : {
+                line: endLine,
+                column: endColumn
+            }, this.css, this.file, opts.plugin), result.input = {
+                line: line,
+                column: column,
+                endLine: endLine,
+                endColumn: endColumn,
+                source: this.css
+            }, this.file && (pathToFileURL$1 && (result.input.url = pathToFileURL$1(this.file).toString()), 
+            result.input.file = this.file), result;
+        }
+        origin(line, column, endLine, endColumn) {
+            if (!this.map) return !1;
+            let to, fromUrl, consumer = this.map.consumer(), from = consumer.originalPositionFor({
+                line: line,
+                column: column
+            });
+            if (!from.source) return !1;
+            "number" == typeof endLine && (to = consumer.originalPositionFor({
+                line: endLine,
+                column: endColumn
+            })), fromUrl = isAbsolute(from.source) ? pathToFileURL$1(from.source) : new URL(from.source, this.map.consumer().sourceRoot || pathToFileURL$1(this.map.mapFile));
+            let result = {
+                url: fromUrl.toString(),
+                line: from.line,
+                column: from.column,
+                endLine: to && to.line,
+                endColumn: to && to.column
+            };
+            if ("file:" === fromUrl.protocol) {
+                if (!fileURLToPath) throw new Error("file: protocol is not available in this PostCSS build");
+                result.file = fileURLToPath(fromUrl);
+            }
+            let source = consumer.sourceContentFor(from.source);
+            return source && (result.source = source), result;
+        }
+        mapResolve(file) {
+            return /^\w+:\/\//.test(file) ? file : resolve$1(this.map.consumer().sourceRoot || this.map.root || ".", file);
+        }
+        get from() {
+            return this.file || this.id;
+        }
+        toJSON() {
+            let json = {};
+            for (let name of [ "hasBOM", "css", "file", "id" ]) null != this[name] && (json[name] = this[name]);
+            return this.map && (json.map = {
+                ...this.map
+            }, json.map.consumerCache && (json.map.consumerCache = void 0)), json;
+        }
+    }
+    var input = Input$4;
+    Input$4.default = Input$4, terminalHighlight && terminalHighlight.registerInput && terminalHighlight.registerInput(Input$4);
+    let {SourceMapConsumer: SourceMapConsumer, SourceMapGenerator: SourceMapGenerator} = require$$2, {dirname: dirname, resolve: resolve, relative: relative, sep: sep} = require$$2, {pathToFileURL: pathToFileURL} = require$$2, Input$3 = input, sourceMapAvailable = Boolean(SourceMapConsumer && SourceMapGenerator), pathAvailable = Boolean(dirname && resolve && relative && sep);
+    var mapGenerator = class MapGenerator$2 {
+        constructor(stringify, root, opts, cssString) {
+            this.stringify = stringify, this.mapOpts = opts.map || {}, this.root = root, this.opts = opts, 
+            this.css = cssString;
         }
         isMap() {
             return void 0 !== this.opts.map ? !!this.opts.map : this.previous().length > 0;
         }
         previous() {
-            return this.previousMaps || (this.previousMaps = [], this.root.walk((node => {
+            if (!this.previousMaps) if (this.previousMaps = [], this.root) this.root.walk((node => {
                 if (node.source && node.source.input.map) {
                     let map = node.source.input.map;
                     this.previousMaps.includes(map) || this.previousMaps.push(map);
                 }
-            }))), this.previousMaps;
+            })); else {
+                let input = new Input$3(this.css, this.opts);
+                input.map && this.previousMaps.push(input.map);
+            }
+            return this.previousMaps;
         }
         isInline() {
             if (void 0 !== this.mapOpts.inline) return this.mapOpts.inline;
@@ -795,25 +1074,28 @@
             return void 0 !== this.mapOpts.sourcesContent ? this.mapOpts.sourcesContent : !this.previous().length || this.previous().some((i => i.withContent()));
         }
         clearAnnotation() {
-            if (!1 === this.mapOpts.annotation) return;
-            let node;
-            for (let i = this.root.nodes.length - 1; i >= 0; i--) node = this.root.nodes[i], 
-            "comment" === node.type && 0 === node.text.indexOf("# sourceMappingURL=") && this.root.removeChild(i);
+            if (!1 !== this.mapOpts.annotation) if (this.root) {
+                let node;
+                for (let i = this.root.nodes.length - 1; i >= 0; i--) node = this.root.nodes[i], 
+                "comment" === node.type && 0 === node.text.indexOf("# sourceMappingURL=") && this.root.removeChild(i);
+            } else this.css && (this.css = this.css.replace(/(\n)?\/\*#[\S\s]*?\*\/$/gm, ""));
         }
         setSourcesContent() {
             let already = {};
-            this.root.walk((node => {
+            if (this.root) this.root.walk((node => {
                 if (node.source) {
                     let from = node.source.input.from;
                     from && !already[from] && (already[from] = !0, this.map.setSourceContent(this.toUrl(this.path(from)), node.source.input.css));
                 }
-            }));
+            })); else if (this.css) {
+                let from = this.opts.from ? this.toUrl(this.path(this.opts.from)) : "<no source>";
+                this.map.setSourceContent(from, this.css);
+            }
         }
         applyPrevMaps() {
             for (let prev of this.previous()) {
-                let map, from = this.toUrl(this.path(prev.file)), root = prev.root || dirname$1(prev.file);
-                !1 === this.mapOpts.sourcesContent ? (map = new SourceMapConsumer$2(prev.text), 
-                map.sourcesContent && (map.sourcesContent = map.sourcesContent.map((() => null)))) : map = prev.consumer(), 
+                let map, from = this.toUrl(this.path(prev.file)), root = prev.root || dirname(prev.file);
+                !1 === this.mapOpts.sourcesContent ? (map = new SourceMapConsumer(prev.text), map.sourcesContent && (map.sourcesContent = map.sourcesContent.map((() => null)))) : map = prev.consumer(), 
                 this.map.applySourceMap(map, from, this.toUrl(this.path(root)));
             }
         }
@@ -833,16 +1115,31 @@
             return this.opts.to ? this.path(this.opts.to) : this.opts.from ? this.path(this.opts.from) : "to.css";
         }
         generateMap() {
-            return this.generateString(), this.isSourcesContent() && this.setSourcesContent(), 
-            this.previous().length > 0 && this.applyPrevMaps(), this.isAnnotation() && this.addAnnotation(), 
-            this.isInline() ? [ this.css ] : [ this.css, this.map ];
+            if (this.root) this.generateString(); else if (1 === this.previous().length) {
+                let prev = this.previous()[0].consumer();
+                prev.file = this.outputFile(), this.map = SourceMapGenerator.fromSourceMap(prev);
+            } else this.map = new SourceMapGenerator({
+                file: this.outputFile()
+            }), this.map.addMapping({
+                source: this.opts.from ? this.toUrl(this.path(this.opts.from)) : "<no source>",
+                generated: {
+                    line: 1,
+                    column: 0
+                },
+                original: {
+                    line: 1,
+                    column: 0
+                }
+            });
+            return this.isSourcesContent() && this.setSourcesContent(), this.root && this.previous().length > 0 && this.applyPrevMaps(), 
+            this.isAnnotation() && this.addAnnotation(), this.isInline() ? [ this.css ] : [ this.css, this.map ];
         }
         path(file) {
             if (0 === file.indexOf("<")) return file;
             if (/^\w+:\/\//.test(file)) return file;
             if (this.mapOpts.absolute) return file;
-            let from = this.opts.to ? dirname$1(this.opts.to) : ".";
-            return "string" == typeof this.mapOpts.annotation && (from = dirname$1(resolve$1(from, this.mapOpts.annotation))), 
+            let from = this.opts.to ? dirname(this.opts.to) : ".";
+            return "string" == typeof this.mapOpts.annotation && (from = dirname(resolve(from, this.mapOpts.annotation))), 
             file = relative(from, file);
         }
         toUrl(path) {
@@ -851,13 +1148,13 @@
         sourcePath(node) {
             if (this.mapOpts.from) return this.toUrl(this.mapOpts.from);
             if (this.mapOpts.absolute) {
-                if (pathToFileURL$1) return pathToFileURL$1(node.source.input.from).toString();
+                if (pathToFileURL) return pathToFileURL(node.source.input.from).toString();
                 throw new Error("`map.absolute` option is not available in this PostCSS build");
             }
             return this.toUrl(this.path(node.source.input.from));
         }
         generateString() {
-            this.css = "", this.map = new SourceMapGenerator$2({
+            this.css = "", this.map = new SourceMapGenerator({
                 file: this.outputFile()
             });
             let lines, last, line = 1, column = 1, mapping = {
@@ -890,11 +1187,13 @@
             }));
         }
         generate() {
-            if (this.clearAnnotation(), pathAvailable$1 && sourceMapAvailable$1 && this.isMap()) return this.generateMap();
-            let result = "";
-            return this.stringify(this.root, (i => {
-                result += i;
-            })), [ result ];
+            if (this.clearAnnotation(), pathAvailable && sourceMapAvailable && this.isMap()) return this.generateMap();
+            {
+                let result = "";
+                return this.stringify(this.root, (i => {
+                    result += i;
+                })), [ result ];
+            }
         }
     };
     let Node$2 = node_1;
@@ -905,7 +1204,7 @@
     }
     var comment = Comment$4;
     Comment$4.default = Comment$4;
-    let parse$3, Rule$4, AtRule$4, {isClean: isClean$1, my: my$1} = symbols, Declaration$3 = declaration, Comment$3 = comment, Node$1 = node_1;
+    let parse$4, Rule$4, AtRule$4, {isClean: isClean$1, my: my$1} = symbols, Declaration$3 = declaration, Comment$3 = comment, Node$1 = node_1;
     function cleanSource(nodes) {
         return nodes.map((i => (i.nodes && (i.nodes = cleanSource(i.nodes)), delete i.source, 
         i)));
@@ -1031,7 +1330,7 @@
             if (this.proxyOf.nodes) return this.proxyOf.nodes[this.proxyOf.nodes.length - 1];
         }
         normalize(nodes, sample) {
-            if ("string" == typeof nodes) nodes = cleanSource(parse$3(nodes).nodes); else if (Array.isArray(nodes)) {
+            if ("string" == typeof nodes) nodes = cleanSource(parse$4(nodes).nodes); else if (Array.isArray(nodes)) {
                 nodes = nodes.slice(0);
                 for (let i of nodes) i.parent && i.parent.removeChild(i, "ignore");
             } else if ("root" === nodes.type && "document" !== this.type) {
@@ -1062,7 +1361,7 @@
         }
     }
     Container$7.registerParse = dependant => {
-        parse$3 = dependant;
+        parse$4 = dependant;
     }, Container$7.registerRule = dependant => {
         Rule$4 = dependant;
     }, Container$7.registerAtRule = dependant => {
@@ -1095,11 +1394,15 @@
     var document$1 = Document$3;
     Document$3.default = Document$3;
     let printed = {};
+    var warnOnce$2 = function warnOnce(message) {
+        printed[message] || (printed[message] = !0, "undefined" != typeof console && console.warn && console.warn(message));
+    };
     class Warning$2 {
         constructor(text, opts = {}) {
             if (this.type = "warning", this.text = text, opts.node && opts.node.source) {
-                let pos = opts.node.positionBy(opts);
-                this.line = pos.line, this.column = pos.column;
+                let range = opts.node.rangeBy(opts);
+                this.line = range.start.line, this.column = range.start.column, this.endLine = range.end.line, 
+                this.endColumn = range.end.column;
             }
             for (let opt in opts) this[opt] = opts[opt];
         }
@@ -1114,7 +1417,7 @@
     var warning = Warning$2;
     Warning$2.default = Warning$2;
     let Warning$1 = warning;
-    class Result$2 {
+    class Result$3 {
         constructor(processor, root, opts) {
             this.processor = processor, this.messages = [], this.root = root, this.opts = opts, 
             this.css = void 0, this.map = void 0;
@@ -1134,8 +1437,8 @@
             return this.css;
         }
     }
-    var result = Result$2;
-    Result$2.default = Result$2;
+    var result = Result$3;
+    Result$3.default = Result$3;
     const SINGLE_QUOTE = "'".charCodeAt(0), DOUBLE_QUOTE = '"'.charCodeAt(0), BACKSLASH = "\\".charCodeAt(0), SLASH = "/".charCodeAt(0), NEWLINE = "\n".charCodeAt(0), SPACE = " ".charCodeAt(0), FEED = "\f".charCodeAt(0), TAB = "\t".charCodeAt(0), CR = "\r".charCodeAt(0), OPEN_SQUARE = "[".charCodeAt(0), CLOSE_SQUARE = "]".charCodeAt(0), OPEN_PARENTHESES = "(".charCodeAt(0), CLOSE_PARENTHESES = ")".charCodeAt(0), OPEN_CURLY = "{".charCodeAt(0), CLOSE_CURLY = "}".charCodeAt(0), SEMICOLON = ";".charCodeAt(0), ASTERISK = "*".charCodeAt(0), COLON = ":".charCodeAt(0), AT = "@".charCodeAt(0), RE_AT_END = /[\t\n\f\r "#'()/;[\\\]{}]/g, RE_WORD_END = /[\t\n\f\r !"#'():;@[\\\]{}]|\/(?=\*)/g, RE_BAD_BRACKET = /.[\n"'(/\\]/, RE_HEX_ESCAPE = /[\da-f]/i;
     let Container$5 = container;
     class AtRule$3 extends Container$5 {
@@ -1313,6 +1616,10 @@
             }
         };
     }, Comment$2 = comment, AtRule$2 = atRule, Root$4 = root, Rule$2 = rule;
+    const SAFE_COMMENT_NEIGHBOR = {
+        empty: !0,
+        space: !0
+    };
     var parser = class Parser$1 {
         constructor(input) {
             this.input = input, this.root = new Root$4, this.current = this.root, this.spaces = "", 
@@ -1395,7 +1702,8 @@
             }
             if (this.tokenizer.endOfFile() && (end = !0), brackets.length > 0 && this.unclosedBracket(bracket), 
             end && colon) {
-                for (;tokens.length && (token = tokens[tokens.length - 1][0], "space" === token || "comment" === token); ) this.tokenizer.back(tokens.pop());
+                if (!customProperty) for (;tokens.length && (token = tokens[tokens.length - 1][0], 
+                "space" === token || "comment" === token); ) this.tokenizer.back(tokens.pop());
                 this.decl(tokens, customProperty);
             } else this.unknownWord(tokens);
         }
@@ -1409,7 +1717,12 @@
             let node = new Declaration$2;
             this.init(node, tokens[0][2]);
             let token, last = tokens[tokens.length - 1];
-            for (";" === last[0] && (this.semicolon = !0, tokens.pop()), node.source.end = this.getPosition(last[3] || last[2]); "word" !== tokens[0][0]; ) 1 === tokens.length && this.unknownWord(tokens), 
+            for (";" === last[0] && (this.semicolon = !0, tokens.pop()), node.source.end = this.getPosition(last[3] || last[2] || function findLastWithPosition(tokens) {
+                for (let i = tokens.length - 1; i >= 0; i--) {
+                    let token = tokens[i], pos = token[3] || token[2];
+                    if (pos) return pos;
+                }
+            }(tokens)); "word" !== tokens[0][0]; ) 1 === tokens.length && this.unknownWord(tokens), 
             node.raws.before += tokens.shift()[1];
             for (node.source.start = this.getPosition(tokens[0][2]), node.prop = ""; tokens.length; ) {
                 let type = tokens[0][0];
@@ -1425,7 +1738,8 @@
             }
             "_" !== node.prop[0] && "*" !== node.prop[0] || (node.raws.before += node.prop[0], 
             node.prop = node.prop.slice(1));
-            let firstSpaces = this.spacesAndCommentsFromStart(tokens);
+            let next, firstSpaces = [];
+            for (;tokens.length && (next = tokens[0][0], "space" === next || "comment" === next); ) firstSpaces.push(tokens.shift());
             this.precheckMissedSemicolon(tokens);
             for (let i = tokens.length - 1; i >= 0; i--) {
                 if (token = tokens[i], "!important" === token[1].toLowerCase()) {
@@ -1446,8 +1760,8 @@
                 }
                 if ("space" !== token[0] && "comment" !== token[0]) break;
             }
-            let hasWord = tokens.some((i => "space" !== i[0] && "comment" !== i[0]));
-            this.raw(node, "value", tokens), hasWord ? node.raws.between += firstSpaces : node.value = firstSpaces + node.value, 
+            tokens.some((i => "space" !== i[0] && "comment" !== i[0])) && (node.raws.between += firstSpaces.map((i => i[1])).join(""), 
+            firstSpaces = []), this.raw(node, "value", firstSpaces.concat(tokens), customProperty), 
             node.value.includes(":") && !customProperty && this.checkMissedSemicolon(tokens);
         }
         atrule(token) {
@@ -1517,10 +1831,10 @@
                 input: this.input
             }, node.raws.before = this.spaces, this.spaces = "", "comment" !== node.type && (this.semicolon = !1);
         }
-        raw(node, prop, tokens) {
-            let token, type, next, prev, length = tokens.length, value = "", clean = !0, pattern = /^([#.|])?(\w)+/i;
-            for (let i = 0; i < length; i += 1) token = tokens[i], type = token[0], "comment" !== type || "rule" !== node.type ? "comment" === type || "space" === type && i === length - 1 ? clean = !1 : value += token[1] : (prev = tokens[i - 1], 
-            next = tokens[i + 1], "space" !== prev[0] && "space" !== next[0] && pattern.test(prev[1]) && pattern.test(next[1]) ? value += token[1] : clean = !1);
+        raw(node, prop, tokens, customProperty) {
+            let token, type, next, prev, length = tokens.length, value = "", clean = !0;
+            for (let i = 0; i < length; i += 1) token = tokens[i], type = token[0], "space" !== type || i !== length - 1 || customProperty ? "comment" === type ? (prev = tokens[i - 1] ? tokens[i - 1][0] : "empty", 
+            next = tokens[i + 1] ? tokens[i + 1][0] : "empty", SAFE_COMMENT_NEIGHBOR[prev] || SAFE_COMMENT_NEIGHBOR[next] || "," === value.slice(-1) ? clean = !1 : value += token[1]) : value += token[1] : clean = !1;
             if (!clean) {
                 let raw = tokens.reduce(((all, i) => all + i[1]), "");
                 node.raws[prop] = {
@@ -1566,23 +1880,43 @@
             return !1;
         }
         unclosedBracket(bracket) {
-            throw this.input.error("Unclosed bracket", bracket[2]);
+            throw this.input.error("Unclosed bracket", {
+                offset: bracket[2]
+            }, {
+                offset: bracket[2] + 1
+            });
         }
         unknownWord(tokens) {
-            throw this.input.error("Unknown word", tokens[0][2]);
+            throw this.input.error("Unknown word", {
+                offset: tokens[0][2]
+            }, {
+                offset: tokens[0][2] + tokens[0][1].length
+            });
         }
         unexpectedClose(token) {
-            throw this.input.error("Unexpected }", token[2]);
+            throw this.input.error("Unexpected }", {
+                offset: token[2]
+            }, {
+                offset: token[2] + 1
+            });
         }
         unclosedBlock() {
             let pos = this.current.source.start;
             throw this.input.error("Unclosed block", pos.line, pos.column);
         }
         doubleColon(token) {
-            throw this.input.error("Double colon", token[2]);
+            throw this.input.error("Double colon", {
+                offset: token[2]
+            }, {
+                offset: token[2] + token[1].length
+            });
         }
         unnamedAtrule(node, token) {
-            throw this.input.error("At-rule without name", token[2]);
+            throw this.input.error("At-rule without name", {
+                offset: token[2]
+            }, {
+                offset: token[2] + token[1].length
+            });
         }
         precheckMissedSemicolon() {}
         checkMissedSemicolon(tokens) {
@@ -1594,185 +1928,8 @@
             throw this.input.error("Missed semicolon", "word" === token[0] ? token[3] + 1 : token[2]);
         }
     };
-    var nonSecure = {
-        nanoid: (size = 21) => {
-            let id = "", i = size;
-            for (;i--; ) id += "ModuleSymbhasOwnPr-0123456789ABCDEFGHNRVfgctiUvz_KqYTJkLxpZXIjQW"[64 * Math.random() | 0];
-            return id;
-        },
-        customAlphabet: (alphabet, size) => () => {
-            let id = "", i = size;
-            for (;i--; ) id += alphabet[Math.random() * alphabet.length | 0];
-            return id;
-        }
-    };
-    let {SourceMapConsumer: SourceMapConsumer$1, SourceMapGenerator: SourceMapGenerator$1} = require$$4, {existsSync: existsSync, readFileSync: readFileSync} = require$$4, {dirname: dirname, join: join} = require$$4;
-    class PreviousMap$2 {
-        constructor(css, opts) {
-            if (!1 === opts.map) return;
-            this.loadAnnotation(css), this.inline = this.startWith(this.annotation, "data:");
-            let prev = opts.map ? opts.map.prev : void 0, text = this.loadMap(opts.from, prev);
-            !this.mapFile && opts.from && (this.mapFile = opts.from), this.mapFile && (this.root = dirname(this.mapFile)), 
-            text && (this.text = text);
-        }
-        consumer() {
-            return this.consumerCache || (this.consumerCache = new SourceMapConsumer$1(this.text)), 
-            this.consumerCache;
-        }
-        withContent() {
-            return !!(this.consumer().sourcesContent && this.consumer().sourcesContent.length > 0);
-        }
-        startWith(string, start) {
-            return !!string && string.substr(0, start.length) === start;
-        }
-        getAnnotationURL(sourceMapString) {
-            return sourceMapString.match(/\/\*\s*# sourceMappingURL=((?:(?!sourceMappingURL=).)*)\*\//)[1].trim();
-        }
-        loadAnnotation(css) {
-            let annotations = css.match(/\/\*\s*# sourceMappingURL=(?:(?!sourceMappingURL=).)*\*\//gm);
-            if (annotations && annotations.length > 0) {
-                let lastAnnotation = annotations[annotations.length - 1];
-                lastAnnotation && (this.annotation = this.getAnnotationURL(lastAnnotation));
-            }
-        }
-        decodeInline(text) {
-            if (/^data:application\/json;charset=utf-?8,/.test(text) || /^data:application\/json,/.test(text)) return decodeURIComponent(text.substr(RegExp.lastMatch.length));
-            if (/^data:application\/json;charset=utf-?8;base64,/.test(text) || /^data:application\/json;base64,/.test(text)) return function fromBase64(str) {
-                return Buffer ? Buffer.from(str, "base64").toString() : window.atob(str);
-            }(text.substr(RegExp.lastMatch.length));
-            let encoding = text.match(/data:application\/json;([^,]+),/)[1];
-            throw new Error("Unsupported source map encoding " + encoding);
-        }
-        loadFile(path) {
-            if (this.root = dirname(path), existsSync(path)) return this.mapFile = path, readFileSync(path, "utf-8").toString().trim();
-        }
-        loadMap(file, prev) {
-            if (!1 === prev) return !1;
-            if (prev) {
-                if ("string" == typeof prev) return prev;
-                if ("function" != typeof prev) {
-                    if (prev instanceof SourceMapConsumer$1) return SourceMapGenerator$1.fromSourceMap(prev).toString();
-                    if (prev instanceof SourceMapGenerator$1) return prev.toString();
-                    if (this.isMap(prev)) return JSON.stringify(prev);
-                    throw new Error("Unsupported previous source map format: " + prev.toString());
-                }
-                {
-                    let prevPath = prev(file);
-                    if (prevPath) {
-                        let map = this.loadFile(prevPath);
-                        if (!map) throw new Error("Unable to load previous source map: " + prevPath.toString());
-                        return map;
-                    }
-                }
-            } else {
-                if (this.inline) return this.decodeInline(this.annotation);
-                if (this.annotation) {
-                    let map = this.annotation;
-                    return file && (map = join(dirname(file), map)), this.loadFile(map);
-                }
-            }
-        }
-        isMap(map) {
-            return "object" == typeof map && ("string" == typeof map.mappings || "string" == typeof map._mappings || Array.isArray(map.sections));
-        }
-    }
-    var previousMap = PreviousMap$2;
-    PreviousMap$2.default = PreviousMap$2;
-    let {SourceMapConsumer: SourceMapConsumer, SourceMapGenerator: SourceMapGenerator} = require$$4, {fileURLToPath: fileURLToPath, pathToFileURL: pathToFileURL} = require$$4, {resolve: resolve, isAbsolute: isAbsolute} = require$$4, {nanoid: nanoid} = nonSecure, terminalHighlight = require$$4, CssSyntaxError$1 = cssSyntaxError, PreviousMap$1 = previousMap, fromOffsetCache = Symbol("fromOffsetCache"), sourceMapAvailable = Boolean(SourceMapConsumer && SourceMapGenerator), pathAvailable = Boolean(resolve && isAbsolute);
-    class Input$3 {
-        constructor(css, opts = {}) {
-            if (null == css || "object" == typeof css && !css.toString) throw new Error(`PostCSS received ${css} instead of CSS string`);
-            if (this.css = css.toString(), "\ufeff" === this.css[0] || "￾" === this.css[0] ? (this.hasBOM = !0, 
-            this.css = this.css.slice(1)) : this.hasBOM = !1, opts.from && (!pathAvailable || /^\w+:\/\//.test(opts.from) || isAbsolute(opts.from) ? this.file = opts.from : this.file = resolve(opts.from)), 
-            pathAvailable && sourceMapAvailable) {
-                let map = new PreviousMap$1(this.css, opts);
-                if (map.text) {
-                    this.map = map;
-                    let file = map.consumer().file;
-                    !this.file && file && (this.file = this.mapResolve(file));
-                }
-            }
-            this.file || (this.id = "<input css " + nanoid(6) + ">"), this.map && (this.map.file = this.from);
-        }
-        fromOffset(offset) {
-            let lastLine, lineToIndex;
-            if (this[fromOffsetCache]) lineToIndex = this[fromOffsetCache]; else {
-                let lines = this.css.split("\n");
-                lineToIndex = new Array(lines.length);
-                let prevIndex = 0;
-                for (let i = 0, l = lines.length; i < l; i++) lineToIndex[i] = prevIndex, prevIndex += lines[i].length + 1;
-                this[fromOffsetCache] = lineToIndex;
-            }
-            lastLine = lineToIndex[lineToIndex.length - 1];
-            let min = 0;
-            if (offset >= lastLine) min = lineToIndex.length - 1; else {
-                let mid, max = lineToIndex.length - 2;
-                for (;min < max; ) if (mid = min + (max - min >> 1), offset < lineToIndex[mid]) max = mid - 1; else {
-                    if (!(offset >= lineToIndex[mid + 1])) {
-                        min = mid;
-                        break;
-                    }
-                    min = mid + 1;
-                }
-            }
-            return {
-                line: min + 1,
-                col: offset - lineToIndex[min] + 1
-            };
-        }
-        error(message, line, column, opts = {}) {
-            let result;
-            if (!column) {
-                let pos = this.fromOffset(line);
-                line = pos.line, column = pos.col;
-            }
-            let origin = this.origin(line, column);
-            return result = origin ? new CssSyntaxError$1(message, origin.line, origin.column, origin.source, origin.file, opts.plugin) : new CssSyntaxError$1(message, line, column, this.css, this.file, opts.plugin), 
-            result.input = {
-                line: line,
-                column: column,
-                source: this.css
-            }, this.file && (pathToFileURL && (result.input.url = pathToFileURL(this.file).toString()), 
-            result.input.file = this.file), result;
-        }
-        origin(line, column) {
-            if (!this.map) return !1;
-            let fromUrl, consumer = this.map.consumer(), from = consumer.originalPositionFor({
-                line: line,
-                column: column
-            });
-            if (!from.source) return !1;
-            fromUrl = isAbsolute(from.source) ? pathToFileURL(from.source) : new URL(from.source, this.map.consumer().sourceRoot || pathToFileURL(this.map.mapFile));
-            let result = {
-                url: fromUrl.toString(),
-                line: from.line,
-                column: from.column
-            };
-            if ("file:" === fromUrl.protocol) {
-                if (!fileURLToPath) throw new Error("file: protocol is not available in this PostCSS build");
-                result.file = fileURLToPath(fromUrl);
-            }
-            let source = consumer.sourceContentFor(from.source);
-            return source && (result.source = source), result;
-        }
-        mapResolve(file) {
-            return /^\w+:\/\//.test(file) ? file : resolve(this.map.consumer().sourceRoot || this.map.root || ".", file);
-        }
-        get from() {
-            return this.file || this.id;
-        }
-        toJSON() {
-            let json = {};
-            for (let name of [ "hasBOM", "css", "file", "id" ]) null != this[name] && (json[name] = this[name]);
-            return this.map && (json.map = {
-                ...this.map
-            }, json.map.consumerCache && (json.map.consumerCache = void 0)), json;
-        }
-    }
-    var input = Input$3;
-    Input$3.default = Input$3, terminalHighlight && terminalHighlight.registerInput && terminalHighlight.registerInput(Input$3);
     let Container$2 = container, Parser = parser, Input$2 = input;
-    function parse$2(css, opts) {
+    function parse$3(css, opts) {
         let input = new Input$2(css, opts), parser = new Parser(input);
         try {
             parser.parse();
@@ -1782,11 +1939,9 @@
         }
         return parser.root;
     }
-    var parse_1 = parse$2;
-    parse$2.default = parse$2, Container$2.registerParse(parse$2);
-    let {isClean: isClean, my: my} = symbols, MapGenerator = mapGenerator, stringify$1 = stringify_1, Container$1 = container, Document$2 = document$1, warnOnce = function warnOnce(message) {
-        printed[message] || (printed[message] = !0, "undefined" != typeof console && console.warn && console.warn(message));
-    }, Result$1 = result, parse$1 = parse_1, Root$3 = root;
+    var parse_1 = parse$3;
+    parse$3.default = parse$3, Container$2.registerParse(parse$3);
+    let {isClean: isClean, my: my} = symbols, MapGenerator$1 = mapGenerator, stringify$2 = stringify_1, Container$1 = container, Document$2 = document$1, warnOnce$1 = warnOnce$2, Result$2 = result, parse$2 = parse_1, Root$3 = root;
     const TYPE_TO_CLASS_NAME = {
         document: "Document",
         root: "Root",
@@ -1844,10 +1999,10 @@
     class LazyResult$2 {
         constructor(processor, css, opts) {
             let root;
-            if (this.stringified = !1, this.processed = !1, "object" != typeof css || null === css || "root" !== css.type && "document" !== css.type) if (css instanceof LazyResult$2 || css instanceof Result$1) root = cleanMarks(css.root), 
+            if (this.stringified = !1, this.processed = !1, "object" != typeof css || null === css || "root" !== css.type && "document" !== css.type) if (css instanceof LazyResult$2 || css instanceof Result$2) root = cleanMarks(css.root), 
             css.map && (void 0 === opts.map && (opts.map = {}), opts.map.inline || (opts.map.inline = !1), 
             opts.map.prev = css.map); else {
-                let parser = parse$1;
+                let parser = parse$2;
                 opts.syntax && (parser = opts.syntax.parse), opts.parser && (parser = opts.parser), 
                 parser.parse && (parser = parser.parse);
                 try {
@@ -1857,7 +2012,7 @@
                 }
                 root && !root[my] && Container$1.rebuild(root);
             } else root = cleanMarks(css);
-            this.result = new Result$1(processor, root, opts), this.helpers = {
+            this.result = new Result$2(processor, root, opts), this.helpers = {
                 ...postcss$2,
                 result: this.result,
                 postcss: postcss$2
@@ -1897,7 +2052,7 @@
             return this.css;
         }
         then(onFulfilled, onRejected) {
-            return "from" in this.opts || warnOnce("Without `from` option PostCSS could generate wrong source map and will not find Browserslist config. Set it to CSS file path or to `undefined` to prevent this warning."), 
+            return "from" in this.opts || warnOnce$1("Without `from` option PostCSS could generate wrong source map and will not find Browserslist config. Set it to CSS file path or to `undefined` to prevent this warning."), 
             this.async().then(onFulfilled, onRejected);
         }
         catch(onRejected) {
@@ -1928,10 +2083,10 @@
             if (this.error) throw this.error;
             if (this.stringified) return this.result;
             this.stringified = !0, this.sync();
-            let opts = this.result.opts, str = stringify$1;
+            let opts = this.result.opts, str = stringify$2;
             opts.syntax && (str = opts.syntax.stringify), opts.stringifier && (str = opts.stringifier), 
             str.stringify && (str = str.stringify);
-            let data = new MapGenerator(str, this.result.root, this.result.opts).generate();
+            let data = new MapGenerator$1(str, this.result.root, this.result.opts).generate();
             return this.result.css = data[0], this.result.map = data[1], this.result;
         }
         walkSync(node) {
@@ -2073,17 +2228,92 @@
     };
     var lazyResult = LazyResult$2;
     LazyResult$2.default = LazyResult$2, Root$3.registerLazyResult(LazyResult$2), Document$2.registerLazyResult(LazyResult$2);
-    let LazyResult$1 = lazyResult, Document$1 = document$1, Root$2 = root;
+    let MapGenerator = mapGenerator, stringify$1 = stringify_1, warnOnce = warnOnce$2, parse$1 = parse_1;
+    const Result$1 = result;
+    class NoWorkResult$1 {
+        constructor(processor, css, opts) {
+            css = css.toString(), this.stringified = !1, this._processor = processor, this._css = css, 
+            this._opts = opts, this._map = void 0;
+            let str = stringify$1;
+            this.result = new Result$1(this._processor, undefined, this._opts), this.result.css = css;
+            let self = this;
+            Object.defineProperty(this.result, "root", {
+                get: () => self.root
+            });
+            let map = new MapGenerator(str, undefined, this._opts, css);
+            if (map.isMap()) {
+                let [generatedCSS, generatedMap] = map.generate();
+                generatedCSS && (this.result.css = generatedCSS), generatedMap && (this.result.map = generatedMap);
+            }
+        }
+        get [Symbol.toStringTag]() {
+            return "NoWorkResult";
+        }
+        get processor() {
+            return this.result.processor;
+        }
+        get opts() {
+            return this.result.opts;
+        }
+        get css() {
+            return this.result.css;
+        }
+        get content() {
+            return this.result.css;
+        }
+        get map() {
+            return this.result.map;
+        }
+        get root() {
+            if (this._root) return this._root;
+            let root, parser = parse$1;
+            try {
+                root = parser(this._css, this._opts);
+            } catch (error) {
+                this.error = error;
+            }
+            if (this.error) throw this.error;
+            return this._root = root, root;
+        }
+        get messages() {
+            return [];
+        }
+        warnings() {
+            return [];
+        }
+        toString() {
+            return this._css;
+        }
+        then(onFulfilled, onRejected) {
+            return "from" in this._opts || warnOnce("Without `from` option PostCSS could generate wrong source map and will not find Browserslist config. Set it to CSS file path or to `undefined` to prevent this warning."), 
+            this.async().then(onFulfilled, onRejected);
+        }
+        catch(onRejected) {
+            return this.async().catch(onRejected);
+        }
+        finally(onFinally) {
+            return this.async().then(onFinally, onFinally);
+        }
+        async() {
+            return this.error ? Promise.reject(this.error) : Promise.resolve(this.result);
+        }
+        sync() {
+            if (this.error) throw this.error;
+            return this.result;
+        }
+    }
+    var noWorkResult = NoWorkResult$1;
+    NoWorkResult$1.default = NoWorkResult$1;
+    let NoWorkResult = noWorkResult, LazyResult$1 = lazyResult, Document$1 = document$1, Root$2 = root;
     class Processor$1 {
         constructor(plugins = []) {
-            this.version = "8.3.6", this.plugins = this.normalize(plugins);
+            this.version = "8.4.8", this.plugins = this.normalize(plugins);
         }
         use(plugin) {
             return this.plugins = this.plugins.concat(this.normalize([ plugin ])), this;
         }
         process(css, opts = {}) {
-            return 0 !== this.plugins.length || void 0 !== opts.parser || void 0 !== opts.stringifier || void 0 !== opts.syntax || opts.hideNothingWarning || "undefined" != typeof console && console.warn && console.warn("You did not set any plugins, parser, or stringifier. Right now, PostCSS does nothing. Pick plugins for your case on https://www.postcss.parts/ and use them in postcss.config.js."), 
-            new LazyResult$1(this, css, opts);
+            return 0 === this.plugins.length && void 0 === opts.parser && void 0 === opts.stringifier && void 0 === opts.syntax ? new NoWorkResult(this, css, opts) : new LazyResult$1(this, css, opts);
         }
         normalize(plugins) {
             let normalized = [];
@@ -2152,10 +2382,10 @@
     postcss$1.decl = defaults => new Declaration(defaults), postcss$1.rule = defaults => new Rule(defaults), 
     postcss$1.root = defaults => new Root(defaults), postcss$1.document = defaults => new Document(defaults), 
     postcss$1.CssSyntaxError = CssSyntaxError, postcss$1.Declaration = Declaration, 
-    postcss$1.Container = Container, postcss$1.Document = Document, postcss$1.Comment = Comment, 
-    postcss$1.Warning = Warning, postcss$1.AtRule = AtRule, postcss$1.Result = Result, 
-    postcss$1.Input = Input, postcss$1.Rule = Rule, postcss$1.Root = Root, postcss$1.Node = Node, 
-    LazyResult.registerPostcss(postcss$1);
+    postcss$1.Container = Container, postcss$1.Processor = Processor, postcss$1.Document = Document, 
+    postcss$1.Comment = Comment, postcss$1.Warning = Warning, postcss$1.AtRule = AtRule, 
+    postcss$1.Result = Result, postcss$1.Input = Input, postcss$1.Rule = Rule, postcss$1.Root = Root, 
+    postcss$1.Node = Node, LazyResult.registerPostcss(postcss$1);
     var postcss_1 = postcss$1;
     postcss$1.default = postcss$1;
     /*
@@ -2370,93 +2600,65 @@
         if ("[object RegExp]" !== Object.prototype.toString.call(reg)) throw new Error("options.exclude should be RegExp.");
         return null !== file.match(reg);
     }
-    var dist = {
-        exports: {}
-    }, commentRemover = {
-        exports: {}
+    function CommentRemover$1(options) {
+        this.options = options;
+    }
+    CommentRemover$1.prototype.canRemove = function(comment) {
+        const remove = this.options.remove;
+        if (remove) return remove(comment);
+        if (!(0 === comment.indexOf("!"))) return !0;
+        if (this.options.removeAll || this._hasFirst) return !0;
+        if (this.options.removeAllButFirst && !this._hasFirst) return this._hasFirst = !0, 
+        !1;
     };
-    !function(module, exports) {
-        function CommentRemover(options) {
-            this.options = options;
-        }
-        Object.defineProperty(exports, "__esModule", {
-            value: !0
-        }), exports.default = void 0, CommentRemover.prototype.canRemove = function(comment) {
-            const remove = this.options.remove;
-            if (remove) return remove(comment);
-            if (!(0 === comment.indexOf("!"))) return !0;
-            if (this.options.removeAll || this._hasFirst) return !0;
-            if (this.options.removeAllButFirst && !this._hasFirst) return this._hasFirst = !0, 
-            !1;
-        };
-        var _default = CommentRemover;
-        exports.default = _default, module.exports = exports.default;
-    }(commentRemover, commentRemover.exports);
-    var module, exports, commentParser = {
-        exports: {}
-    };
-    module = commentParser, exports = commentParser.exports, Object.defineProperty(exports, "__esModule", {
-        value: !0
-    }), exports.default = function commentParser(input) {
+    const CommentRemover = CommentRemover$1, commentParser = function commentParser(input) {
         const tokens = [], length = input.length;
         let next, pos = 0;
         for (;pos < length; ) next = input.indexOf("/*", pos), ~next ? (tokens.push([ 0, pos, next ]), 
         pos = next, next = input.indexOf("*/", pos + 2), tokens.push([ 1, pos + 2, next ]), 
         pos = next + 2) : (tokens.push([ 0, pos, length ]), pos = length);
         return tokens;
-    }, module.exports = exports.default, function(module, exports) {
-        Object.defineProperty(exports, "__esModule", {
-            value: !0
-        }), exports.default = void 0;
-        var _commentRemover = _interopRequireDefault(commentRemover.exports), _commentParser = _interopRequireDefault(commentParser.exports);
-        function _interopRequireDefault(obj) {
-            return obj && obj.__esModule ? obj : {
-                default: obj
-            };
+    };
+    function pluginCreator(opts = {}) {
+        const remover = new CommentRemover(opts), matcherCache = new Map, replacerCache = new Map;
+        function replaceComments(source, space, separator = " ") {
+            const key = source + "@|@" + separator;
+            if (replacerCache.has(key)) return replacerCache.get(key);
+            const result = space(commentParser(source).reduce(((value, [type, start, end]) => {
+                const contents = source.slice(start, end);
+                return type ? remover.canRemove(contents) ? value + separator : `${value}/*${contents}*/` : value + contents;
+            }), "")).join(" ");
+            return replacerCache.set(key, result), result;
         }
-        function pluginCreator(opts = {}) {
-            const remover = new _commentRemover.default(opts), matcherCache = {}, replacerCache = {};
-            function replaceComments(source, space, separator = " ") {
-                const key = source + "@|@" + separator;
-                if (replacerCache[key]) return replacerCache[key];
-                const result = space((0, _commentParser.default)(source).reduce(((value, [type, start, end]) => {
-                    const contents = source.slice(start, end);
-                    return type ? remover.canRemove(contents) ? value + separator : `${value}/*${contents}*/` : value + contents;
-                }), "")).join(" ");
-                return replacerCache[key] = result, result;
-            }
-            return {
-                postcssPlugin: "postcss-discard-comments",
-                OnceExit(css, {list: list}) {
-                    css.walk((node => {
-                        if ("comment" === node.type && remover.canRemove(node.text)) node.remove(); else if (node.raws.between && (node.raws.between = replaceComments(node.raws.between, list.space)), 
-                        "decl" !== node.type) {
-                            if ("rule" === node.type && node.raws.selector && node.raws.selector.raw) node.raws.selector.raw = replaceComments(node.raws.selector.raw, list.space, ""); else if ("atrule" === node.type) {
-                                if (node.raws.afterName) {
-                                    const commentsReplaced = replaceComments(node.raws.afterName, list.space);
-                                    commentsReplaced.length ? node.raws.afterName = " " + commentsReplaced + " " : node.raws.afterName = commentsReplaced + " ";
-                                }
-                                node.raws.params && node.raws.params.raw && (node.raws.params.raw = replaceComments(node.raws.params.raw, list.space));
+        return {
+            postcssPlugin: "postcss-discard-comments",
+            OnceExit(css, {list: list}) {
+                css.walk((node => {
+                    if ("comment" === node.type && remover.canRemove(node.text)) node.remove(); else if (node.raws.between && (node.raws.between = replaceComments(node.raws.between, list.space)), 
+                    "decl" !== node.type) {
+                        if ("rule" === node.type && node.raws.selector && node.raws.selector.raw) node.raws.selector.raw = replaceComments(node.raws.selector.raw, list.space, ""); else if ("atrule" === node.type) {
+                            if (node.raws.afterName) {
+                                const commentsReplaced = replaceComments(node.raws.afterName, list.space);
+                                commentsReplaced.length ? node.raws.afterName = " " + commentsReplaced + " " : node.raws.afterName = commentsReplaced + " ";
                             }
-                        } else if (node.raws.value && node.raws.value.raw && (node.raws.value.value === node.value ? node.value = replaceComments(node.raws.value.raw, list.space) : node.value = replaceComments(node.value, list.space), 
-                        node.raws.value = null), node.raws.important) {
-                            node.raws.important = replaceComments(node.raws.important, list.space);
-                            const b = function matchesComments(source) {
-                                if (matcherCache[source]) return matcherCache[source];
-                                const result = (0, _commentParser.default)(source).filter((([type]) => type));
-                                return matcherCache[source] = result, result;
-                            }(node.raws.important);
-                            node.raws.important = b.length ? node.raws.important : "!important";
+                            node.raws.params && node.raws.params.raw && (node.raws.params.raw = replaceComments(node.raws.params.raw, list.space));
                         }
-                    }));
-                }
-            };
-        }
-        pluginCreator.postcss = !0;
-        var _default = pluginCreator;
-        exports.default = _default, module.exports = exports.default;
-    }(dist, dist.exports);
-    var postcssDiscardComments = getDefaultExportFromCjs(dist.exports);
+                    } else if (node.raws.value && node.raws.value.raw && (node.raws.value.value === node.value ? node.value = replaceComments(node.raws.value.raw, list.space) : node.value = replaceComments(node.value, list.space), 
+                    node.raws.value = null), node.raws.important) {
+                        node.raws.important = replaceComments(node.raws.important, list.space);
+                        const b = function matchesComments(source) {
+                            if (matcherCache.has(source)) return matcherCache.get(source);
+                            const result = commentParser(source).filter((([type]) => type));
+                            return matcherCache.set(source, result), result;
+                        }(node.raws.important);
+                        node.raws.important = b.length ? node.raws.important : "!important";
+                    } else node.value = replaceComments(node.value, list.space);
+                }));
+            }
+        };
+    }
+    pluginCreator.postcss = !0;
+    var src = pluginCreator;
     const pxToViewportConfigDefault = {
         unitToConvert: "px",
         viewportWidth: 50,
@@ -2488,17 +2690,18 @@
         };
     }
     function instance$2($$self) {
-        return [ debounce((() => {
+        const copy = debounce((() => {
             const codeEl = document.querySelector("[name=propertiesPanelContainer]")?.querySelector("p.hljs-comment")?.parentElement?.innerText;
             codeEl ? async function getCSS(css) {
-                const content = await postcss_1([ postcssPxToViewport(GM_getValue("__PX_TO_VIEWPORT_CONFIG", pxToViewportConfigDefault)), postcssDiscardComments({}) ]).process(css), filters = GM_getValue("__FILTER_CONFIG", filterConfigDefault), styleArray = content.css.replace(/(^\{)|(\}$)/g, "").split("\n").filter((raw => !!raw && filters.findIndex((rule => new RegExp(rule).test(raw))) > -1));
+                const content = await postcss_1([ postcssPxToViewport(GM_getValue("__PX_TO_VIEWPORT_CONFIG", pxToViewportConfigDefault)), src({}) ]).process(css), filters = GM_getValue("__FILTER_CONFIG", filterConfigDefault), styleArray = content.css.replace(/(^\{)|(\}$)/g, "").split("\n").filter((raw => !!raw && filters.findIndex((rule => new RegExp(rule).test(raw))) > -1));
                 await navigator.clipboard.writeText(styleArray.join("\n")), toast({
                     title: "复制成功"
                 });
             }(`{${codeEl}}`) : toast("从网页上获取css失败");
-        }), 500) ];
+        }), 500);
+        return [ copy ];
     }
-    styleInject(".fcb-copy-button.svelte-16mfo7u{padding:4px 8px;border-radius:4px;background:#05bea9;outline:none;color:#fff;cursor:pointer;margin-bottom:10px;user-select:none}");
+    styleInject(".fcb-copy-button.svelte-16mfo7u{background:#05bea9;border-radius:4px;color:#fff;cursor:pointer;margin-bottom:10px;outline:none;padding:4px 8px;user-select:none}");
     class CopyButton extends SvelteComponent {
         constructor(options) {
             super(), init(this, options, instance$2, create_fragment$3, safe_not_equal, {});
@@ -2620,7 +2823,7 @@
             filterConfig = this.value, $$invalidate(1, filterConfig);
         } ];
     }
-    styleInject(".fcb-setting-textarea.svelte-1imlprz{width:100%;height:200px;background:#f4f4f4}");
+    styleInject(".fcb-setting-textarea.svelte-1imlprz{background:#f4f4f4;height:200px;width:100%}");
     class SettingPanel extends SvelteComponent {
         constructor(options) {
             super(), init(this, options, instance, create_fragment, safe_not_equal, {});

@@ -58,7 +58,7 @@ module.exports = {
         ],
         ['match', '*://www.figma.com/file/*'],
         ['match', 'https://lbb00.github.io/figma-css-better/setting'],
-        ['run-at', 'document-start'],
+        ['run-at', 'document-end'],
         ['icon', 'https://www.google.com/s2/favicons?domain=figma.com'],
         [
           'license',
