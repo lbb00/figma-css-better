@@ -7,7 +7,7 @@ export const pxToViewportConfigDefault = {
   fontViewportUnit: 'rpx',
   selectorBlackList: ['.ignore'],
   minPixelValue: 1,
-  mediaQuery: false
+  mediaQuery: false,
 }
 
 export const filterConfigDefault = [
@@ -23,5 +23,5 @@ export const filterConfigDefault = [
   'opacity',
   'background',
   'background-image',
-  'box-shadow'
+  'box-shadow',
 ]

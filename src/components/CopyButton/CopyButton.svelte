@@ -3,17 +3,20 @@
   import { getCSS } from '../../utils/css'
   import { toast } from '../Toast/index'
   const copy = debounce(() => {
-    const codeEl = document.querySelector('[name=propertiesPanelContainer]')?.querySelector('p.hljs-comment')
-      ?.parentElement?.innerText
+    const codeEl = document
+      .querySelector('[name=propertiesPanelContainer]')
+      ?.querySelector('p.hljs-comment')?.parentElement?.innerText
     if (!codeEl) {
       toast('从网页上获取css失败')
       return
     }
-    getCSS(`{${codeEl}}`)
+    getCSS(codeEl)
   }, 500)
 </script>
 
-<button id="fcb-copy-button" class="fcb-copy-button" on:click={copy}>🔥复制小程序样式</button>
+<button id="fcb-copy-button" class="fcb-copy-button" on:click={copy}>
+  🔥复制小程序样式
+</button>
 
 <style>
   .fcb-copy-button {

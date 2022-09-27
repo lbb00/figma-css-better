@@ -1,5 +1,5 @@
 <script>
-  function goToSetting () {
+  function goToSetting() {
     window.open('https://lbb00.github.io/figma-css-better/setting', 'target')
   }
 </script>
