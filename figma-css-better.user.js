@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Figma CSS Better
 // @namespace   https://github.com/lbb00
-// @version     1.2.4
+// @version     1.2.5
 // @description Figma CSS 转为微信小程序样式,rpx,figma,微信,小程序
 // @encoding    utf-8
 // @author      lbb00

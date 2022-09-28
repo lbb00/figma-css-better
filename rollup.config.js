@@ -6,6 +6,7 @@ import svelte from 'rollup-plugin-svelte'
 import postcss from 'rollup-plugin-postcss'
 import replace from 'rollup-plugin-replace'
 import json from '@rollup/plugin-json'
+import { version } from './package.json'
 
 module.exports = {
   input: 'src/main.js',
@@ -42,7 +43,7 @@ module.exports = {
       const items = [
         ['name', 'Figma CSS Better'],
         ['namespace', 'https://github.com/lbb00'],
-        ['version', '1.2.4'],
+        ['version', version],
         ['description', 'Figma CSS 转为微信小程序样式,rpx,figma,微信,小程序'],
         ['encoding', 'utf-8'],
         ['author', 'lbb00'],
