@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Figma CSS Better
 // @namespace   https://github.com/lbb00
-// @version     1.2.4
+// @version     1.2.5
 // @description Figma CSS 转为微信小程序样式,rpx,figma,微信,小程序
 // @encoding    utf-8
 // @author      lbb00
@@ -18,15 +18,16 @@
 // @grant       window.console
 // @grant       GM_getValue
 // @grant       GM_setValue
+// @grant       GM_xmlhttpRequest
 // ==/UserScript==
 !function() {
     "use strict";
-    var freeGlobal$1 = "object" == typeof global && global && global.Object === Object && global, freeSelf = "object" == typeof self && self && self.Object === Object && self, root$2 = freeGlobal$1 || freeSelf || Function("return this")(), Symbol$2 = root$2.Symbol, objectProto$1 = Object.prototype, hasOwnProperty$1 = objectProto$1.hasOwnProperty, nativeObjectToString$1 = objectProto$1.toString, symToStringTag$1 = Symbol$2 ? Symbol$2.toStringTag : void 0;
+    var freeGlobal$1 = "object" == typeof global && global && global.Object === Object && global, freeSelf = "object" == typeof self && self && self.Object === Object && self, root$2 = freeGlobal$1 || freeSelf || Function("return this")(), Symbol$2 = root$2.Symbol, objectProto$1 = Object.prototype, hasOwnProperty = objectProto$1.hasOwnProperty, nativeObjectToString$1 = objectProto$1.toString, symToStringTag$1 = Symbol$2 ? Symbol$2.toStringTag : void 0;
     var nativeObjectToString = Object.prototype.toString;
     var symToStringTag = Symbol$2 ? Symbol$2.toStringTag : void 0;
     function baseGetTag(value) {
         return null == value ? void 0 === value ? "[object Undefined]" : "[object Null]" : symToStringTag && symToStringTag in Object(value) ? function getRawTag(value) {
-            var isOwn = hasOwnProperty$1.call(value, symToStringTag$1), tag = value[symToStringTag$1];
+            var isOwn = hasOwnProperty.call(value, symToStringTag$1), tag = value[symToStringTag$1];
             try {
                 value[symToStringTag$1] = void 0;
                 var unmasked = !0;
@@ -201,7 +202,7 @@
             outroing.add(block), undefined.c.push((() => {
                 outroing.delete(block), callback && (detach && block.d(1), callback());
             })), block.o(local);
-        }
+        } else callback && callback();
     }
     function create_component(block) {
         block && block.c();
@@ -358,6 +359,7 @@
             });
         };
     }))();
+    var commonjsGlobal = "undefined" != typeof globalThis ? globalThis : "undefined" != typeof window ? window : "undefined" != typeof global ? global : "undefined" != typeof self ? self : {};
     function getAugmentedNamespace(n) {
         if (n.__esModule) return n;
         var a = Object.defineProperty({}, "__esModule", {
@@ -1204,7 +1206,7 @@
     }
     var comment = Comment$4;
     Comment$4.default = Comment$4;
-    let parse$4, Rule$4, AtRule$4, {isClean: isClean$1, my: my$1} = symbols, Declaration$3 = declaration, Comment$3 = comment, Node$1 = node_1;
+    let parse$5, Rule$4, AtRule$4, Root$6, {isClean: isClean$1, my: my$1} = symbols, Declaration$3 = declaration, Comment$3 = comment, Node$1 = node_1;
     function cleanSource(nodes) {
         return nodes.map((i => (i.nodes && (i.nodes = cleanSource(i.nodes)), delete i.source, 
         i)));
@@ -1330,7 +1332,7 @@
             if (this.proxyOf.nodes) return this.proxyOf.nodes[this.proxyOf.nodes.length - 1];
         }
         normalize(nodes, sample) {
-            if ("string" == typeof nodes) nodes = cleanSource(parse$4(nodes).nodes); else if (Array.isArray(nodes)) {
+            if ("string" == typeof nodes) nodes = cleanSource(parse$5(nodes).nodes); else if (Array.isArray(nodes)) {
                 nodes = nodes.slice(0);
                 for (let i of nodes) i.parent && i.parent.removeChild(i, "ignore");
             } else if ("root" === nodes.type && "document" !== this.type) {
@@ -1345,7 +1347,7 @@
             }
             return nodes.map((i => (i[my$1] || Container$7.rebuild(i), (i = i.proxyOf).parent && i.parent.removeChild(i), 
             i[isClean$1] && markDirtyUp(i), void 0 === i.raws.before && sample && void 0 !== sample.raws.before && (i.raws.before = sample.raws.before.replace(/\S/g, "")), 
-            i.parent = this, i)));
+            i.parent = this.proxyOf, i)));
         }
         getProxyProcessor() {
             return {
@@ -1361,15 +1363,17 @@
         }
     }
     Container$7.registerParse = dependant => {
-        parse$4 = dependant;
+        parse$5 = dependant;
     }, Container$7.registerRule = dependant => {
         Rule$4 = dependant;
     }, Container$7.registerAtRule = dependant => {
         AtRule$4 = dependant;
+    }, Container$7.registerRoot = dependant => {
+        Root$6 = dependant;
     };
     var container = Container$7;
     Container$7.default = Container$7, Container$7.rebuild = node => {
-        "atrule" === node.type ? Object.setPrototypeOf(node, AtRule$4.prototype) : "rule" === node.type ? Object.setPrototypeOf(node, Rule$4.prototype) : "decl" === node.type ? Object.setPrototypeOf(node, Declaration$3.prototype) : "comment" === node.type && Object.setPrototypeOf(node, Comment$3.prototype), 
+        "atrule" === node.type ? Object.setPrototypeOf(node, AtRule$4.prototype) : "rule" === node.type ? Object.setPrototypeOf(node, Rule$4.prototype) : "decl" === node.type ? Object.setPrototypeOf(node, Declaration$3.prototype) : "comment" === node.type ? Object.setPrototypeOf(node, Comment$3.prototype) : "root" === node.type && Object.setPrototypeOf(node, Root$6.prototype), 
         node[my$1] = !0, node.nodes && node.nodes.forEach((child => {
             Container$7.rebuild(child);
         }));
@@ -1479,11 +1483,12 @@
         Processor$2 = dependant;
     };
     var root = Root$5;
-    Root$5.default = Root$5;
+    Root$5.default = Root$5, Container$4.registerRoot(Root$5);
     let list$2 = {
         split(string, separators, last) {
-            let array = [], current = "", split = !1, func = 0, quote = !1, escape = !1;
-            for (let letter of string) escape ? escape = !1 : "\\" === letter ? escape = !0 : quote ? letter === quote && (quote = !1) : '"' === letter || "'" === letter ? quote = letter : "(" === letter ? func += 1 : ")" === letter ? func > 0 && (func -= 1) : 0 === func && separators.includes(letter) && (split = !0), 
+            let array = [], current = "", split = !1, func = 0, inQuote = !1, prevQuote = "", escape = !1;
+            for (let letter of string) escape ? escape = !1 : "\\" === letter ? escape = !0 : inQuote ? letter === prevQuote && (inQuote = !1) : '"' === letter || "'" === letter ? (inQuote = !0, 
+            prevQuote = letter) : "(" === letter ? func += 1 : ")" === letter ? func > 0 && (func -= 1) : 0 === func && separators.includes(letter) && (split = !0), 
             split ? ("" !== current && array.push(current.trim()), current = "", split = !1) : current += letter;
             return (last || "" !== current) && array.push(current.trim()), array;
         },
@@ -1929,7 +1934,7 @@
         }
     };
     let Container$2 = container, Parser = parser, Input$2 = input;
-    function parse$3(css, opts) {
+    function parse$4(css, opts) {
         let input = new Input$2(css, opts), parser = new Parser(input);
         try {
             parser.parse();
@@ -1939,9 +1944,9 @@
         }
         return parser.root;
     }
-    var parse_1 = parse$3;
-    parse$3.default = parse$3, Container$2.registerParse(parse$3);
-    let {isClean: isClean, my: my} = symbols, MapGenerator$1 = mapGenerator, stringify$2 = stringify_1, Container$1 = container, Document$2 = document$1, warnOnce$1 = warnOnce$2, Result$2 = result, parse$2 = parse_1, Root$3 = root;
+    var parse_1 = parse$4;
+    parse$4.default = parse$4, Container$2.registerParse(parse$4);
+    let {isClean: isClean, my: my} = symbols, MapGenerator$1 = mapGenerator, stringify$2 = stringify_1, Container$1 = container, Document$2 = document$1, warnOnce$1 = warnOnce$2, Result$2 = result, parse$3 = parse_1, Root$3 = root;
     const TYPE_TO_CLASS_NAME = {
         document: "Document",
         root: "Root",
@@ -1995,14 +2000,14 @@
         return node[isClean] = !1, node.nodes && node.nodes.forEach((i => cleanMarks(i))), 
         node;
     }
-    let postcss$2 = {};
+    let postcss$1 = {};
     class LazyResult$2 {
         constructor(processor, css, opts) {
             let root;
             if (this.stringified = !1, this.processed = !1, "object" != typeof css || null === css || "root" !== css.type && "document" !== css.type) if (css instanceof LazyResult$2 || css instanceof Result$2) root = cleanMarks(css.root), 
             css.map && (void 0 === opts.map && (opts.map = {}), opts.map.inline || (opts.map.inline = !1), 
             opts.map.prev = css.map); else {
-                let parser = parse$2;
+                let parser = parse$3;
                 opts.syntax && (parser = opts.syntax.parse), opts.parser && (parser = opts.parser), 
                 parser.parse && (parser = parser.parse);
                 try {
@@ -2013,9 +2018,9 @@
                 root && !root[my] && Container$1.rebuild(root);
             } else root = cleanMarks(css);
             this.result = new Result$2(processor, root, opts), this.helpers = {
-                ...postcss$2,
+                ...postcss$1,
                 result: this.result,
-                postcss: postcss$2
+                postcss: postcss$1
             }, this.plugins = this.processor.plugins.map((plugin => "object" == typeof plugin && plugin.prepare ? {
                 ...plugin,
                 ...plugin.prepare(this.result)
@@ -2224,11 +2229,11 @@
         }
     }
     LazyResult$2.registerPostcss = dependant => {
-        postcss$2 = dependant;
+        postcss$1 = dependant;
     };
     var lazyResult = LazyResult$2;
     LazyResult$2.default = LazyResult$2, Root$3.registerLazyResult(LazyResult$2), Document$2.registerLazyResult(LazyResult$2);
-    let MapGenerator = mapGenerator, stringify$1 = stringify_1, warnOnce = warnOnce$2, parse$1 = parse_1;
+    let MapGenerator = mapGenerator, stringify$1 = stringify_1, warnOnce = warnOnce$2, parse$2 = parse_1;
     const Result$1 = result;
     class NoWorkResult$1 {
         constructor(processor, css, opts) {
@@ -2266,7 +2271,7 @@
         }
         get root() {
             if (this._root) return this._root;
-            let root, parser = parse$1;
+            let root, parser = parse$2;
             try {
                 root = parser(this._css, this._opts);
             } catch (error) {
@@ -2307,7 +2312,7 @@
     let NoWorkResult = noWorkResult, LazyResult$1 = lazyResult, Document$1 = document$1, Root$2 = root;
     class Processor$1 {
         constructor(plugins = []) {
-            this.version = "8.4.8", this.plugins = this.normalize(plugins);
+            this.version = "8.4.16", this.plugins = this.normalize(plugins);
         }
         use(plugin) {
             return this.plugins = this.plugins.concat(this.normalize([ plugin ])), this;
@@ -2358,232 +2363,143 @@
     }
     var fromJSON_1 = fromJSON$1;
     fromJSON$1.default = fromJSON$1;
-    let CssSyntaxError = cssSyntaxError, Declaration = declaration, LazyResult = lazyResult, Container = container, Processor = processor, stringify = stringify_1, fromJSON = fromJSON_1, Document = document$1, Warning = warning, Comment = comment, AtRule = atRule, Result = result, Input = input, parse = parse_1, list = list_1, Rule = rule, Root = root, Node = node_1;
-    function postcss$1(...plugins) {
+    let CssSyntaxError = cssSyntaxError, Declaration = declaration, LazyResult = lazyResult, Container = container, Processor = processor, stringify = stringify_1, fromJSON = fromJSON_1, Document = document$1, Warning = warning, Comment = comment, AtRule = atRule, Result = result, Input = input, parse$1 = parse_1, list = list_1, Rule = rule, Root = root, Node = node_1;
+    function postcss(...plugins) {
         return 1 === plugins.length && Array.isArray(plugins[0]) && (plugins = plugins[0]), 
         new Processor(plugins);
     }
-    postcss$1.plugin = function plugin(name, initializer) {
+    postcss.plugin = function plugin(name, initializer) {
+        let cache, warningPrinted = !1;
         function creator(...args) {
+            console && console.warn && !warningPrinted && (warningPrinted = !0, console.warn(name + ": postcss.plugin was deprecated. Migration guide:\nhttps://evilmartians.com/chronicles/postcss-8-plugin-migration"), 
+            "cn".startsWith("cn") && console.warn(name + ": 里面 postcss.plugin 被弃用. 迁移指南:\nhttps://www.w3ctech.com/topic/2226"));
             let transformer = initializer(...args);
             return transformer.postcssPlugin = name, transformer.postcssVersion = (new Processor).version, 
             transformer;
         }
-        let cache;
-        return console && console.warn && (console.warn(name + ": postcss.plugin was deprecated. Migration guide:\nhttps://evilmartians.com/chronicles/postcss-8-plugin-migration"), 
-        "cn".startsWith("cn") && console.warn(name + ": 里面 postcss.plugin 被弃用. 迁移指南:\nhttps://www.w3ctech.com/topic/2226")), 
-        Object.defineProperty(creator, "postcss", {
+        return Object.defineProperty(creator, "postcss", {
             get: () => (cache || (cache = creator()), cache)
         }), creator.process = function(css, processOpts, pluginOpts) {
-            return postcss$1([ creator(pluginOpts) ]).process(css, processOpts);
+            return postcss([ creator(pluginOpts) ]).process(css, processOpts);
         }, creator;
-    }, postcss$1.stringify = stringify, postcss$1.parse = parse, postcss$1.fromJSON = fromJSON, 
-    postcss$1.list = list, postcss$1.comment = defaults => new Comment(defaults), postcss$1.atRule = defaults => new AtRule(defaults), 
-    postcss$1.decl = defaults => new Declaration(defaults), postcss$1.rule = defaults => new Rule(defaults), 
-    postcss$1.root = defaults => new Root(defaults), postcss$1.document = defaults => new Document(defaults), 
-    postcss$1.CssSyntaxError = CssSyntaxError, postcss$1.Declaration = Declaration, 
-    postcss$1.Container = Container, postcss$1.Processor = Processor, postcss$1.Document = Document, 
-    postcss$1.Comment = Comment, postcss$1.Warning = Warning, postcss$1.AtRule = AtRule, 
-    postcss$1.Result = Result, postcss$1.Input = Input, postcss$1.Rule = Rule, postcss$1.Root = Root, 
-    postcss$1.Node = Node, LazyResult.registerPostcss(postcss$1);
-    var postcss_1 = postcss$1;
-    postcss$1.default = postcss$1;
-    /*
-  object-assign
-  (c) Sindre Sorhus
-  @license MIT
-  */
-    var getOwnPropertySymbols = Object.getOwnPropertySymbols, hasOwnProperty = Object.prototype.hasOwnProperty, propIsEnumerable = Object.prototype.propertyIsEnumerable;
-    function toObject(val) {
-        if (null == val) throw new TypeError("Object.assign cannot be called with null or undefined");
-        return Object(val);
-    }
-    var objectAssign$1 = function shouldUseNative() {
-        try {
-            if (!Object.assign) return !1;
-            var test1 = new String("abc");
-            if (test1[5] = "de", "5" === Object.getOwnPropertyNames(test1)[0]) return !1;
-            for (var test2 = {}, i = 0; i < 10; i++) test2["_" + String.fromCharCode(i)] = i;
-            if ("0123456789" !== Object.getOwnPropertyNames(test2).map((function(n) {
-                return test2[n];
-            })).join("")) return !1;
-            var test3 = {};
-            return "abcdefghijklmnopqrst".split("").forEach((function(letter) {
-                test3[letter] = letter;
-            })), "abcdefghijklmnopqrst" === Object.keys(Object.assign({}, test3)).join("");
-        } catch (err) {
-            return !1;
-        }
-    }() ? Object.assign : function(target, source) {
-        for (var from, symbols, to = toObject(target), s = 1; s < arguments.length; s++) {
-            for (var key in from = Object(arguments[s])) hasOwnProperty.call(from, key) && (to[key] = from[key]);
-            if (getOwnPropertySymbols) {
-                symbols = getOwnPropertySymbols(from);
-                for (var i = 0; i < symbols.length; i++) propIsEnumerable.call(from, symbols[i]) && (to[symbols[i]] = from[symbols[i]]);
-            }
-        }
-        return to;
-    }, filterPropList = {
-        exact: function(list) {
-            return list.filter((function(m) {
-                return m.match(/^[^\*\!]+$/);
-            }));
-        },
-        contain: function(list) {
-            return list.filter((function(m) {
-                return m.match(/^\*.+\*$/);
-            })).map((function(m) {
-                return m.substr(1, m.length - 2);
-            }));
-        },
-        endWith: function(list) {
-            return list.filter((function(m) {
-                return m.match(/^\*[^\*]+$/);
-            })).map((function(m) {
-                return m.substr(1);
-            }));
-        },
-        startWith: function(list) {
-            return list.filter((function(m) {
-                return m.match(/^[^\*\!]+\*$/);
-            })).map((function(m) {
-                return m.substr(0, m.length - 1);
-            }));
-        },
-        notExact: function(list) {
-            return list.filter((function(m) {
-                return m.match(/^\![^\*].*$/);
-            })).map((function(m) {
-                return m.substr(1);
-            }));
-        },
-        notContain: function(list) {
-            return list.filter((function(m) {
-                return m.match(/^\!\*.+\*$/);
-            })).map((function(m) {
-                return m.substr(2, m.length - 3);
-            }));
-        },
-        notEndWith: function(list) {
-            return list.filter((function(m) {
-                return m.match(/^\!\*[^\*]+$/);
-            })).map((function(m) {
-                return m.substr(2);
-            }));
-        },
-        notStartWith: function(list) {
-            return list.filter((function(m) {
-                return m.match(/^\![^\*]+\*$/);
-            })).map((function(m) {
-                return m.substr(1, m.length - 2);
-            }));
-        }
+    }, postcss.stringify = stringify, postcss.parse = parse$1, postcss.fromJSON = fromJSON, 
+    postcss.list = list, postcss.comment = defaults => new Comment(defaults), postcss.atRule = defaults => new AtRule(defaults), 
+    postcss.decl = defaults => new Declaration(defaults), postcss.rule = defaults => new Rule(defaults), 
+    postcss.root = defaults => new Root(defaults), postcss.document = defaults => new Document(defaults), 
+    postcss.CssSyntaxError = CssSyntaxError, postcss.Declaration = Declaration, postcss.Container = Container, 
+    postcss.Processor = Processor, postcss.Document = Document, postcss.Comment = Comment, 
+    postcss.Warning = Warning, postcss.AtRule = AtRule, postcss.Result = Result, postcss.Input = Input, 
+    postcss.Rule = Rule, postcss.Root = Root, postcss.Node = Node, LazyResult.registerPostcss(postcss);
+    var postcss_1 = postcss;
+    postcss.default = postcss, postcss_1.stringify, postcss_1.fromJSON, postcss_1.plugin, 
+    postcss_1.parse, postcss_1.list, postcss_1.document, postcss_1.comment, postcss_1.atRule, 
+    postcss_1.rule, postcss_1.decl, postcss_1.root, postcss_1.CssSyntaxError, postcss_1.Declaration, 
+    postcss_1.Container, postcss_1.Processor, postcss_1.Document, postcss_1.Comment, 
+    postcss_1.Warning, postcss_1.AtRule, postcss_1.Result, postcss_1.Input, postcss_1.Rule, 
+    postcss_1.Root, postcss_1.Node;
+    var pixelUnitRegexp = {};
+    Object.defineProperty(pixelUnitRegexp, "__esModule", {
+        value: !0
+    }), pixelUnitRegexp.default = function getUnitRegexp(unit) {
+        return new RegExp("\"[^\"]+\"|'[^']+'|url\\([^\\)]+\\)|(\\d*\\.?\\d+)" + unit, "g");
     };
-    var propListMatcher = {
-        filterPropList: filterPropList,
-        createPropListMatcher: function createPropListMatcher$1(propList) {
-            var hasWild = propList.indexOf("*") > -1, matchAll = hasWild && 1 === propList.length, lists = {
-                exact: filterPropList.exact(propList),
-                contain: filterPropList.contain(propList),
-                startWith: filterPropList.startWith(propList),
-                endWith: filterPropList.endWith(propList),
-                notExact: filterPropList.notExact(propList),
-                notContain: filterPropList.notContain(propList),
-                notStartWith: filterPropList.notStartWith(propList),
-                notEndWith: filterPropList.notEndWith(propList)
-            };
-            return function(prop) {
-                return !!matchAll || (hasWild || lists.exact.indexOf(prop) > -1 || lists.contain.some((function(m) {
-                    return prop.indexOf(m) > -1;
-                })) || lists.startWith.some((function(m) {
-                    return 0 === prop.indexOf(m);
-                })) || lists.endWith.some((function(m) {
-                    return prop.indexOf(m) === prop.length - m.length;
-                }))) && !(lists.notExact.indexOf(prop) > -1 || lists.notContain.some((function(m) {
-                    return prop.indexOf(m) > -1;
-                })) || lists.notStartWith.some((function(m) {
-                    return 0 === prop.indexOf(m);
-                })) || lists.notEndWith.some((function(m) {
-                    return prop.indexOf(m) === prop.length - m.length;
-                })));
-            };
-        }
-    };
-    var pixelUnitRegexp = {
-        getUnitRegexp: function getUnitRegexp$1(unit) {
-            return new RegExp("\"[^\"]+\"|'[^']+'|url\\([^\\)]+\\)|(\\d*\\.?\\d+)" + unit, "g");
-        }
-    }, postcss = postcss_1, objectAssign = objectAssign$1, {createPropListMatcher: createPropListMatcher} = propListMatcher, {getUnitRegexp: getUnitRegexp} = pixelUnitRegexp, defaults = {
-        unitToConvert: "px",
-        viewportWidth: 320,
-        viewportHeight: 568,
-        unitPrecision: 5,
-        viewportUnit: "vw",
-        fontViewportUnit: "vw",
-        selectorBlackList: [],
-        propList: [ "*" ],
-        minPixelValue: 1,
-        mediaQuery: !1,
-        replace: !0,
-        landscape: !1,
-        landscapeUnit: "vw",
-        landscapeWidth: 568
-    }, postcssPxToViewport = postcss.plugin("postcss-px-to-viewport", (function(options) {
-        var opts = objectAssign({}, defaults, options), pxRegex = getUnitRegexp(opts.unitToConvert), satisfyPropList = createPropListMatcher(opts.propList), landscapeRules = [];
-        return function(css) {
-            if (css.walkRules((function(rule) {
-                var file = rule.source && rule.source.input.file;
-                if (opts.exclude && file) if ("[object RegExp]" === Object.prototype.toString.call(opts.exclude)) {
-                    if (isExclude(opts.exclude, file)) return;
-                } else {
-                    if ("[object Array]" !== Object.prototype.toString.call(opts.exclude)) throw new Error("options.exclude should be RegExp or Array.");
-                    for (let i = 0; i < opts.exclude.length; i++) if (isExclude(opts.exclude[i], file)) return;
-                }
-                if (!function blacklistedSelector(blacklist, selector) {
-                    if ("string" != typeof selector) return;
-                    return blacklist.some((function(regex) {
-                        return "string" == typeof regex ? -1 !== selector.indexOf(regex) : selector.match(regex);
-                    }));
-                }(opts.selectorBlackList, rule.selector)) {
-                    if (opts.landscape && !rule.parent.params) {
-                        var landscapeRule = rule.clone().removeAll();
-                        rule.walkDecls((function(decl) {
-                            -1 !== decl.value.indexOf(opts.unitToConvert) && satisfyPropList(decl.prop) && landscapeRule.append(decl.clone({
-                                value: decl.value.replace(pxRegex, createPxReplace(opts, opts.landscapeUnit, opts.landscapeWidth))
-                            }));
-                        })), landscapeRule.nodes.length > 0 && landscapeRules.push(landscapeRule);
-                    }
-                    (function validateParams(params, mediaQuery) {
-                        return !params || params && mediaQuery;
-                    })(rule.parent.params, opts.mediaQuery) && rule.walkDecls((function(decl, i) {
-                        if (-1 !== decl.value.indexOf(opts.unitToConvert) && satisfyPropList(decl.prop)) {
-                            var unit, size, params = rule.parent.params;
-                            opts.landscape && params && -1 !== params.indexOf("landscape") ? (unit = opts.landscapeUnit, 
-                            size = opts.landscapeWidth) : (unit = function getUnit(prop, opts) {
-                                return -1 === prop.indexOf("font") ? opts.viewportUnit : opts.fontViewportUnit;
-                            }(decl.prop, opts), size = opts.viewportWidth);
-                            var value = decl.value.replace(pxRegex, createPxReplace(opts, unit, size));
-                            (function declarationExists(decls, prop, value) {
-                                return decls.some((function(decl) {
-                                    return decl.prop === prop && decl.value === value;
-                                }));
-                            })(decl.parent, decl.prop, value) || (opts.replace ? decl.value = value : decl.parent.insertAfter(i, decl.clone({
-                                value: value
-                            })));
-                        }
-                    }));
-                }
-            })), landscapeRules.length > 0) {
-                var landscapeRoot = new postcss.atRule({
-                    params: "(orientation: landscape)",
-                    name: "media"
-                });
-                landscapeRules.forEach((function(rule) {
-                    landscapeRoot.append(rule);
-                })), css.append(landscapeRoot);
+    var propListMatcher = {};
+    !function(exports) {
+        Object.defineProperty(exports, "__esModule", {
+            value: !0
+        }), exports.createPropListMatcher = exports.filterPropList = void 0, exports.filterPropList = {
+            exact: function(list) {
+                return list.filter((function(m) {
+                    return m.match(/^[^\*\!]+$/);
+                }));
+            },
+            contain: function(list) {
+                return list.filter((function(m) {
+                    return m.match(/^\*.+\*$/);
+                })).map((function(m) {
+                    return m.substr(1, m.length - 2);
+                }));
+            },
+            endWith: function(list) {
+                return list.filter((function(m) {
+                    return m.match(/^\*[^\*]+$/);
+                })).map((function(m) {
+                    return m.substr(1);
+                }));
+            },
+            startWith: function(list) {
+                return list.filter((function(m) {
+                    return m.match(/^[^\*\!]+\*$/);
+                })).map((function(m) {
+                    return m.substr(0, m.length - 1);
+                }));
+            },
+            notExact: function(list) {
+                return list.filter((function(m) {
+                    return m.match(/^\![^\*].*$/);
+                })).map((function(m) {
+                    return m.substr(1);
+                }));
+            },
+            notContain: function(list) {
+                return list.filter((function(m) {
+                    return m.match(/^\!\*.+\*$/);
+                })).map((function(m) {
+                    return m.substr(2, m.length - 3);
+                }));
+            },
+            notEndWith: function(list) {
+                return list.filter((function(m) {
+                    return m.match(/^\!\*[^\*]+$/);
+                })).map((function(m) {
+                    return m.substr(2);
+                }));
+            },
+            notStartWith: function(list) {
+                return list.filter((function(m) {
+                    return m.match(/^\![^\*]+\*$/);
+                })).map((function(m) {
+                    return m.substr(1, m.length - 2);
+                }));
             }
         };
-    }));
+        const matcherMap = new Map;
+        exports.createPropListMatcher = function createPropListMatcher(propList) {
+            const key = propList.join(",");
+            return matcherMap.has(key) || matcherMap.set(key, function _createPropListMatcher(propList) {
+                var hasWild = propList.indexOf("*") > -1, matchAll = hasWild && 1 === propList.length, lists = {
+                    exact: exports.filterPropList.exact(propList),
+                    contain: exports.filterPropList.contain(propList),
+                    startWith: exports.filterPropList.startWith(propList),
+                    endWith: exports.filterPropList.endWith(propList),
+                    notExact: exports.filterPropList.notExact(propList),
+                    notContain: exports.filterPropList.notContain(propList),
+                    notStartWith: exports.filterPropList.notStartWith(propList),
+                    notEndWith: exports.filterPropList.notEndWith(propList)
+                };
+                return function(prop) {
+                    return !!matchAll || (hasWild || lists.exact.indexOf(prop) > -1 || lists.contain.some((function(m) {
+                        return prop.indexOf(m) > -1;
+                    })) || lists.startWith.some((function(m) {
+                        return 0 === prop.indexOf(m);
+                    })) || lists.endWith.some((function(m) {
+                        return prop.indexOf(m) === prop.length - m.length;
+                    }))) && !(lists.notExact.indexOf(prop) > -1 || lists.notContain.some((function(m) {
+                        return prop.indexOf(m) > -1;
+                    })) || lists.notStartWith.some((function(m) {
+                        return 0 === prop.indexOf(m);
+                    })) || lists.notEndWith.some((function(m) {
+                        return prop.indexOf(m) === prop.length - m.length;
+                    })));
+                };
+            }(propList)), matcherMap.get(key);
+        };
+    }(propListMatcher);
+    const pixel_unit_regexp_1 = (commonjsGlobal && commonjsGlobal.__importDefault || function(mod) {
+        return mod && mod.__esModule ? mod : {
+            default: mod
+        };
+    })(pixelUnitRegexp), prop_list_matcher_1 = propListMatcher;
     function createPxReplace(opts, viewportUnit, viewportSize) {
         return function(m, $1) {
             if (!$1) return m;
@@ -2593,13 +2509,104 @@
                 var multiplier = Math.pow(10, precision + 1), wholeNumber = Math.floor(number * multiplier);
                 return 10 * Math.round(wholeNumber / 10) / multiplier;
             }(pixels / viewportSize * 100, opts.unitPrecision);
-            return 0 === parsedVal ? "0" : parsedVal + viewportUnit;
+            return 0 === parsedVal ? "0" : `${parsedVal}${viewportUnit}`;
         };
     }
-    function isExclude(reg, file) {
-        if ("[object RegExp]" !== Object.prototype.toString.call(reg)) throw new Error("options.exclude should be RegExp.");
-        return null !== file.match(reg);
+    function getUnit(prop, opts) {
+        return prop.includes("font") ? opts.fontViewportUnit : opts.viewportUnit;
     }
+    const px2vp = options => {
+        const landscapeRules = [], defaultOptions = {
+            unitToConvert: "px",
+            viewportWidth: 320,
+            viewportHeight: 568,
+            unitPrecision: 5,
+            viewportUnit: "vw",
+            fontViewportUnit: "vw",
+            selectorBlackList: [],
+            propList: [ "*" ],
+            minPixelValue: 1,
+            mediaQuery: !1,
+            replace: !0,
+            landscape: !1,
+            landscapeUnit: "vw",
+            exclude: [],
+            landscapeWidth: 568
+        };
+        return {
+            postcssPlugin: "postcss-px2vp",
+            Once(root, {atRule: atRule, result: result}) {
+                if (root.walkRules((rule => {
+                    var _a, _b;
+                    const file = null === (_a = rule.source) || void 0 === _a ? void 0 : _a.input.file, {exclude: exclude, selectorBlackList: selectorBlackList, propList: propList, landscape: landscape, unitToConvert: unitToConvert, minPixelValue: minPixelValue, unitPrecision: unitPrecision, landscapeUnit: landscapeUnit, landscapeWidth: landscapeWidth, fontViewportUnit: fontViewportUnit, viewportUnit: viewportUnit, mediaQuery: mediaQuery, viewportWidth: viewportWidth, replace: replace} = function optionCreator({options: options, rule: rule, defaultOptions: defaultOptions}) {
+                        return options ? Object.assign(Object.assign({}, defaultOptions), Object.entries(options).reduce(((prev, [key, value]) => (prev[key] = function getOption(option, rule) {
+                            return "function" == typeof option ? option(rule) : option;
+                        }(value, rule), prev)), {})) : defaultOptions;
+                    }({
+                        options: options,
+                        rule: rule,
+                        defaultOptions: defaultOptions
+                    }), pxRegex = pixel_unit_regexp_1.default(unitToConvert), satisfyPropList = prop_list_matcher_1.createPropListMatcher(propList), params = null === (_b = rule.parent) || void 0 === _b ? void 0 : _b.params;
+                    if (!((exclude, file) => !!file && (Array.isArray(exclude) ? exclude.some((reg => reg.test(file))) : exclude.test(file)))(exclude, file) && (blacklist = selectorBlackList, 
+                    selector = rule.selector, !blacklist.some((rule => "string" == typeof rule ? selector.includes(rule) : rule.test(selector))))) {
+                        var blacklist, selector;
+                        if (landscape && !params) {
+                            const landscapeRule = rule.clone().removeAll();
+                            rule.walkDecls((decl => {
+                                const {value: value, prop: prop} = decl;
+                                value.includes(unitToConvert) && satisfyPropList(prop) && (landscapeRule.append(decl.clone({
+                                    value: value.replace(pxRegex, createPxReplace({
+                                        minPixelValue: minPixelValue,
+                                        unitPrecision: unitPrecision
+                                    }, landscapeUnit, landscapeWidth))
+                                })), landscapeRule.nodes.length > 0 && landscapeRules.push(landscapeRule));
+                            }));
+                        }
+                        (function validateParams(params, mediaQuery) {
+                            return !params || params && mediaQuery;
+                        })(params, mediaQuery) && rule.walkDecls(((decl, i) => {
+                            var _a, _b;
+                            let {value: value, prop: prop} = decl;
+                            if (!value.includes(unitToConvert) || !satisfyPropList(prop)) return;
+                            const prev = decl.prev();
+                            if ("comment" === (null == prev ? void 0 : prev.type) && "px-to-viewport-ignore-next" === prev.text) return void prev.remove();
+                            const next = decl.next();
+                            if ("comment" === (null == next ? void 0 : next.type) && "px-to-viewport-ignore" === next.text) {
+                                if (!/\n/.test(null !== (_a = next.raws.before) && void 0 !== _a ? _a : "")) return void next.remove();
+                                result.warn("Unexpected comment /* px-to-viewport-ignore */ must be after declaration at same line.", {
+                                    node: next
+                                });
+                            }
+                            const [unit, size] = landscape && (null == params ? void 0 : params.includes("landscape")) ? [ landscapeUnit, landscapeWidth ] : [ getUnit(prop, {
+                                viewportUnit: viewportUnit,
+                                fontViewportUnit: fontViewportUnit
+                            }), viewportWidth ];
+                            value = value.replace(pxRegex, createPxReplace({
+                                minPixelValue: minPixelValue,
+                                unitPrecision: unitPrecision
+                            }, unit, size)), function declarationExists(decls, prop, value) {
+                                return !!decls && decls.some((function(decl) {
+                                    return decl.prop === prop && decl.value === value;
+                                }));
+                            }(decl.parent, prop, value) || (replace ? decl.value = value : null === (_b = decl.parent) || void 0 === _b || _b.insertAfter(i, decl.clone({
+                                value: value
+                            })));
+                        }));
+                    }
+                })), landscapeRules.length) {
+                    const landscapeRoot = atRule({
+                        params: "(orientation: landscape)",
+                        name: "media"
+                    });
+                    landscapeRules.forEach((rule => {
+                        landscapeRoot.append(rule);
+                    })), root.append(landscapeRoot);
+                }
+            }
+        };
+    };
+    px2vp.postcss = !0;
+    var dist = px2vp;
     function CommentRemover$1(options) {
         this.options = options;
     }
@@ -2634,7 +2641,7 @@
             postcssPlugin: "postcss-discard-comments",
             OnceExit(css, {list: list}) {
                 css.walk((node => {
-                    if ("comment" === node.type && remover.canRemove(node.text)) node.remove(); else if (node.raws.between && (node.raws.between = replaceComments(node.raws.between, list.space)), 
+                    if ("comment" === node.type && remover.canRemove(node.text)) node.remove(); else if ("string" == typeof node.raws.between && (node.raws.between = replaceComments(node.raws.between, list.space)), 
                     "decl" !== node.type) {
                         if ("rule" === node.type && node.raws.selector && node.raws.selector.raw) node.raws.selector.raw = replaceComments(node.raws.selector.raw, list.space, ""); else if ("atrule" === node.type) {
                             if (node.raws.afterName) {
@@ -2670,6 +2677,269 @@
         minPixelValue: 1,
         mediaQuery: !1
     }, filterConfigDefault = [ "width", "height", "border", "border-radius", "font-size: ?(?!normal).*", "font-weight: ?(?!normal).*", "word-spacing", "line-height", "color", "opacity", "background", "background-image", "box-shadow" ];
+    var colorName = {
+        aliceblue: [ 240, 248, 255 ],
+        antiquewhite: [ 250, 235, 215 ],
+        aqua: [ 0, 255, 255 ],
+        aquamarine: [ 127, 255, 212 ],
+        azure: [ 240, 255, 255 ],
+        beige: [ 245, 245, 220 ],
+        bisque: [ 255, 228, 196 ],
+        black: [ 0, 0, 0 ],
+        blanchedalmond: [ 255, 235, 205 ],
+        blue: [ 0, 0, 255 ],
+        blueviolet: [ 138, 43, 226 ],
+        brown: [ 165, 42, 42 ],
+        burlywood: [ 222, 184, 135 ],
+        cadetblue: [ 95, 158, 160 ],
+        chartreuse: [ 127, 255, 0 ],
+        chocolate: [ 210, 105, 30 ],
+        coral: [ 255, 127, 80 ],
+        cornflowerblue: [ 100, 149, 237 ],
+        cornsilk: [ 255, 248, 220 ],
+        crimson: [ 220, 20, 60 ],
+        cyan: [ 0, 255, 255 ],
+        darkblue: [ 0, 0, 139 ],
+        darkcyan: [ 0, 139, 139 ],
+        darkgoldenrod: [ 184, 134, 11 ],
+        darkgray: [ 169, 169, 169 ],
+        darkgreen: [ 0, 100, 0 ],
+        darkgrey: [ 169, 169, 169 ],
+        darkkhaki: [ 189, 183, 107 ],
+        darkmagenta: [ 139, 0, 139 ],
+        darkolivegreen: [ 85, 107, 47 ],
+        darkorange: [ 255, 140, 0 ],
+        darkorchid: [ 153, 50, 204 ],
+        darkred: [ 139, 0, 0 ],
+        darksalmon: [ 233, 150, 122 ],
+        darkseagreen: [ 143, 188, 143 ],
+        darkslateblue: [ 72, 61, 139 ],
+        darkslategray: [ 47, 79, 79 ],
+        darkslategrey: [ 47, 79, 79 ],
+        darkturquoise: [ 0, 206, 209 ],
+        darkviolet: [ 148, 0, 211 ],
+        deeppink: [ 255, 20, 147 ],
+        deepskyblue: [ 0, 191, 255 ],
+        dimgray: [ 105, 105, 105 ],
+        dimgrey: [ 105, 105, 105 ],
+        dodgerblue: [ 30, 144, 255 ],
+        firebrick: [ 178, 34, 34 ],
+        floralwhite: [ 255, 250, 240 ],
+        forestgreen: [ 34, 139, 34 ],
+        fuchsia: [ 255, 0, 255 ],
+        gainsboro: [ 220, 220, 220 ],
+        ghostwhite: [ 248, 248, 255 ],
+        gold: [ 255, 215, 0 ],
+        goldenrod: [ 218, 165, 32 ],
+        gray: [ 128, 128, 128 ],
+        green: [ 0, 128, 0 ],
+        greenyellow: [ 173, 255, 47 ],
+        grey: [ 128, 128, 128 ],
+        honeydew: [ 240, 255, 240 ],
+        hotpink: [ 255, 105, 180 ],
+        indianred: [ 205, 92, 92 ],
+        indigo: [ 75, 0, 130 ],
+        ivory: [ 255, 255, 240 ],
+        khaki: [ 240, 230, 140 ],
+        lavender: [ 230, 230, 250 ],
+        lavenderblush: [ 255, 240, 245 ],
+        lawngreen: [ 124, 252, 0 ],
+        lemonchiffon: [ 255, 250, 205 ],
+        lightblue: [ 173, 216, 230 ],
+        lightcoral: [ 240, 128, 128 ],
+        lightcyan: [ 224, 255, 255 ],
+        lightgoldenrodyellow: [ 250, 250, 210 ],
+        lightgray: [ 211, 211, 211 ],
+        lightgreen: [ 144, 238, 144 ],
+        lightgrey: [ 211, 211, 211 ],
+        lightpink: [ 255, 182, 193 ],
+        lightsalmon: [ 255, 160, 122 ],
+        lightseagreen: [ 32, 178, 170 ],
+        lightskyblue: [ 135, 206, 250 ],
+        lightslategray: [ 119, 136, 153 ],
+        lightslategrey: [ 119, 136, 153 ],
+        lightsteelblue: [ 176, 196, 222 ],
+        lightyellow: [ 255, 255, 224 ],
+        lime: [ 0, 255, 0 ],
+        limegreen: [ 50, 205, 50 ],
+        linen: [ 250, 240, 230 ],
+        magenta: [ 255, 0, 255 ],
+        maroon: [ 128, 0, 0 ],
+        mediumaquamarine: [ 102, 205, 170 ],
+        mediumblue: [ 0, 0, 205 ],
+        mediumorchid: [ 186, 85, 211 ],
+        mediumpurple: [ 147, 112, 219 ],
+        mediumseagreen: [ 60, 179, 113 ],
+        mediumslateblue: [ 123, 104, 238 ],
+        mediumspringgreen: [ 0, 250, 154 ],
+        mediumturquoise: [ 72, 209, 204 ],
+        mediumvioletred: [ 199, 21, 133 ],
+        midnightblue: [ 25, 25, 112 ],
+        mintcream: [ 245, 255, 250 ],
+        mistyrose: [ 255, 228, 225 ],
+        moccasin: [ 255, 228, 181 ],
+        navajowhite: [ 255, 222, 173 ],
+        navy: [ 0, 0, 128 ],
+        oldlace: [ 253, 245, 230 ],
+        olive: [ 128, 128, 0 ],
+        olivedrab: [ 107, 142, 35 ],
+        orange: [ 255, 165, 0 ],
+        orangered: [ 255, 69, 0 ],
+        orchid: [ 218, 112, 214 ],
+        palegoldenrod: [ 238, 232, 170 ],
+        palegreen: [ 152, 251, 152 ],
+        paleturquoise: [ 175, 238, 238 ],
+        palevioletred: [ 219, 112, 147 ],
+        papayawhip: [ 255, 239, 213 ],
+        peachpuff: [ 255, 218, 185 ],
+        peru: [ 205, 133, 63 ],
+        pink: [ 255, 192, 203 ],
+        plum: [ 221, 160, 221 ],
+        powderblue: [ 176, 224, 230 ],
+        purple: [ 128, 0, 128 ],
+        rebeccapurple: [ 102, 51, 153 ],
+        red: [ 255, 0, 0 ],
+        rosybrown: [ 188, 143, 143 ],
+        royalblue: [ 65, 105, 225 ],
+        saddlebrown: [ 139, 69, 19 ],
+        salmon: [ 250, 128, 114 ],
+        sandybrown: [ 244, 164, 96 ],
+        seagreen: [ 46, 139, 87 ],
+        seashell: [ 255, 245, 238 ],
+        sienna: [ 160, 82, 45 ],
+        silver: [ 192, 192, 192 ],
+        skyblue: [ 135, 206, 235 ],
+        slateblue: [ 106, 90, 205 ],
+        slategray: [ 112, 128, 144 ],
+        slategrey: [ 112, 128, 144 ],
+        snow: [ 255, 250, 250 ],
+        springgreen: [ 0, 255, 127 ],
+        steelblue: [ 70, 130, 180 ],
+        tan: [ 210, 180, 140 ],
+        teal: [ 0, 128, 128 ],
+        thistle: [ 216, 191, 216 ],
+        tomato: [ 255, 99, 71 ],
+        turquoise: [ 64, 224, 208 ],
+        violet: [ 238, 130, 238 ],
+        wheat: [ 245, 222, 179 ],
+        white: [ 255, 255, 255 ],
+        whitesmoke: [ 245, 245, 245 ],
+        yellow: [ 255, 255, 0 ],
+        yellowgreen: [ 154, 205, 50 ]
+    }, baseHues = {
+        red: 0,
+        orange: 60,
+        yellow: 120,
+        green: 180,
+        blue: 240,
+        purple: 300
+    };
+    function parse(cstr) {
+        var m, space, parts = [], alpha = 1;
+        if ("string" == typeof cstr) if (colorName[cstr]) parts = colorName[cstr].slice(), 
+        space = "rgb"; else if ("transparent" === cstr) alpha = 0, space = "rgb", parts = [ 0, 0, 0 ]; else if (/^#[A-Fa-f0-9]+$/.test(cstr)) {
+            var base = cstr.slice(1);
+            alpha = 1, (size = base.length) <= 4 ? (parts = [ parseInt(base[0] + base[0], 16), parseInt(base[1] + base[1], 16), parseInt(base[2] + base[2], 16) ], 
+            4 === size && (alpha = parseInt(base[3] + base[3], 16) / 255)) : (parts = [ parseInt(base[0] + base[1], 16), parseInt(base[2] + base[3], 16), parseInt(base[4] + base[5], 16) ], 
+            8 === size && (alpha = parseInt(base[6] + base[7], 16) / 255)), parts[0] || (parts[0] = 0), 
+            parts[1] || (parts[1] = 0), parts[2] || (parts[2] = 0), space = "rgb";
+        } else if (m = /^((?:rgb|hs[lvb]|hwb|cmyk?|xy[zy]|gray|lab|lchu?v?|[ly]uv|lms)a?)\s*\(([^\)]*)\)/.exec(cstr)) {
+            var name = m[1], isRGB = "rgb" === name;
+            space = base = name.replace(/a$/, "");
+            var size = "cmyk" === base ? 4 : "gray" === base ? 1 : 3;
+            parts = m[2].trim().split(/\s*[,\/]\s*|\s+/).map((function(x, i) {
+                if (/%$/.test(x)) return i === size ? parseFloat(x) / 100 : "rgb" === base ? 255 * parseFloat(x) / 100 : parseFloat(x);
+                if ("h" === base[i]) {
+                    if (/deg$/.test(x)) return parseFloat(x);
+                    if (void 0 !== baseHues[x]) return baseHues[x];
+                }
+                return parseFloat(x);
+            })), name === base && parts.push(1), alpha = isRGB || void 0 === parts[size] ? 1 : parts[size], 
+            parts = parts.slice(0, size);
+        } else cstr.length > 10 && /[0-9](?:\s|\/)/.test(cstr) && (parts = cstr.match(/([0-9]+)/g).map((function(value) {
+            return parseFloat(value);
+        })), space = cstr.match(/([a-z])/gi).join("").toLowerCase()); else isNaN(cstr) ? Array.isArray(cstr) || cstr.length ? (parts = [ cstr[0], cstr[1], cstr[2] ], 
+        space = "rgb", alpha = 4 === cstr.length ? cstr[3] : 1) : cstr instanceof Object && (null != cstr.r || null != cstr.red || null != cstr.R ? (space = "rgb", 
+        parts = [ cstr.r || cstr.red || cstr.R || 0, cstr.g || cstr.green || cstr.G || 0, cstr.b || cstr.blue || cstr.B || 0 ]) : (space = "hsl", 
+        parts = [ cstr.h || cstr.hue || cstr.H || 0, cstr.s || cstr.saturation || cstr.S || 0, cstr.l || cstr.lightness || cstr.L || cstr.b || cstr.brightness ]), 
+        alpha = cstr.a || cstr.alpha || cstr.opacity || 1, null != cstr.opacity && (alpha /= 100)) : (space = "rgb", 
+        parts = [ cstr >>> 16, (65280 & cstr) >>> 8, 255 & cstr ]);
+        return {
+            space: space,
+            values: parts,
+            alpha: alpha
+        };
+    }
+    var rgb = {
+        name: "rgb",
+        min: [ 0, 0, 0 ],
+        max: [ 255, 255, 255 ],
+        channel: [ "red", "green", "blue" ],
+        alias: [ "RGB" ]
+    }, hsl = {
+        name: "hsl",
+        min: [ 0, 0, 0 ],
+        max: [ 360, 100, 100 ],
+        channel: [ "hue", "saturation", "lightness" ],
+        alias: [ "HSL" ],
+        rgb: function(hsl) {
+            var t1, t2, t3, rgb, val, h = hsl[0] / 360, s = hsl[1] / 100, l = hsl[2] / 100;
+            if (0 === s) return [ val = 255 * l, val, val ];
+            t1 = 2 * l - (t2 = l < .5 ? l * (1 + s) : l + s - l * s), rgb = [ 0, 0, 0 ];
+            for (var i = 0; i < 3; i++) (t3 = h + 1 / 3 * -(i - 1)) < 0 ? t3++ : t3 > 1 && t3--, 
+            val = 6 * t3 < 1 ? t1 + 6 * (t2 - t1) * t3 : 2 * t3 < 1 ? t2 : 3 * t3 < 2 ? t1 + (t2 - t1) * (2 / 3 - t3) * 6 : t1, 
+            rgb[i] = 255 * val;
+            return rgb;
+        }
+    };
+    function rgba(color) {
+        var values;
+        Array.isArray(color) && color.raw && (color = String.raw(...arguments));
+        var parsed = parse(color);
+        if (!parsed.space) return [];
+        const min = "h" === parsed.space[0] ? hsl.min : rgb.min, max = "h" === parsed.space[0] ? hsl.max : rgb.max;
+        return (values = Array(3))[0] = Math.min(Math.max(parsed.values[0], min[0]), max[0]), 
+        values[1] = Math.min(Math.max(parsed.values[1], min[1]), max[1]), values[2] = Math.min(Math.max(parsed.values[2], min[2]), max[2]), 
+        "h" === parsed.space[0] && (values = hsl.rgb(values)), values.push(Math.min(Math.max(parsed.alpha, 0), 1)), 
+        values;
+    }
+    async function getCSS(css) {
+        const filters = GM_getValue("__FILTER_CONFIG", filterConfigDefault);
+        css = css.split("\n").filter((raw => !!raw && filters.findIndex((rule => new RegExp(rule).test(raw))) > -1)).join("\n");
+        const postcssRes = await postcss_1([ dist(GM_getValue("__PX_TO_VIEWPORT_CONFIG", pxToViewportConfigDefault)), src({}) ]).process(`{${css}}`);
+        css = postcssRes.css.replace(/(^\{)|(\}$)/g, "");
+        const {colors: colors, custom: custom} = GM_getValue("__REPLACE_CONFIG_KEY", {});
+        if (colors) {
+            const res = function replace(content, colors) {
+                const res = content.match(/(rgba?)\(.*?\)|#[a-fA-f\d]{6}|#[a-fA-f\d]{3}/g);
+                let modified = !1;
+                return res?.forEach((i => {
+                    const foundColor = colors.find((c => function isSameRgbaArr(a, b) {
+                        return a.every(((i, index) => i === b[index]));
+                    }(rgba(c.color), rgba(i))));
+                    foundColor && (modified = !0, content = content.replace(new RegExp(`${i}(?![a-fA-f\\d])`), foundColor.new));
+                })), {
+                    content: content,
+                    modified: modified
+                };
+            }(css, colors);
+            css = res.content;
+        }
+        custom && custom.forEach((i => {
+            const regArr = [];
+            Array.isArray(i.reg) ? i.reg.forEach((s => regArr.push(new RegExp(s)))) : regArr.push(new RegExp(i.reg)), 
+            regArr.every((r => r.test(css))) && (regArr.forEach((reg => {
+                css = css.replace(reg, "");
+            })), css += i.new);
+        })), await navigator.clipboard.writeText(css.replace(/^\s*\n/gm, "")), toast({
+            title: "复制成功"
+        });
+    }
+    rgb.hsl = function(rgb) {
+        var h, l, r = rgb[0] / 255, g = rgb[1] / 255, b = rgb[2] / 255, min = Math.min(r, g, b), max = Math.max(r, g, b), delta = max - min;
+        return max === min ? h = 0 : r === max ? h = (g - b) / delta : g === max ? h = 2 + (b - r) / delta : b === max && (h = 4 + (r - g) / delta), 
+        (h = Math.min(60 * h, 360)) < 0 && (h += 360), l = (min + max) / 2, [ h, 100 * (max === min ? 0 : l <= .5 ? delta / (max + min) : delta / (2 - max - min)), 100 * l ];
+    };
     function create_fragment$3(ctx) {
         let button, mounted, dispose;
         return {
@@ -2690,16 +2960,10 @@
         };
     }
     function instance$2($$self) {
-        const copy = debounce((() => {
+        return [ debounce((() => {
             const codeEl = document.querySelector("[name=propertiesPanelContainer]")?.querySelector("p.hljs-comment")?.parentElement?.innerText;
-            codeEl ? async function getCSS(css) {
-                const content = await postcss_1([ postcssPxToViewport(GM_getValue("__PX_TO_VIEWPORT_CONFIG", pxToViewportConfigDefault)), src({}) ]).process(css), filters = GM_getValue("__FILTER_CONFIG", filterConfigDefault), styleArray = content.css.replace(/(^\{)|(\}$)/g, "").split("\n").filter((raw => !!raw && filters.findIndex((rule => new RegExp(rule).test(raw))) > -1));
-                await navigator.clipboard.writeText(styleArray.join("\n")), toast({
-                    title: "复制成功"
-                });
-            }(`{${codeEl}}`) : toast("从网页上获取css失败");
-        }), 500);
-        return [ copy ];
+            codeEl ? getCSS(codeEl) : toast("从网页上获取css失败");
+        }), 500) ];
     }
     styleInject(".fcb-copy-button.svelte-16mfo7u{background:#05bea9;border-radius:4px;color:#fff;cursor:pointer;margin-bottom:10px;outline:none;padding:4px 8px;user-select:none}");
     class CopyButton extends SvelteComponent {
@@ -2778,37 +3042,53 @@
         }
     }
     function create_fragment(ctx) {
-        let div2, div0, h20, t1, textarea0, t2, div1, h21, t4, textarea1, t5, button, mounted, dispose;
+        let div4, div0, h20, t1, input, t2, button0, t4, div1, h21, t6, textarea0, t7, div2, h22, t9, textarea1, t10, div3, h23, t12, textarea2, t13, button1, mounted, dispose;
         return {
             c() {
-                div2 = element("div"), div0 = element("div"), h20 = element("h2"), h20.textContent = "px-to-viewport 配置", 
-                t1 = space(), textarea0 = element("textarea"), t2 = space(), div1 = element("div"), 
-                h21 = element("h2"), h21.textContent = "filter rule 配置", t4 = space(), textarea1 = element("textarea"), 
-                t5 = space(), button = element("button"), button.textContent = "保存", attr(textarea0, "class", "fcb-setting-textarea svelte-1imlprz"), 
-                attr(textarea1, "class", "fcb-setting-textarea svelte-1imlprz"), attr(div2, "class", "fcb-setting");
+                div4 = element("div"), div0 = element("div"), h20 = element("h2"), h20.textContent = "远程加载配置（请配置json文件地址，会覆盖本地配置，插件每次被启动都会更新）", 
+                t1 = space(), input = element("input"), t2 = space(), button0 = element("button"), 
+                button0.textContent = "测试加载", t4 = space(), div1 = element("div"), h21 = element("h2"), 
+                h21.textContent = "px-to-viewport 配置", t6 = space(), textarea0 = element("textarea"), 
+                t7 = space(), div2 = element("div"), h22 = element("h2"), h22.textContent = "Filter Rule 配置", 
+                t9 = space(), textarea1 = element("textarea"), t10 = space(), div3 = element("div"), 
+                h23 = element("h2"), h23.textContent = "Replace Rule 配置", t12 = space(), textarea2 = element("textarea"), 
+                t13 = space(), button1 = element("button"), button1.textContent = "保存", attr(h20, "class", "svelte-tqd2p7"), 
+                attr(input, "class", "config-addr-input svelte-tqd2p7"), attr(button0, "class", "config-button svelte-tqd2p7"), 
+                attr(h21, "class", "svelte-tqd2p7"), attr(textarea0, "class", "fcb-setting-textarea svelte-tqd2p7"), 
+                textarea0.disabled = ctx[3], attr(h22, "class", "svelte-tqd2p7"), attr(textarea1, "class", "fcb-setting-textarea svelte-tqd2p7"), 
+                textarea1.disabled = ctx[3], attr(h23, "class", "svelte-tqd2p7"), attr(textarea2, "class", "fcb-setting-textarea svelte-tqd2p7"), 
+                textarea2.disabled = ctx[3], attr(button1, "class", "save-button svelte-tqd2p7"), 
+                attr(div4, "class", "fcb-setting");
             },
             m(target, anchor) {
-                insert(target, div2, anchor), append(div2, div0), append(div0, h20), append(div0, t1), 
-                append(div0, textarea0), set_input_value(textarea0, ctx[0]), append(div2, t2), append(div2, div1), 
-                append(div1, h21), append(div1, t4), append(div1, textarea1), set_input_value(textarea1, ctx[1]), 
-                append(div2, t5), append(div2, button), mounted || (dispose = [ listen(textarea0, "input", ctx[3]), listen(textarea1, "input", ctx[4]), listen(button, "click", ctx[2]) ], 
+                insert(target, div4, anchor), append(div4, div0), append(div0, h20), append(div0, t1), 
+                append(div0, input), set_input_value(input, ctx[3]), append(div0, t2), append(div0, button0), 
+                append(div4, t4), append(div4, div1), append(div1, h21), append(div1, t6), append(div1, textarea0), 
+                set_input_value(textarea0, ctx[0]), append(div4, t7), append(div4, div2), append(div2, h22), 
+                append(div2, t9), append(div2, textarea1), set_input_value(textarea1, ctx[1]), append(div4, t10), 
+                append(div4, div3), append(div3, h23), append(div3, t12), append(div3, textarea2), 
+                set_input_value(textarea2, ctx[2]), append(div4, t13), append(div4, button1), mounted || (dispose = [ listen(input, "input", ctx[6]), listen(button0, "click", ctx[5]), listen(textarea0, "input", ctx[7]), listen(textarea1, "input", ctx[8]), listen(textarea2, "input", ctx[9]), listen(button1, "click", ctx[4]) ], 
                 mounted = !0);
             },
             p(ctx, [dirty]) {
-                1 & dirty && set_input_value(textarea0, ctx[0]), 2 & dirty && set_input_value(textarea1, ctx[1]);
+                8 & dirty && input.value !== ctx[3] && set_input_value(input, ctx[3]), 8 & dirty && (textarea0.disabled = ctx[3]), 
+                1 & dirty && set_input_value(textarea0, ctx[0]), 8 & dirty && (textarea1.disabled = ctx[3]), 
+                2 & dirty && set_input_value(textarea1, ctx[1]), 8 & dirty && (textarea2.disabled = ctx[3]), 
+                4 & dirty && set_input_value(textarea2, ctx[2]);
             },
             i: noop,
             o: noop,
             d(detaching) {
-                detaching && detach(div2), mounted = !1, run_all(dispose);
+                detaching && detach(div4), mounted = !1, run_all(dispose);
             }
         };
     }
     function instance($$self, $$props, $$invalidate) {
-        let pxToViewportConfig = JSON.stringify(GM_getValue("__PX_TO_VIEWPORT_CONFIG", pxToViewportConfigDefault)), filterConfig = JSON.stringify(GM_getValue("__FILTER_CONFIG", filterConfigDefault));
-        return [ pxToViewportConfig, filterConfig, function save() {
+        let pxToViewportConfig = JSON.stringify(GM_getValue("__PX_TO_VIEWPORT_CONFIG", pxToViewportConfigDefault)), filterConfig = JSON.stringify(GM_getValue("__FILTER_CONFIG", filterConfigDefault)), replaceConfig = JSON.stringify(GM_getValue("__REPLACE_CONFIG_KEY", [])), configUrl = GM_getValue("__CONFIG_URL", "");
+        return [ pxToViewportConfig, filterConfig, replaceConfig, configUrl, function save() {
             try {
                 GM_setValue("__PX_TO_VIEWPORT_CONFIG", JSON.parse(pxToViewportConfig)), GM_setValue("__FILTER_CONFIG", JSON.parse(filterConfig)), 
+                GM_setValue("__REPLACE_CONFIG_KEY", JSON.parse(replaceConfig)), GM_setValue("__CONFIG_URL", configUrl), 
                 toast({
                     title: "保存成功"
                 });
@@ -2817,13 +3097,37 @@
                     title: e.message
                 });
             }
+        }, function confirmRemoteUrl() {
+            !function loadConfig() {
+                configUrl && GM_xmlhttpRequest({
+                    url: configUrl,
+                    method: "get",
+                    onload(xhr) {
+                        if (200 != +xhr.status) return void toast({
+                            title: "配置加载失败"
+                        });
+                        const {pxToViewport: pxToViewport, filter: filter, replace: replace} = JSON.parse(xhr.response);
+                        $$invalidate(0, pxToViewportConfig = JSON.stringify(pxToViewport)), $$invalidate(1, filterConfig = JSON.stringify(filter)), 
+                        $$invalidate(2, replaceConfig = JSON.stringify(replace));
+                    },
+                    onerror(e) {
+                        toast({
+                            title: "配置加载失败" + e.message
+                        });
+                    }
+                });
+            }();
+        }, function input_input_handler() {
+            configUrl = this.value, $$invalidate(3, configUrl);
         }, function textarea0_input_handler() {
             pxToViewportConfig = this.value, $$invalidate(0, pxToViewportConfig);
         }, function textarea1_input_handler() {
             filterConfig = this.value, $$invalidate(1, filterConfig);
+        }, function textarea2_input_handler() {
+            replaceConfig = this.value, $$invalidate(2, replaceConfig);
         } ];
     }
-    styleInject(".fcb-setting-textarea.svelte-1imlprz{background:#f4f4f4;height:200px;width:100%}");
+    styleInject(":root{color:#333}h2.svelte-tqd2p7{margin-top:20px}.config-addr-input.svelte-tqd2p7{background:#f8f8f8;border-radius:6px;display:block;height:30px;margin-top:10px;outline:none;padding:8px 6px;width:100%}.config-button.svelte-tqd2p7{background:rgba(0,0,0,.16)}.config-button.svelte-tqd2p7,.save-button.svelte-tqd2p7{border-radius:4px;color:#fff;margin-top:10px;outline:none;padding:4px 8px}.save-button.svelte-tqd2p7{background:#05bea9}.fcb-setting-textarea.svelte-tqd2p7{background:#f8f8f8;border-radius:6px;height:200px;margin-top:10px;outline:none;padding:8px 6px;width:100%}");
     class SettingPanel extends SvelteComponent {
         constructor(options) {
             super(), init(this, options, instance, create_fragment, safe_not_equal, {});
@@ -2839,7 +3143,26 @@
         }
     }), 500);
     !function main() {
-        !function checkFigma() {
+        !function loadConfig() {
+            const configUrl = GM_getValue("__CONFIG_URL", "");
+            configUrl && GM_xmlhttpRequest({
+                url: configUrl,
+                method: "get",
+                onload(xhr) {
+                    if (200 != +xhr.status) return void toast({
+                        title: "配置加载失败"
+                    });
+                    const {pxToViewport: pxToViewport, filter: filter, replace: replace} = JSON.parse(xhr.response);
+                    GM_setValue("__PX_TO_VIEWPORT_CONFIG", pxToViewport), GM_setValue("__FILTER_CONFIG", filter), 
+                    GM_setValue("__REPLACE_CONFIG_KEY", replace);
+                },
+                onerror(e) {
+                    toast({
+                        title: "配置加载失败" + e.message
+                    });
+                }
+            });
+        }(), function checkFigma() {
             const oldLog = unsafeWindow.console.log;
             unsafeWindow.console.log = function(...args) {
                 /\[Fullscreen\] loadtime/gi.test(args[0]) && setTimeout((() => {
@@ -2851,12 +3174,12 @@
                 }), 1e3), oldLog(...args);
             };
         }(), function checkSetting() {
-            /^https:\/\/lbb00.github.io\/figma-css-better\/setting/.test(window.location.href) && (window.onload = () => {
+            if (/^https:\/\/lbb00.github.io\/figma-css-better\/setting/.test(window.location.href)) {
                 const mainEl = document.querySelector("main");
                 new SettingPanel({
                     target: mainEl
                 });
-            });
+            }
         }();
     }();
 }();

@@ -6,43 +6,44 @@ import svelte from 'rollup-plugin-svelte'
 import postcss from 'rollup-plugin-postcss'
 import replace from 'rollup-plugin-replace'
 import json from '@rollup/plugin-json'
+import { version } from './package.json'
 
 module.exports = {
   input: 'src/main.js',
   output: {
     file: 'figma-css-better.user.js',
-    format: 'iife'
+    format: 'iife',
   },
   plugins: [
     svelte(),
     postcss({
       extract: false,
-      minimize: true
+      minimize: true,
     }),
     json(),
     nodeResolve({
-      browser: true
+      browser: true,
     }),
     commonjs(),
     terser({
       ecma: true,
       warnings: false,
       format: {
-        beautify: true
+        beautify: true,
       },
       mangle: false,
       keep_classnames: true,
-      keep_fnames: true
+      keep_fnames: true,
     }),
     replace({
       'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
-      'process.env.LANG': JSON.stringify('cn')
+      'process.env.LANG': JSON.stringify('cn'),
     }),
     banner2(() => {
       const items = [
         ['name', 'Figma CSS Better'],
         ['namespace', 'https://github.com/lbb00'],
-        ['version', '1.2.4'],
+        ['version', version],
         ['description', 'Figma CSS 转为微信小程序样式,rpx,figma,微信,小程序'],
         ['encoding', 'utf-8'],
         ['author', 'lbb00'],
@@ -50,11 +51,11 @@ module.exports = {
         ['supportURL', 'https://github.com/lbb00/figma-css-better/issues'],
         [
           'updateURL',
-          'https://github.com/lbb00/figma-css-better/raw/master/figma-css-better.user.js'
+          'https://github.com/lbb00/figma-css-better/raw/master/figma-css-better.user.js',
         ],
         [
           'downloadURL',
-          'https://github.com/lbb00/figma-css-better/raw/master/figma-css-better.user.js'
+          'https://github.com/lbb00/figma-css-better/raw/master/figma-css-better.user.js',
         ],
         ['match', '*://www.figma.com/file/*'],
         ['match', 'https://lbb00.github.io/figma-css-better/setting'],
@@ -62,12 +63,13 @@ module.exports = {
         ['icon', 'https://www.google.com/s2/favicons?domain=figma.com'],
         [
           'license',
-          'MIT; https://github.com/lbb00/figma-css-better/blob/main/LICENSE'
+          'MIT; https://github.com/lbb00/figma-css-better/blob/main/LICENSE',
         ],
         ['grant', 'unsafeWindow'],
         ['grant', 'window.console'],
         ['grant', 'GM_getValue'],
-        ['grant', 'GM_setValue']
+        ['grant', 'GM_setValue'],
+        ['grant', 'GM_xmlhttpRequest'],
       ]
       const maxLabelLen = items.reduce(
         (max, [i]) => (max > i.length ? max : i.length),
@@ -93,6 +95,6 @@ module.exports = {
         }, '') +
         '// ==/UserScript==\n'
       )
-    })
-  ]
+    }),
+  ],
 }
