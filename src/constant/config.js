@@ -1,6 +1,6 @@
 export const INNER_CONFIG = {
   id: 'inner',
-  name: '内置配置',
+  name: '内置配置(小程序)',
   url: '',
   options: {
     pxToViewport: {

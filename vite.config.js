@@ -34,6 +34,7 @@ function genBannerStr() {
     ['grant', 'unsafeWindow'],
     ['grant', 'GM_getValue'],
     ['grant', 'GM_setValue'],
+    ['grant', 'GM_deleteValue'],
     ['grant', 'GM_xmlhttpRequest'],
   ]
   const maxLabelLen = items.reduce(

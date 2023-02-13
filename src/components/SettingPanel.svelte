@@ -70,23 +70,22 @@
   }
 
   function cacheLocalConfig() {
-    GM_setValue(
-      'CONFIG_LIST',
-      configList
-        .filter((i) => i.id !== 'inner')
-        .map((i) => {
-          if (i.id === currentConfigId) {
-            if (configData.url) {
-              return {
-                ...configData,
-                options: {},
-              }
+    const newList = configList
+      .filter((i) => i.id !== 'inner')
+      .map((i) => {
+        if (i.id === currentConfigId) {
+          if (configData.url) {
+            return {
+              ...configData,
+              options: {},
             }
-            return configData
           }
-          return i
-        })
-    )
+          return configData
+        }
+        return i
+      })
+    GM_setValue('CONFIG_LIST', newList)
+    configList = [INNER_CONFIG, ...newList]
   }
 
   function saveConfig() {

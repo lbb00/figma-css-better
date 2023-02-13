@@ -2,6 +2,22 @@ import { writable } from 'svelte/store'
 import { loadConfig } from '../utils/loadConfig.js'
 import { INNER_CONFIG } from '../constant/config.js'
 
+// 兼容旧的逻辑
+console.log('old config url', GM_getValue('__CONFIG_URL'))
+if (GM_getValue('__CONFIG_URL')) {
+  const configList = GM_getValue('CONFIG_LIST', [])
+  if (configList.every((i) => i.id !== 'older')) {
+    configList.push({
+      id: 'older',
+      name: '回响小程序',
+      url: GM_getValue('__CONFIG_URL'),
+    })
+    GM_setValue('CONFIG_LIST', configList)
+    GM_setValue('USED_CONFIG_ID', 'older')
+  }
+  GM_deleteValue('__CONFIG_URL')
+}
+
 export const appStore = writable({
   usedConfigId: GM_getValue('USED_CONFIG_ID', 'inner'),
   currentConfigData: {},

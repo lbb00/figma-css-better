@@ -9,7 +9,7 @@
 
 <textarea
   class="fcb-setting-textarea"
-  value={JSON.stringify(value, null, 2)}
+  value={JSON.stringify(value || {}, null, 2)}
   on:input={onInput}
   {disabled}
 />

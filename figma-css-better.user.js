@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Figma CSS Better
 // @namespace   https://github.com/lbb00
-// @version     1.2.5
+// @version     2.0.0
 // @description Figma CSS 转为微信小程序样式,rpx,figma,微信,小程序
 // @author      lbb00
 // @homepage    https://github.com/lbb00/figma-css-better
@@ -16,6 +16,7 @@
 // @grant       unsafeWindow
 // @grant       GM_getValue
 // @grant       GM_setValue
+// @grant       GM_deleteValue
 // @grant       GM_xmlhttpRequest
 // ==/UserScript==
 
@@ -6023,7 +6024,7 @@ function loadConfig$1(url) {
 
 const INNER_CONFIG = {
   id: 'inner',
-  name: '内置配置',
+  name: '内置配置(小程序)',
   url: '',
   options: {
     pxToViewport: {
@@ -6075,6 +6076,22 @@ const INIT_CONFIG_OPTIONS = {
   ],
   replace: [],
 };
+
+// 兼容旧的逻辑
+console.log('old config url', GM_getValue('__CONFIG_URL'));
+if (GM_getValue('__CONFIG_URL')) {
+  const configList = GM_getValue('CONFIG_LIST', []);
+  if (configList.every((i) => i.id !== 'older')) {
+    configList.push({
+      id: 'older',
+      name: '回响小程序',
+      url: GM_getValue('__CONFIG_URL'),
+    });
+    GM_setValue('CONFIG_LIST', configList);
+    GM_setValue('USED_CONFIG_ID', 'older');
+  }
+  GM_deleteValue('__CONFIG_URL');
+}
 
 const appStore = writable({
   usedConfigId: GM_getValue('USED_CONFIG_ID', 'inner'),
@@ -15854,7 +15871,7 @@ function create_fragment$1(ctx) {
 		c() {
 			textarea = element("textarea");
 			attr(textarea, "class", "fcb-setting-textarea svelte-1v4iww6");
-			textarea.value = textarea_value_value = JSON.stringify(/*value*/ ctx[0], null, 2);
+			textarea.value = textarea_value_value = JSON.stringify(/*value*/ ctx[0] || {}, null, 2);
 			textarea.disabled = /*disabled*/ ctx[1];
 		},
 		m(target, anchor) {
@@ -15866,7 +15883,7 @@ function create_fragment$1(ctx) {
 			}
 		},
 		p(ctx, [dirty]) {
-			if (dirty & /*value*/ 1 && textarea_value_value !== (textarea_value_value = JSON.stringify(/*value*/ ctx[0], null, 2))) {
+			if (dirty & /*value*/ 1 && textarea_value_value !== (textarea_value_value = JSON.stringify(/*value*/ ctx[0] || {}, null, 2))) {
 				textarea.value = textarea_value_value;
 			}
 
@@ -15913,7 +15930,7 @@ function add_css(target) {
 	append_styles(target, "svelte-1h6610i", ":root{color:#333}h2.svelte-1h6610i{margin-top:20px}");
 }
 
-// (107:4) <Button on:click={addConfig}>
+// (106:4) <Button on:click={addConfig}>
 function create_default_slot_3(ctx) {
 	let t;
 
@@ -15930,7 +15947,7 @@ function create_default_slot_3(ctx) {
 	};
 }
 
-// (109:2) {#if currentConfig}
+// (108:2) {#if currentConfig}
 function create_if_block(ctx) {
 	let div;
 	let h2;
@@ -16031,7 +16048,7 @@ function create_if_block(ctx) {
 	};
 }
 
-// (112:6) {#if configData}
+// (111:6) {#if configData}
 function create_if_block_2(ctx) {
 	let textinput0;
 	let updating_value;
@@ -16194,7 +16211,7 @@ function create_if_block_2(ctx) {
 	};
 }
 
-// (130:4) {#if !isInnerConfig}
+// (129:4) {#if !isInnerConfig}
 function create_if_block_1(ctx) {
 	let group;
 	let current;
@@ -16239,7 +16256,7 @@ function create_if_block_1(ctx) {
 	};
 }
 
-// (132:8) <Button on:click={deleteConfig}>
+// (131:8) <Button on:click={deleteConfig}>
 function create_default_slot_2(ctx) {
 	let t;
 
@@ -16256,7 +16273,7 @@ function create_default_slot_2(ctx) {
 	};
 }
 
-// (133:8) <Button on:click={saveConfig}>
+// (132:8) <Button on:click={saveConfig}>
 function create_default_slot_1(ctx) {
 	let t;
 
@@ -16273,7 +16290,7 @@ function create_default_slot_1(ctx) {
 	};
 }
 
-// (131:6) <Group position="right">
+// (130:6) <Group position="right">
 function create_default_slot(ctx) {
 	let button0;
 	let t;
@@ -16512,7 +16529,7 @@ function instance($$self, $$props, $$invalidate) {
 	}
 
 	function cacheLocalConfig() {
-		GM_setValue('CONFIG_LIST', configList.filter(i => i.id !== 'inner').map(i => {
+		const newList = configList.filter(i => i.id !== 'inner').map(i => {
 			if (i.id === currentConfigId) {
 				if (configData.url) {
 					return { ...configData, options: {} };
@@ -16522,7 +16539,10 @@ function instance($$self, $$props, $$invalidate) {
 			}
 
 			return i;
-		}));
+		});
+
+		GM_setValue('CONFIG_LIST', newList);
+		$$invalidate(8, configList = [INNER_CONFIG, ...newList]);
 	}
 
 	function saveConfig() {
