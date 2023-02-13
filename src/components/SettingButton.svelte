@@ -4,7 +4,7 @@
   }
 </script>
 
-<button on:click={goToSetting}>设置</button>
+<button on:click={goToSetting}>⚙设置</button>
 
 <style>
 </style>

@@ -11,7 +11,10 @@ export default function replace(content, colors) {
     const foundColor = colors.find((c) => isSameRgbaArr(rgba(c.color), rgba(i)))
     if (foundColor) {
       modified = true
-      content = content.replace(new RegExp(`${i}(?![a-fA-f\\d])`), foundColor.new)
+      content = content.replace(
+        new RegExp(`${i}(?![a-fA-f\\d])`),
+        foundColor.new
+      )
     }
   })
   return {

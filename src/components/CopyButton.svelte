@@ -1,21 +1,21 @@
 <script>
   import { debounce } from 'lodash-es'
-  import { getCSS } from '../../utils/css'
-  import { toast } from '../Toast/index'
+  import { getCSS } from '../utils/css'
+  import { toast } from './Toast/index'
   const copy = debounce(() => {
-    const codeEl = document
+    const codeText = document
       .querySelector('[name=propertiesPanelContainer]')
       ?.querySelector('p.hljs-comment')?.parentElement?.innerText
-    if (!codeEl) {
+    if (!codeText) {
       toast('从网页上获取css失败')
       return
     }
-    getCSS(codeEl)
+    getCSS(codeText)
   }, 500)
 </script>
 
 <button id="fcb-copy-button" class="fcb-copy-button" on:click={copy}>
-  🔥复制小程序样式
+  🔥 复制样式
 </button>
 
 <style>
