@@ -1,6 +1,6 @@
 import { debounce } from 'lodash-es'
-import Actions from './components/Actions/Actions.svelte'
-import SettingPanel from './components/Setting/SettingPanel.svelte'
+import Actions from './components/Actions.svelte'
+import SettingPanel from './components/SettingPanel.svelte'
 import { toast } from './components/Toast/index'
 import {
   PX_TO_VIEWPORT_CONFIG_KEY,

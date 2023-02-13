@@ -1,20 +1,17 @@
-import { toast } from '../components/Toast/index.js'
 import postcss from 'postcss'
 import postcssPxToViewport from 'postcss-px2vp'
 import postcssDiscardComments from 'postcss-discard-comments'
-import {
-  PX_TO_VIEWPORT_CONFIG_KEY,
-  FILTER_CONFIG_KEY,
-  REPLACE_CONFIG_KEY,
-} from '../constant/storage'
-import {
-  pxToViewportConfigDefault,
-  filterConfigDefault,
-} from '../constant/config'
+
+import { appStore } from '../store/app.js'
+import { get } from 'svelte/store'
 import replaceColor from './replaceColor'
+import { toast } from '../components/Toast/index.js'
 
 export async function getCSS(css) {
-  const filters = GM_getValue(FILTER_CONFIG_KEY, filterConfigDefault)
+  const {
+    currentConfigData: { options },
+  } = get(appStore)
+  const filters = options.filter || []
   css = css
     .split('\n')
     .filter((raw) => {
@@ -24,16 +21,16 @@ export async function getCSS(css) {
     })
     .join('\n')
 
-  const postcssRes = await postcss([
-    postcssPxToViewport(
-      GM_getValue(PX_TO_VIEWPORT_CONFIG_KEY, pxToViewportConfigDefault)
-    ),
-    postcssDiscardComments({}),
-  ]).process(`{${css}}`)
+  const postcssPlugins = []
+  if (options.pxToViewport) {
+    postcssPlugins.push(postcssPxToViewport(options.pxToViewport))
+  }
+  postcssPlugins.push(postcssDiscardComments({}))
+  const postcssRes = await postcss(postcssPlugins).process(`{${css}}`)
 
   css = postcssRes.css.replace(/(^\{)|(\}$)/g, '')
 
-  const { colors, custom } = GM_getValue(REPLACE_CONFIG_KEY, {})
+  const { colors, custom } = options.replace || []
 
   if (colors) {
     const res = replaceColor(css, colors)

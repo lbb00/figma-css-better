@@ -19,6 +19,7 @@ module.exports = {
     GM_getValue: true,
     GM_setValue: true,
     GM_xmlhttpRequest: true,
+    GM_deleteValue: true,
     unsafeWindow: true,
   },
 }
