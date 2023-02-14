@@ -5,3 +5,7 @@ node_modules/
 dist
 .cache
 .DS_Store
+stats.html
+
+*.dev.user.js
+*.local.user.js

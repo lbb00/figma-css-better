@@ -128,8 +128,8 @@
     </div>
     {#if !isInnerConfig}
       <Group position="right">
-        <Button on:click={deleteConfig}>删除配置</Button>
-        <Button on:click={saveConfig}>保存</Button>
+        <Button on:click={deleteConfig} color="red">删除配置</Button>
+        <Button on:click={saveConfig} color="green">保存</Button>
       </Group>
     {/if}
   {/if}
