@@ -30,7 +30,7 @@ export async function getCSS(css) {
 
   css = postcssRes.css.replace(/(^\{)|(\}$)/g, '')
 
-  const { colors, custom } = options.replace || []
+  const { colors, custom } = options.replace || {}
 
   if (colors) {
     const res = replaceColor(css, colors)

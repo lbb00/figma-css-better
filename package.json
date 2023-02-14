@@ -1,9 +1,9 @@
 {
-  "version": "2.0.0",
+  "version": "2.0.1",
   "scripts": {
     "prebuild": "eslint --ext .js,.svelte --fix",
     "build": "vite build",
-    "build-r": "rollup -c"
+    "dev": "vite build -w -m development & vite preview"
   },
   "type": "module",
   "devDependencies": {
@@ -17,7 +17,6 @@
     "eslint-plugin-svelte3": "^3.4.1",
     "prettier": "^2.7.1",
     "svelte": "^3.55.1",
-    "terser": "^5.16.3",
     "vite": "^4.1.1",
     "vite-plugin-banner": "^0.7.0"
   },
@@ -31,6 +30,7 @@
     "postcss": "^8.4.16",
     "postcss-discard-comments": "^5.1.2",
     "postcss-px2vp": "^1.1.4",
+    "rollup-plugin-visualizer": "^5.9.0",
     "use-singleton": "^0.3.0"
   }
 }

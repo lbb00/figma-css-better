@@ -3,10 +3,11 @@ import { defineConfig } from 'vite'
 import fs from 'node:fs'
 import { svelte } from '@sveltejs/vite-plugin-svelte'
 import banner from 'vite-plugin-banner'
+import { visualizer } from 'rollup-plugin-visualizer'
 
 const version = JSON.parse(fs.readFileSync('./package.json', 'utf-8')).version
 
-function genBannerStr() {
+function genBannerStr(customItems = []) {
   const items = [
     ['name', 'Figma CSS Better'],
     ['namespace', 'https://github.com/lbb00'],
@@ -36,6 +37,7 @@ function genBannerStr() {
     ['grant', 'GM_setValue'],
     ['grant', 'GM_deleteValue'],
     ['grant', 'GM_xmlhttpRequest'],
+    ...customItems,
   ]
   const maxLabelLen = items.reduce(
     (max, [i]) => (max > i.length ? max : i.length),
@@ -61,31 +63,84 @@ function genBannerStr() {
   )
 }
 
-export default defineConfig({
-  root: '.',
-  mode: 'production',
-  build: {
-    target: 'esnext',
-    outDir: './',
-    minify: false,
-    lib: {
-      entry: resolve(__dirname, 'src/main.js'),
-      formats: ['es'],
-      fileName: 'figma-css-better.user',
+export default defineConfig(({ mode }) => {
+  const isDev = mode === 'development'
+  const previewPort = 8087
+  if (isDev) {
+    const LOCAL_URL = `http://127.0.0.1:${previewPort}/figma-css-better.local.user.js`
+    // https://github.com/Tampermonkey/tampermonkey/issues/723
+    fs.writeFileSync(
+      './figma-css-better.dev.user.js',
+      `${genBannerStr()}
+      (async function () {
+        let isInit = false
+        function checkReload() {
+          GM.xmlHttpRequest({
+            url: '${LOCAL_URL}',
+            onload: async (response) => {
+              const text = response.responseText
+              const storageData = await GM.getValue('DEV_CachedScriptKey', '')
+              if (text.length !== storageData.length || text !== storageData) {
+                console.log('reload!')
+                await GM.setValue('DEV_CachedScriptKey', text)
+                window.location.reload()
+              } else {
+                if(!isInit) {
+                  eval(text)
+                  isInit = true
+                }
+                setTimeout(checkReload, 1000)
+              }
+            },
+            onerror: () => {
+              setTimeout(checkReload, 1000)
+            },
+          })
+        }
+        checkReload()
+      })()
+      `
+    )
+  }
+  return {
+    root: '.',
+    esbuild: {
+      minifyIdentifiers: false,
+      minifyWhitespace: false,
     },
-  },
-  define: {
-    'process.env.NODE_ENV': JSON.stringify('production'),
-    'process.env.LANG': JSON.stringify('cn'),
-  },
-  plugins: [
-    svelte({
-      emitCss: false,
-    }),
-    banner({
+    build: {
+      target: 'esnext',
       outDir: './',
-      verify: false,
-      content: genBannerStr(),
-    }),
-  ],
+      minify: !isDev,
+      lib: {
+        name: 'FigmaCssBetter',
+        entry: resolve(__dirname, 'src/main.js'),
+        formats: ['iife'],
+        fileName: () => {
+          return isDev
+            ? 'figma-css-better.local.user.js'
+            : 'figma-css-better.user.js'
+        },
+      },
+    },
+    preview: {
+      port: previewPort,
+    },
+    define: {
+      'process.env.NODE_ENV': JSON.stringify(mode),
+      'process.env.LANG': JSON.stringify('cn'),
+    },
+    plugins: [
+      visualizer(),
+      svelte({
+        emitCss: false,
+      }),
+      !isDev &&
+        banner({
+          outDir: './',
+          verify: false,
+          content: genBannerStr(),
+        }),
+    ],
+  }
 })
