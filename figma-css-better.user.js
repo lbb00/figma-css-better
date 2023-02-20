@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Figma CSS Better
 // @namespace   https://github.com/lbb00
-// @version     2.0.0
+// @version     2.1.0
 // @description Figma CSS 转为微信小程序样式,rpx,figma,微信,小程序
 // @author      lbb00
 // @homepage    https://github.com/lbb00/figma-css-better
@@ -3137,7 +3137,9 @@ https://www.w3ctech.com/topic/2226`
         "background-image",
         "box-shadow"
       ],
-      replace: []
+      replace: [],
+      textWithoutBoxSize: !0,
+      autoHeight: !0
     }
   }, INIT_CONFIG_OPTIONS = {
     pxToViewport: null,
@@ -3449,15 +3451,27 @@ https://www.w3ctech.com/topic/2226`
     } = get_store_value(appStore), filters = options.filter || [];
     css2 = css2.split(`
 `).filter((raw) => !!raw && filters.findIndex((rule2) => new RegExp(rule2).test(raw)) > -1).join(`
-`);
+`), /font-size/.test(css2) && options.textWithoutBoxSize && (css2 = css2.split(`
+`).filter((raw) => !/^(width|height)/.test(raw)).join(`
+`));
     const postcssPlugins = [];
     options.pxToViewport && postcssPlugins.push(dist(options.pxToViewport)), postcssPlugins.push(src({})), css2 = (await postcss_1(postcssPlugins).process(`{${css2}}`)).css.replace(/(^\{)|(\}$)/g, "");
-    const { colors: colors2, custom } = options.replace || {};
-    colors2 && (css2 = replace(css2, colors2).content), custom && custom.forEach((i2) => {
-      const regArr = [];
-      Array.isArray(i2.reg) ? i2.reg.forEach((s2) => regArr.push(new RegExp(s2))) : regArr.push(new RegExp(i2.reg)), regArr.every((r2) => r2.test(css2)) && (regArr.forEach((reg) => {
-        css2 = css2.replace(reg, "");
-      }), css2 = css2 + i2.new);
+    const { colors: colors2, custom = [] } = options.replace || {};
+    colors2 && (css2 = replace(css2, colors2).content), options.autoHeight && custom.push({
+      reg: "(^|\\n)height:\\s*(.*);",
+      new: `
+/* height: $2; */`
+    }), custom.forEach((i2) => {
+      if (typeof i2.reg == "string") {
+        css2 = css2.replace(new RegExp(i2.reg), i2.new);
+        return;
+      }
+      if (Array.isArray(i2.reg)) {
+        const regArr = [];
+        i2.reg.forEach((s2) => regArr.push(new RegExp(s2))), regArr.every((r2) => r2.test(css2)) && (regArr.forEach((reg) => {
+          css2 = css2.replace(reg, "");
+        }), css2 = css2 + i2.new);
+      }
     }), await navigator.clipboard.writeText(css2.replace(/^\s*\n/gm, "")), toast({
       title: "复制成功"
     });
