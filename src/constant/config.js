@@ -30,6 +30,8 @@ export const INNER_CONFIG = {
       'box-shadow',
     ],
     replace: [],
+    textWithoutBoxSize: true,
+    autoHeight: true,
   },
 }
 

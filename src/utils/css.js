@@ -12,6 +12,7 @@ export async function getCSS(css) {
     currentConfigData: { options },
   } = get(appStore)
   const filters = options.filter || []
+
   css = css
     .split('\n')
     .filter((raw) => {
@@ -20,7 +21,12 @@ export async function getCSS(css) {
       )
     })
     .join('\n')
-
+  if (/font-size/.test(css) && options.textWithoutBoxSize) {
+    css = css
+      .split('\n')
+      .filter((raw) => !/^(width|height)/.test(raw))
+      .join('\n')
+  }
   const postcssPlugins = []
   if (options.pxToViewport) {
     postcssPlugins.push(postcssPxToViewport(options.pxToViewport))
@@ -30,28 +36,37 @@ export async function getCSS(css) {
 
   css = postcssRes.css.replace(/(^\{)|(\}$)/g, '')
 
-  const { colors, custom } = options.replace || {}
+  const { colors, custom = [] } = options.replace || {}
 
   if (colors) {
     const res = replaceColor(css, colors)
     css = res.content
   }
 
-  if (custom) {
-    custom.forEach((i) => {
-      const regArr = []
-      Array.isArray(i.reg)
-        ? i.reg.forEach((s) => regArr.push(new RegExp(s)))
-        : regArr.push(new RegExp(i.reg))
+  if (options.autoHeight) {
+    custom.push({
+      reg: '(^|\\n)height:\\s*(.*);',
+      new: '\n/* height: $2; */',
+    })
+  }
 
+  custom.forEach((i) => {
+    if (typeof i.reg === 'string') {
+      css = css.replace(new RegExp(i.reg), i.new)
+      return
+    }
+    if (Array.isArray(i.reg)) {
+      const regArr = []
+
+      i.reg.forEach((s) => regArr.push(new RegExp(s)))
       if (regArr.every((r) => r.test(css))) {
         regArr.forEach((reg) => {
           css = css.replace(reg, '')
         })
         css = css + i.new
       }
-    })
-  }
+    }
+  })
   await navigator.clipboard.writeText(css.replace(/^\s*\n/gm, ''))
   toast({
     title: '复制成功',
