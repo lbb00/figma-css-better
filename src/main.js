@@ -8,13 +8,14 @@ import {
   REPLACE_CONFIG_KEY,
   CONFIG_URL,
 } from './constant/storage'
+import { FIGMA_MENU_QUERY, FIGMA_CSS_CODE_QUERY } from './constant/figma'
 
 const installFigmaPlugin = debounce(function (el) {
   const btnEl = el.querySelector('#fcb-copy-button')
-  const codeEl = el.querySelector('p.hljs-comment')
+  const codeEl = el.querySelector(FIGMA_CSS_CODE_QUERY)
   if (!btnEl && codeEl) {
     const targetEl = document.createElement('div')
-    codeEl.parentElement.parentElement.prepend(targetEl)
+    codeEl.parentElement.prepend(targetEl)
     // eslint-disable-next-line no-new
     new Actions({
       target: targetEl,
@@ -27,7 +28,7 @@ function checkFigma() {
   unsafeWindow.console.log = function (...args) {
     if (/\[Fullscreen\] loadtime/gi.test(args[0])) {
       setTimeout(() => {
-        const el = document.querySelector('[name=propertiesPanelContainer]')
+        const el = document.querySelector(FIGMA_MENU_QUERY)
         if (el) {
           installFigmaPlugin(el)
           el.addEventListener(

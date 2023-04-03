@@ -2,10 +2,9 @@
   import { debounce } from 'lodash-es'
   import { getCSS } from '../utils/css'
   import { toast } from './Toast/index'
+  import { FIGMA_CSS_CODE_QUERY } from '../constant/figma'
   const copy = debounce(() => {
-    const codeText = document
-      .querySelector('[name=propertiesPanelContainer]')
-      ?.querySelector('p.hljs-comment')?.parentElement?.innerText
+    const codeText = document.querySelector(FIGMA_CSS_CODE_QUERY)?.innerText
     if (!codeText) {
       toast('从网页上获取css失败')
       return
