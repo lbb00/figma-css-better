@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Figma CSS Better
 // @namespace   https://github.com/lbb00
-// @version     2.1.0
+// @version     2.2.0
 // @description Figma CSS 转为微信小程序样式,rpx,figma,微信,小程序
 // @author      lbb00
 // @homepage    https://github.com/lbb00/figma-css-better
@@ -3476,6 +3476,7 @@ https://www.w3ctech.com/topic/2226`
       title: "复制成功"
     });
   }
+  const FIGMA_MENU_QUERY = "[name=propertiesPanelContainer]", FIGMA_CSS_CODE_QUERY = 'pre[data-lang="css"]';
   function add_css$4(target) {
     append_styles(target, "svelte-16mfo7u", ".fcb-copy-button.svelte-16mfo7u{padding:4px 8px;border-radius:4px;background:#05bea9;outline:none;color:#fff;cursor:pointer;margin-bottom:10px;user-select:none}");
   }
@@ -3504,7 +3505,7 @@ https://www.w3ctech.com/topic/2226`
   function instance$l($$self) {
     return [debounce(
       () => {
-        const codeText = document.querySelector("[name=propertiesPanelContainer]")?.querySelector("p.hljs-comment")?.parentElement?.innerText;
+        const codeText = document.querySelector(FIGMA_CSS_CODE_QUERY)?.innerText;
         if (!codeText) {
           toast("从网页上获取css失败");
           return;
@@ -12038,10 +12039,10 @@ https://www.w3ctech.com/topic/2226`
     }
   }
   const PX_TO_VIEWPORT_CONFIG_KEY = "__PX_TO_VIEWPORT_CONFIG", FILTER_CONFIG_KEY = "__FILTER_CONFIG", REPLACE_CONFIG_KEY = "__REPLACE_CONFIG_KEY", CONFIG_URL = "__CONFIG_URL", installFigmaPlugin = debounce(function(el) {
-    const btnEl = el.querySelector("#fcb-copy-button"), codeEl = el.querySelector("p.hljs-comment");
+    const btnEl = el.querySelector("#fcb-copy-button"), codeEl = el.querySelector(FIGMA_CSS_CODE_QUERY);
     if (!btnEl && codeEl) {
       const targetEl = document.createElement("div");
-      codeEl.parentElement.parentElement.prepend(targetEl), new Actions({
+      codeEl.parentElement.prepend(targetEl), new Actions({
         target: targetEl
       });
     }
@@ -12050,7 +12051,7 @@ https://www.w3ctech.com/topic/2226`
     const oldLog = unsafeWindow.console.log;
     unsafeWindow.console.log = function(...args) {
       /\[Fullscreen\] loadtime/gi.test(args[0]) && setTimeout(() => {
-        const el = document.querySelector("[name=propertiesPanelContainer]");
+        const el = document.querySelector(FIGMA_MENU_QUERY);
         el ? (installFigmaPlugin(el), el.addEventListener(
           "DOMSubtreeModified",
           installFigmaPlugin.bind(null, el),
