@@ -2,7 +2,12 @@
   import { nanoid } from 'nanoid'
   import { NativeSelect, Button, TextInput, Group } from '@svelteuidev/core'
   import JsonEditor from './JSONEditor.svelte'
-  import { INNER_CONFIG, INIT_CONFIG_OPTIONS } from '../constant/config'
+  import {
+    INIT_CONFIG_OPTIONS,
+    INNER_CONFIG,
+    INNER_CONFIG_TAILWIND,
+    innerConfigIds,
+  } from '../constant/config'
   import { toast } from './Toast/index'
   import { appStore } from '../store/app'
   import { loadConfig } from '../utils/loadConfig'
@@ -11,7 +16,11 @@
    * config 结构
    * {url,name,options}
    */
-  let configList = [INNER_CONFIG, ...GM_getValue('CONFIG_LIST', [])]
+  let configList = [
+    INNER_CONFIG,
+    INNER_CONFIG_TAILWIND,
+    ...GM_getValue('CONFIG_LIST', []),
+  ]
   $: configSelectData = configList.map((config) => {
     return {
       label: config.name,
@@ -47,7 +56,7 @@
     configData.options = options
   }
 
-  $: isInnerConfig = currentConfigId === 'inner'
+  $: isInnerConfig = innerConfigIds.includes(currentConfigId)
 
   function deleteConfig() {
     configList = configList.filter((config) => config.id !== currentConfigId)
@@ -71,7 +80,7 @@
 
   function cacheLocalConfig() {
     const newList = configList
-      .filter((i) => i.id !== 'inner')
+      .filter((i) => !innerConfigIds.includes(i.id))
       .map((i) => {
         if (i.id === currentConfigId) {
           if (configData.url) {

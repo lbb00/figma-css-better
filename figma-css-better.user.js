@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Figma CSS Better
 // @namespace   https://github.com/lbb00
-// @version     2.2.0
+// @version     2.3.0
 // @description Figma CSS 转为微信小程序样式,rpx,figma,微信,小程序
 // @author      lbb00
 // @homepage    https://github.com/lbb00/figma-css-better
@@ -543,6 +543,9 @@
     }
   }
   var commonjsGlobal = typeof globalThis < "u" ? globalThis : typeof window < "u" ? window : typeof global < "u" ? global : typeof self < "u" ? self : {};
+  function getDefaultExportFromCjs(x2) {
+    return x2 && x2.__esModule && Object.prototype.hasOwnProperty.call(x2, "default") ? x2.default : x2;
+  }
   function getAugmentedNamespace(n2) {
     if (n2.__esModule)
       return n2;
@@ -570,17 +573,11 @@
       });
     }), a2;
   }
-  var picocolors_browserExports = {}, picocolors_browser = {
-    get exports() {
-      return picocolors_browserExports;
-    },
-    set exports(v2) {
-      picocolors_browserExports = v2;
-    }
-  }, x$1 = String, create = function() {
+  var picocolors_browser = { exports: {} }, x$1 = String, create = function() {
     return { isColorSupported: !1, reset: x$1, bold: x$1, dim: x$1, italic: x$1, underline: x$1, inverse: x$1, hidden: x$1, strikethrough: x$1, black: x$1, red: x$1, green: x$1, yellow: x$1, blue: x$1, magenta: x$1, cyan: x$1, white: x$1, gray: x$1, bgBlack: x$1, bgRed: x$1, bgGreen: x$1, bgYellow: x$1, bgBlue: x$1, bgMagenta: x$1, bgCyan: x$1, bgWhite: x$1 };
   };
-  picocolors_browser.exports = create(), picocolors_browserExports.createColors = create;
+  picocolors_browser.exports = create(), picocolors_browser.exports.createColors = create;
+  var picocolors_browserExports = picocolors_browser.exports;
   const require$$2 = /* @__PURE__ */ getAugmentedNamespace(/* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
     __proto__: null,
     default: {}
@@ -1144,7 +1141,7 @@
   };
   var previousMap = PreviousMap$2;
   PreviousMap$2.default = PreviousMap$2;
-  let { SourceMapConsumer: SourceMapConsumer$1, SourceMapGenerator: SourceMapGenerator$1 } = require$$2, { fileURLToPath, pathToFileURL: pathToFileURL$1 } = require$$2, { resolve: resolve$1, isAbsolute } = require$$2, { nanoid: nanoid$1 } = nonSecure, terminalHighlight = require$$2, CssSyntaxError$1 = cssSyntaxError, PreviousMap$1 = previousMap, fromOffsetCache = Symbol("fromOffsetCache"), sourceMapAvailable$1 = Boolean(SourceMapConsumer$1 && SourceMapGenerator$1), pathAvailable$1 = Boolean(resolve$1 && isAbsolute), Input$6 = class {
+  let { SourceMapConsumer: SourceMapConsumer$1, SourceMapGenerator: SourceMapGenerator$1 } = require$$2, { fileURLToPath, pathToFileURL: pathToFileURL$1 } = require$$2, { resolve: resolve$1, isAbsolute } = require$$2, { nanoid: nanoid$1 } = nonSecure, terminalHighlight = require$$2, CssSyntaxError$1 = cssSyntaxError, PreviousMap$1 = previousMap, fromOffsetCache = Symbol("fromOffsetCache"), sourceMapAvailable$1 = !!(SourceMapConsumer$1 && SourceMapGenerator$1), pathAvailable$1 = !!(resolve$1 && isAbsolute), Input$6 = class {
     constructor(css2, opts = {}) {
       if (css2 === null || typeof css2 > "u" || typeof css2 == "object" && !css2.toString)
         throw new Error(`PostCSS received ${css2} instead of CSS string`);
@@ -1196,7 +1193,7 @@
       let result2, endLine, endColumn;
       if (line && typeof line == "object") {
         let start = line, end = column;
-        if (typeof line.offset == "number") {
+        if (typeof start.offset == "number") {
           let pos = this.fromOffset(start.offset);
           line = pos.line, column = pos.col;
         } else
@@ -1270,10 +1267,10 @@
   };
   var input = Input$6;
   Input$6.default = Input$6, terminalHighlight && terminalHighlight.registerInput && terminalHighlight.registerInput(Input$6);
-  let { SourceMapConsumer, SourceMapGenerator } = require$$2, { dirname, resolve, relative, sep } = require$$2, { pathToFileURL } = require$$2, Input$5 = input, sourceMapAvailable = Boolean(SourceMapConsumer && SourceMapGenerator), pathAvailable = Boolean(dirname && resolve && relative && sep);
+  let { SourceMapConsumer, SourceMapGenerator } = require$$2, { dirname, resolve, relative, sep } = require$$2, { pathToFileURL } = require$$2, Input$5 = input, sourceMapAvailable = !!(SourceMapConsumer && SourceMapGenerator), pathAvailable = !!(dirname && resolve && relative && sep);
   var mapGenerator = class {
     constructor(stringify2, root2, opts, cssString) {
-      this.stringify = stringify2, this.mapOpts = opts.map || {}, this.root = root2, this.opts = opts, this.css = cssString;
+      this.stringify = stringify2, this.mapOpts = opts.map || {}, this.root = root2, this.opts = opts, this.css = cssString, this.usesFileUrls = !this.mapOpts.from && this.mapOpts.absolute;
     }
     isMap() {
       return typeof this.opts.map < "u" ? !!this.opts.map : this.previous().length > 0;
@@ -1317,10 +1314,11 @@
         this.root.walk((node2) => {
           if (node2.source) {
             let from = node2.source.input.from;
-            from && !already[from] && (already[from] = !0, this.map.setSourceContent(
-              this.toUrl(this.path(from)),
-              node2.source.input.css
-            ));
+            if (from && !already[from]) {
+              already[from] = !0;
+              let fromUrl = this.usesFileUrls ? this.toFileUrl(from) : this.toUrl(this.path(from));
+              this.map.setSourceContent(fromUrl, node2.source.input.css);
+            }
           }
         });
       else if (this.css) {
@@ -1375,17 +1373,15 @@
     toUrl(path) {
       return sep === "\\" && (path = path.replace(/\\/g, "/")), encodeURI(path).replace(/[#?]/g, encodeURIComponent);
     }
+    toFileUrl(path) {
+      if (pathToFileURL)
+        return pathToFileURL(path).toString();
+      throw new Error(
+        "`map.absolute` option is not available in this PostCSS build"
+      );
+    }
     sourcePath(node2) {
-      if (this.mapOpts.from)
-        return this.toUrl(this.mapOpts.from);
-      if (this.mapOpts.absolute) {
-        if (pathToFileURL)
-          return pathToFileURL(node2.source.input.from).toString();
-        throw new Error(
-          "`map.absolute` option is not available in this PostCSS build"
-        );
-      } else
-        return this.toUrl(this.path(node2.source.input.from));
+      return this.mapOpts.from ? this.toUrl(this.mapOpts.from) : this.usesFileUrls ? this.toFileUrl(node2.source.input.from) : this.toUrl(this.path(node2.source.input.from));
     }
     generateString() {
       this.css = "", this.map = new SourceMapGenerator({ file: this.outputFile() });
@@ -1398,7 +1394,7 @@
         if (this.css += str, node2 && type !== "end" && (mapping.generated.line = line, mapping.generated.column = column - 1, node2.source && node2.source.start ? (mapping.source = this.sourcePath(node2), mapping.original.line = node2.source.start.line, mapping.original.column = node2.source.start.column - 1, this.map.addMapping(mapping)) : (mapping.source = noSource, mapping.original.line = 1, mapping.original.column = 0, this.map.addMapping(mapping))), lines = str.match(/\n/g), lines ? (line += lines.length, last = str.lastIndexOf(`
 `), column = str.length - last) : column += str.length, node2 && type !== "start") {
           let p2 = node2.parent || { raws: {} };
-          (node2.type !== "decl" || node2 !== p2.last || p2.raws.semicolon) && (node2.source && node2.source.end ? (mapping.source = this.sourcePath(node2), mapping.original.line = node2.source.end.line, mapping.original.column = node2.source.end.column - 1, mapping.generated.line = line, mapping.generated.column = column - 2, this.map.addMapping(mapping)) : (mapping.source = noSource, mapping.original.line = 1, mapping.original.column = 0, mapping.generated.line = line, mapping.generated.column = column - 1, this.map.addMapping(mapping)));
+          (!(node2.type === "decl" || node2.type === "atrule" && !node2.nodes) || node2 !== p2.last || p2.raws.semicolon) && (node2.source && node2.source.end ? (mapping.source = this.sourcePath(node2), mapping.original.line = node2.source.end.line, mapping.original.column = node2.source.end.column - 1, mapping.generated.line = line, mapping.generated.column = column - 2, this.map.addMapping(mapping)) : (mapping.source = noSource, mapping.original.line = 1, mapping.original.column = 0, mapping.generated.line = line, mapping.generated.column = column - 1, this.map.addMapping(mapping)));
         }
       });
     }
@@ -1519,23 +1515,23 @@
           node2.cleanRaws(keepBetween);
     }
     insertBefore(exist, add) {
-      exist = this.index(exist);
-      let type = exist === 0 ? "prepend" : !1, nodes = this.normalize(add, this.proxyOf.nodes[exist], type).reverse();
+      let existIndex = this.index(exist), type = existIndex === 0 ? "prepend" : !1, nodes = this.normalize(add, this.proxyOf.nodes[existIndex], type).reverse();
+      existIndex = this.index(exist);
       for (let node2 of nodes)
-        this.proxyOf.nodes.splice(exist, 0, node2);
+        this.proxyOf.nodes.splice(existIndex, 0, node2);
       let index;
       for (let id in this.indexes)
-        index = this.indexes[id], exist <= index && (this.indexes[id] = index + nodes.length);
+        index = this.indexes[id], existIndex <= index && (this.indexes[id] = index + nodes.length);
       return this.markDirty(), this;
     }
     insertAfter(exist, add) {
-      exist = this.index(exist);
-      let nodes = this.normalize(add, this.proxyOf.nodes[exist]).reverse();
+      let existIndex = this.index(exist), nodes = this.normalize(add, this.proxyOf.nodes[existIndex]).reverse();
+      existIndex = this.index(exist);
       for (let node2 of nodes)
-        this.proxyOf.nodes.splice(exist + 1, 0, node2);
+        this.proxyOf.nodes.splice(existIndex + 1, 0, node2);
       let index;
       for (let id in this.indexes)
-        index = this.indexes[id], exist < index && (this.indexes[id] = index + nodes.length);
+        index = this.indexes[id], existIndex < index && (this.indexes[id] = index + nodes.length);
       return this.markDirty(), this;
     }
     removeChild(child) {
@@ -2253,7 +2249,7 @@
   function cleanMarks(node2) {
     return node2[isClean] = !1, node2.nodes && node2.nodes.forEach((i2) => cleanMarks(i2)), node2;
   }
-  let postcss$1 = {}, LazyResult$2 = class LazyResult2 {
+  let postcss$2 = {}, LazyResult$2 = class LazyResult2 {
     constructor(processor2, css2, opts) {
       this.stringified = !1, this.processed = !1;
       let root2;
@@ -2271,7 +2267,7 @@
         }
         root2 && !root2[my] && Container$1.rebuild(root2);
       }
-      this.result = new Result$2(processor2, root2, opts), this.helpers = { ...postcss$1, result: this.result, postcss: postcss$1 }, this.plugins = this.processor.plugins.map((plugin) => typeof plugin == "object" && plugin.prepare ? { ...plugin, ...plugin.prepare(this.result) } : plugin);
+      this.result = new Result$2(processor2, root2, opts), this.helpers = { ...postcss$2, result: this.result, postcss: postcss$2 }, this.plugins = this.processor.plugins.map((plugin) => typeof plugin == "object" && plugin.prepare ? { ...plugin, ...plugin.prepare(this.result) } : plugin);
     }
     get [Symbol.toStringTag]() {
       return "LazyResult";
@@ -2518,7 +2514,7 @@
     }
   };
   LazyResult$2.registerPostcss = (dependant) => {
-    postcss$1 = dependant;
+    postcss$2 = dependant;
   };
   var lazyResult = LazyResult$2;
   LazyResult$2.default = LazyResult$2, Root$3.registerLazyResult(LazyResult$2), Document$2.registerLazyResult(LazyResult$2);
@@ -2603,7 +2599,7 @@
   NoWorkResult$1.default = NoWorkResult$1;
   let NoWorkResult = noWorkResult, LazyResult$1 = lazyResult, Document$1 = document$1, Root$2 = root, Processor$1 = class {
     constructor(plugins = []) {
-      this.version = "8.4.16", this.plugins = this.normalize(plugins);
+      this.version = "8.4.23", this.plugins = this.normalize(plugins);
     }
     use(plugin) {
       return this.plugins = this.plugins.concat(this.normalize([plugin])), this;
@@ -2687,7 +2683,9 @@ https://www.w3ctech.com/topic/2226`
     }, creator;
   }, postcss.stringify = stringify, postcss.parse = parse$1, postcss.fromJSON = fromJSON, postcss.list = list, postcss.comment = (defaults) => new Comment(defaults), postcss.atRule = (defaults) => new AtRule(defaults), postcss.decl = (defaults) => new Declaration(defaults), postcss.rule = (defaults) => new Rule(defaults), postcss.root = (defaults) => new Root(defaults), postcss.document = (defaults) => new Document(defaults), postcss.CssSyntaxError = CssSyntaxError, postcss.Declaration = Declaration, postcss.Container = Container, postcss.Processor = Processor, postcss.Document = Document, postcss.Comment = Comment, postcss.Warning = Warning, postcss.AtRule = AtRule, postcss.Result = Result, postcss.Input = Input$2, postcss.Rule = Rule, postcss.Root = Root, postcss.Node = Node, LazyResult.registerPostcss(postcss);
   var postcss_1 = postcss;
-  postcss.default = postcss, postcss_1.stringify, postcss_1.fromJSON, postcss_1.plugin, postcss_1.parse, postcss_1.list, postcss_1.document, postcss_1.comment, postcss_1.atRule, postcss_1.rule, postcss_1.decl, postcss_1.root, postcss_1.CssSyntaxError, postcss_1.Declaration, postcss_1.Container, postcss_1.Processor, postcss_1.Document, postcss_1.Comment, postcss_1.Warning, postcss_1.AtRule, postcss_1.Result, postcss_1.Input, postcss_1.Rule, postcss_1.Root, postcss_1.Node;
+  postcss.default = postcss;
+  const postcss$1 = /* @__PURE__ */ getDefaultExportFromCjs(postcss_1);
+  postcss$1.stringify, postcss$1.fromJSON, postcss$1.plugin, postcss$1.parse, postcss$1.list, postcss$1.document, postcss$1.comment, postcss$1.atRule, postcss$1.rule, postcss$1.decl, postcss$1.root, postcss$1.CssSyntaxError, postcss$1.Declaration, postcss$1.Container, postcss$1.Processor, postcss$1.Document, postcss$1.Comment, postcss$1.Warning, postcss$1.AtRule, postcss$1.Result, postcss$1.Input, postcss$1.Rule, postcss$1.Root, postcss$1.Node;
   var pixelUnitRegexp = {};
   Object.defineProperty(pixelUnitRegexp, "__esModule", { value: !0 });
   function getUnitRegexp(unit) {
@@ -2895,6 +2893,7 @@ https://www.w3ctech.com/topic/2226`
   };
   px2vp.postcss = !0;
   var dist = px2vp;
+  const postcssPxToViewport = /* @__PURE__ */ getDefaultExportFromCjs(dist);
   function CommentRemover$1(options) {
     this.options = options;
   }
@@ -2980,7 +2979,7 @@ https://www.w3ctech.com/topic/2226`
   }
   pluginCreator.postcss = !0;
   var src = pluginCreator;
-  const subscriber_queue = [];
+  const postcssDiscardComments = /* @__PURE__ */ getDefaultExportFromCjs(src), subscriber_queue = [];
   function writable(value, start = noop) {
     let stop;
     const subscribers = /* @__PURE__ */ new Set();
@@ -3106,11 +3105,33 @@ https://www.w3ctech.com/topic/2226`
       });
     });
   }
-  const INNER_CONFIG = {
+  const innerConfigIds = ["inner", "inner-tailwind"], INIT_CONFIG_OPTIONS = {
+    pxToViewport: null,
+    filter: [
+      "width",
+      "height",
+      "border",
+      "border-radius",
+      "font-size: ?(?!normal).*",
+      "font-weight: ?(?!normal).*",
+      "word-spacing",
+      "line-height",
+      "color",
+      "opacity",
+      "background",
+      "background-image",
+      "box-shadow"
+    ],
+    replace: [],
+    textWithoutBoxSize: !0,
+    autoHeight: !0,
+    tailwind: !1
+  }, INNER_CONFIG = {
     id: "inner",
     name: "内置配置(小程序)",
     url: "",
     options: {
+      ...structuredClone(INIT_CONFIG_OPTIONS),
       pxToViewport: {
         unitToConvert: "px",
         viewportWidth: 50,
@@ -3136,29 +3157,15 @@ https://www.w3ctech.com/topic/2226`
         "background",
         "background-image",
         "box-shadow"
-      ],
-      replace: [],
-      textWithoutBoxSize: !0,
-      autoHeight: !0
+      ]
     }
-  }, INIT_CONFIG_OPTIONS = {
-    pxToViewport: null,
-    filter: [
-      "width",
-      "height",
-      "border",
-      "border-radius",
-      "font-size: ?(?!normal).*",
-      "font-weight: ?(?!normal).*",
-      "word-spacing",
-      "line-height",
-      "color",
-      "opacity",
-      "background",
-      "background-image",
-      "box-shadow"
-    ],
-    replace: []
+  }, INNER_CONFIG_TAILWIND = {
+    id: "inner-tailwind",
+    name: "内置配置(Tailwind)",
+    options: {
+      ...structuredClone(INIT_CONFIG_OPTIONS),
+      tailwind: !0
+    }
   };
   if (console.log("old config url", GM_getValue("__CONFIG_URL")), GM_getValue("__CONFIG_URL")) {
     const configList = GM_getValue("CONFIG_LIST", []);
@@ -3173,9 +3180,11 @@ https://www.w3ctech.com/topic/2226`
     currentConfigData: {}
   });
   async function loadNewConfig(id) {
-    const configLocal = [INNER_CONFIG, ...GM_getValue("CONFIG_LIST", [])].find(
-      (i2) => i2.id === id
-    );
+    const configLocal = [
+      INNER_CONFIG,
+      INNER_CONFIG_TAILWIND,
+      ...GM_getValue("CONFIG_LIST", [])
+    ].find((i2) => i2.id === id);
     configLocal.url && (configLocal.options = await loadConfig$1(configLocal.url)), updateCurrentConfigData(configLocal);
   }
   appStore.subscribe(async (store) => {
@@ -3333,7 +3342,9 @@ https://www.w3ctech.com/topic/2226`
     whitesmoke: [245, 245, 245],
     yellow: [255, 255, 0],
     yellowgreen: [154, 205, 50]
-  }, baseHues = {
+  };
+  const names = /* @__PURE__ */ getDefaultExportFromCjs(colorName);
+  var baseHues = {
     red: 0,
     orange: 60,
     yellow: 120,
@@ -3344,8 +3355,8 @@ https://www.w3ctech.com/topic/2226`
   function parse(cstr) {
     var m2, parts = [], alpha = 1, space2;
     if (typeof cstr == "string")
-      if (colorName[cstr])
-        parts = colorName[cstr].slice(), space2 = "rgb";
+      if (names[cstr])
+        parts = names[cstr].slice(), space2 = "rgb";
       else if (cstr === "transparent")
         alpha = 0, space2 = "rgb", parts = [0, 0, 0];
       else if (/^#[A-Fa-f0-9]+$/.test(cstr)) {
@@ -3445,6 +3456,3229 @@ https://www.w3ctech.com/topic/2226`
       modified
     };
   }
+  const specialAttribute = [
+    "@charset",
+    "@font-face",
+    "@import",
+    "@keyframes"
+  ];
+  let useAllDefaultValues = !1, customTheme = {};
+  const hasNegative = (val) => [val[0] === "-" ? "-" : "", val[0] === "-" ? val.slice(1) : val], getCustomVal = (val) => {
+    val = val.replace(/\s/g, "_");
+    for (let index = 1; index < val.length; index) {
+      const char = val[index];
+      char === "_" && char === val[index - 1] ? val = val.slice(0, index) + val.slice(index + 1) : index++;
+    }
+    return val;
+  }, isColor = (str, joinLinearGradient = !1) => {
+    const namedColors = [
+      "initial",
+      "inherit",
+      "currentColor",
+      "currentcolor",
+      "transparent",
+      "aliceblue",
+      "antiquewhite",
+      "aqua",
+      "aquamarine",
+      "azure",
+      "beige",
+      "bisque",
+      "black",
+      "blanchedalmond",
+      "blue",
+      "blueviolet",
+      "brown",
+      "burlywood",
+      "cadetblue",
+      "chartreuse",
+      "chocolate",
+      "coral",
+      "cornflowerblue",
+      "cornsilk",
+      "crimson",
+      "cyan",
+      "darkblue",
+      "darkcyan",
+      "darkgoldenrod",
+      "darkgray",
+      "darkgrey",
+      "darkgreen",
+      "darkkhaki",
+      "darkmagenta",
+      "darkolivegreen",
+      "darkorange",
+      "darkorchid",
+      "darkred",
+      "darksalmon",
+      "darkseagreen",
+      "darkslateblue",
+      "darkslategray",
+      "darkslategrey",
+      "darkturquoise",
+      "darkviolet",
+      "deeppink",
+      "deepskyblue",
+      "dimgray",
+      "dimgrey",
+      "dodgerblue",
+      "firebrick",
+      "floralwhite",
+      "forestgreen",
+      "fuchsia",
+      "gainsboro",
+      "ghostwhite",
+      "gold",
+      "goldenrod",
+      "gray",
+      "grey",
+      "green",
+      "greenyellow",
+      "honeydew",
+      "hotpink",
+      "indianred",
+      "indigo",
+      "ivory",
+      "khaki",
+      "lavender",
+      "lavenderblush",
+      "lawngreen",
+      "lemonchiffon",
+      "lightblue",
+      "lightcoral",
+      "lightcyan",
+      "lightgoldenrodyellow",
+      "lightgray",
+      "lightgrey",
+      "lightgreen",
+      "lightpink",
+      "lightsalmon",
+      "lightseagreen",
+      "lightskyblue",
+      "lightslategray",
+      "lightslategrey",
+      "lightsteelblue",
+      "lightyellow",
+      "lime",
+      "limegreen",
+      "linen",
+      "magenta",
+      "maroon",
+      "mediumaquamarine",
+      "mediumblue",
+      "mediumorchid",
+      "mediumpurple",
+      "mediumseagreen",
+      "mediumslateblue",
+      "mediumspringgreen",
+      "mediumturquoise",
+      "mediumvioletred",
+      "midnightblue",
+      "mintcream",
+      "mistyrose",
+      "moccasin",
+      "navajowhite",
+      "navy",
+      "oldlace",
+      "olive",
+      "olivedrab",
+      "orange",
+      "orangered",
+      "orchid",
+      "palegoldenrod",
+      "palegreen",
+      "paleturquoise",
+      "palevioletred",
+      "papayawhip",
+      "peachpuff",
+      "peru",
+      "pink",
+      "plum",
+      "powderblue",
+      "purple",
+      "rebeccapurple",
+      "red",
+      "rosybrown",
+      "royalblue",
+      "saddlebrown",
+      "salmon",
+      "sandybrown",
+      "seagreen",
+      "seashell",
+      "sienna",
+      "silver",
+      "skyblue",
+      "slateblue",
+      "slategray",
+      "slategrey",
+      "snow",
+      "springgreen",
+      "steelblue",
+      "tan",
+      "teal",
+      "thistle",
+      "tomato",
+      "turquoise",
+      "violet",
+      "wheat",
+      "white",
+      "whitesmoke",
+      "yellow",
+      "yellowgreen"
+    ];
+    return /^\s*#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})\s*$|^\s*rgb\(\s*(\d{1,3}|[a-z]+)\s*,\s*(\d{1,3}|[a-z]+)\s*,\s*(\d{1,3}|[a-z]+)\s*\)\s*$|^\s*rgba\(\s*(\d{1,3}|[a-z]+)\s*,\s*(\d{1,3}|[a-z]+)\s*,\s*(\d{1,3}|[a-z]+)\s*,\s*(\d*(\.\d+)?)\s*\)\s*$|^\s*hsl\(\s*(\d+)\s*,\s*(\d*(\.\d+)?%)\s*,\s*(\d*(\.\d+)?%)\)\s*$|^\s*hsla\((\d+)\s*,\s*([\d.]+)%\s*,\s*([\d.]+)%\s*,\s*(\d*(\.\d+)?)\)\s*$/i.test(str) || namedColors.includes(str) || joinLinearGradient && /^\s*linear-gradient\([\w\W]+?\)\s*$/.test(str);
+  }, isUnit = (str) => [
+    "em",
+    "ex",
+    "ch",
+    "rem",
+    "vw",
+    "vh",
+    "vmin",
+    "vmax",
+    "cm",
+    "mm",
+    "in",
+    "pt",
+    "pc",
+    "px",
+    "min-content",
+    "max-content",
+    "fit-content",
+    "deg",
+    "grad",
+    "rad",
+    "turn",
+    "ms",
+    "s",
+    "Hz",
+    "kHz",
+    "%",
+    "length",
+    "inherit",
+    "thick",
+    "medium",
+    "thin",
+    "initial",
+    "auto"
+  ].includes(str.replace(/[.\d\s-]/g, "")) || /^[-.\d]+$/.test(str.trim()) || /^var\(.+\)$/.test(str);
+  var CustomSelect;
+  (function(CustomSelect2) {
+    CustomSelect2.auto = "auto", CustomSelect2.vh = "100vh", CustomSelect2.vw = "100vw";
+  })(CustomSelect || (CustomSelect = {}));
+  const getUnitMetacharactersVal = (val, excludes = []) => {
+    /^\d+\.[1-9]{2,}%$/.test(val) && (val = `${Number(val.slice(0, -1)).toFixed(6).replace(/(\.[1-9]{2})\d+/, "$1")}%`);
+    const config2 = {
+      auto: "auto",
+      "50%": "1/2",
+      "33.33%": "1/3",
+      "66.66%": "2/3",
+      "25%": "1/4",
+      "75%": "3/4",
+      "20%": "1/5",
+      "40%": "2/5",
+      "60%": "3/5",
+      "80%": "4/5",
+      "16.66%": "1/6",
+      "83.33%": "5/6",
+      "8.33%": "1/12",
+      "41.66%": "5/12",
+      "58.33%": "7/12",
+      "91.66%": "11/12",
+      "100%": "full",
+      "100vw": "screen",
+      "100vh": "screen",
+      "min-content": "min",
+      "max-content": "max"
+    };
+    return excludes.forEach((key2) => {
+      delete config2[key2];
+    }), config2[val];
+  }, getRemDefaultVal = (val) => ({
+    "0px": "0",
+    "1px": "px",
+    "0.125rem": "0.5",
+    "0.25rem": "1",
+    "0.375rem": "1.5",
+    "0.5rem": "2",
+    "0.625rem": "2.5",
+    "0.75rem": "3",
+    "0.875rem": "3.5",
+    "1rem": "4",
+    "1.25rem": "5",
+    "1.5rem": "6",
+    "1.75rem": "7",
+    "2rem": "8",
+    "2.25rem": "9",
+    "2.5rem": "10",
+    "2.75rem": "11",
+    "3rem": "12",
+    "3.5rem": "14",
+    "4rem": "16",
+    "5rem": "20",
+    "6rem": "24",
+    "7rem": "28",
+    "8rem": "32",
+    "9rem": "36",
+    "10rem": "40",
+    "11rem": "44",
+    "12rem": "48",
+    "13rem": "52",
+    "14rem": "56",
+    "15rem": "60",
+    "16rem": "64",
+    "18rem": "72",
+    "20rem": "80",
+    "24rem": "96"
+  })[val], getBorderRadiusDefaultVal = (val) => ({
+    "0px": "-none",
+    "0.125rem": "-sm",
+    "0.25rem": "null",
+    "0.375rem": "-md",
+    "0.5rem": "-lg",
+    "0.75rem": "-xl",
+    "1rem": "-2xl",
+    "1.5rem": "-3xl",
+    "9999px": "-full"
+  })[val], getFilterDefaultVal = (val) => ({ "blur(0)": "blur-none", "blur(4px)": "blur-sm", "blur(8px)": "blur", "blur(12px)": "blur-md", "blur(16px)": "blur-lg", "blur(24px)": "blur-xl", "blur(40px)": "blur-2xl", "blur(64px)": "blur-3xl", "brightness(0)": "brightness-0", "brightness(.5)": "brightness-50", "brightness(.75)": "brightness-75", "brightness(.9)": "brightness-90", "brightness(.95)": "brightness-95", "brightness(1)": "brightness-100", "brightness(1.05)": "brightness-105", "brightness(1.1)": "brightness-110", "brightness(1.25)": "brightness-125", "brightness(1.5)": "brightness-150", "brightness(2)": "brightness-200", "contrast(0)": "contrast-0", "contrast(.5)": "contrast-50", "contrast(.75)": "contrast-75", "contrast(1)": "contrast-100", "contrast(1.25)": "contrast-125", "contrast(1.5)": "contrast-150", "contrast(2)": "contrast-200", "drop-shadow(0 1px 1px rgba(0,0,0,0.05))": "drop-shadow-sm", "drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1)) drop-shadow(0 1px 1px rgba(0, 0, 0, 0.06))": "drop-shadow", "drop-shadow(0 4px 3px rgba(0, 0, 0, 0.07)) drop-shadow(0 2px 2px rgba(0, 0, 0, 0.06))": "drop-shadow-md", "drop-shadow(0 10px 8px rgba(0, 0, 0, 0.04)) drop-shadow(0 4px 3px rgba(0, 0, 0, 0.1))": "drop-shadow-lg", "drop-shadow(0 20px 13px rgba(0, 0, 0, 0.03)) drop-shadow(0 8px 5px rgba(0, 0, 0, 0.08))": "drop-shadow-xl", "drop-shadow(0 25px 25px rgba(0, 0, 0, 0.15))": "drop-shadow-2xl", "drop-shadow(0 0 #0000)": "drop-shadow-none", "grayscale(0)": "grayscale-0", "grayscale(1)": "grayscale", "hue-rotate(-180deg)": "-hue-rotate-180", "hue-rotate(-90deg)": "-hue-rotate-90", "hue-rotate(-60deg)": "-hue-rotate-60", "hue-rotate(-30deg)": "-hue-rotate-30", "hue-rotate(-15deg)": "-hue-rotate-15", "hue-rotate(0deg)": "hue-rotate-0", "hue-rotate(15deg)": "hue-rotate-15", "hue-rotate(30deg)": "hue-rotate-30", "hue-rotate(60deg)": "hue-rotate-60", "hue-rotate(90deg)": "hue-rotate-90", "hue-rotate(180deg)": "hue-rotate-180", "invert(0)": "invert-0", "invert(1)": "invert", "saturate(0)": "saturate-0", "saturate(.5)": "saturate-50", "saturate(1)": "saturate-100", "saturate(1.5)": "saturate-150", "saturate(2)": "saturate-200", "sepia(0)": "sepia-0", "sepia(1)": "sepia" })[val], propertyMap = /* @__PURE__ */ new Map([
+    [
+      "align-content",
+      {
+        center: "content-center",
+        "flex-start": "content-start",
+        "flex-end": "content-end",
+        "space-between": "content-between",
+        "space-around": "content-around",
+        "space-evenly": "content-evenly"
+      }
+    ],
+    [
+      "align-items",
+      {
+        "flex-start": "items-start",
+        "flex-end": "items-end",
+        center: "items-center",
+        baseline: "items-baseline",
+        stretch: "items-stretch"
+      }
+    ],
+    [
+      "align-self",
+      {
+        auto: "self-auto",
+        "flex-start": "self-start",
+        "flex-end": "self-end",
+        center: "self-center",
+        stretch: "self-stretch",
+        baseline: "self-baseline"
+      }
+    ],
+    [
+      "all",
+      {
+        initial: "[all:initial]",
+        inherit: "[all:inherit]",
+        unset: "[all:unset]"
+      }
+    ],
+    [
+      "animation",
+      (val) => {
+        var _a;
+        return (_a = { none: "animate-none" }[val]) !== null && _a !== void 0 ? _a : `animate-[${getCustomVal(val)}]`;
+      }
+    ],
+    [
+      "animation-delay",
+      (val) => `[animation-delay:${getCustomVal(val)}]`
+    ],
+    [
+      "animation-direction",
+      (val) => `[animation-direction:${getCustomVal(val)}]`
+    ],
+    [
+      "animation-duration",
+      (val) => `[animation-duration:${getCustomVal(val)}]`
+    ],
+    [
+      "animation-fill-mode",
+      (val) => `[animation-fill-mode:${getCustomVal(val)}]`
+    ],
+    [
+      "animation-iteration-count",
+      (val) => `[animation-iteration-count:${getCustomVal(val)}]`
+    ],
+    [
+      "animation-name",
+      (val) => `[animation-name:${getCustomVal(val)}]`
+    ],
+    [
+      "animation-play-state",
+      (val) => `[animation-play-state:${getCustomVal(val)}]`
+    ],
+    [
+      "animation-timing-function",
+      (val) => `[animation-timing-function:${getCustomVal(val)}]`
+    ],
+    [
+      "appearance",
+      (val) => {
+        var _a;
+        return (_a = { none: "appearance-none" }[val]) !== null && _a !== void 0 ? _a : `[appearance:${getCustomVal(val)}]`;
+      }
+    ],
+    [
+      "aspect-ratio",
+      (val) => `[aspect-ratio:${getCustomVal(val)}]`
+    ],
+    [
+      "backdrop-filter",
+      (val) => {
+        const defaultVal = { none: "backdrop-filter-none" }[val];
+        if (defaultVal)
+          return defaultVal;
+        const backdropFilterValConfig = {
+          blur: (v2) => {
+            var _a, _b;
+            return `backdrop-blur-${(_b = (_a = customTheme["backdrop-blur"]) === null || _a === void 0 ? void 0 : _a[v2]) !== null && _b !== void 0 ? _b : `[${v2}]`}`;
+          },
+          brightness: (v2) => {
+            var _a, _b;
+            return `backdrop-brightness-${(_b = (_a = customTheme["backdrop-brightness"]) === null || _a === void 0 ? void 0 : _a[v2]) !== null && _b !== void 0 ? _b : `[${v2}]`}`;
+          },
+          contrast: (v2) => {
+            var _a, _b;
+            return `backdrop-contrast-${(_b = (_a = customTheme["backdrop-contrast"]) === null || _a === void 0 ? void 0 : _a[v2]) !== null && _b !== void 0 ? _b : `[${v2}]`}`;
+          },
+          grayscale: (v2) => {
+            var _a, _b;
+            return `backdrop-grayscale-${(_b = (_a = customTheme["backdrop-grayscale"]) === null || _a === void 0 ? void 0 : _a[v2]) !== null && _b !== void 0 ? _b : `[${v2}]`}`;
+          },
+          "hue-rotate": (v2) => {
+            var _a, _b;
+            const t2 = hasNegative(v2);
+            return `${t2[0]}backdrop-hue-rotate-${(_b = (_a = customTheme["backdrop-grayscale"]) === null || _a === void 0 ? void 0 : _a[t2[1]]) !== null && _b !== void 0 ? _b : `[${t2[1]}]`}`;
+          },
+          invert: (v2) => {
+            var _a, _b;
+            return `backdrop-invert-${(_b = (_a = customTheme["backdrop-invert"]) === null || _a === void 0 ? void 0 : _a[v2]) !== null && _b !== void 0 ? _b : `[${v2}]`}`;
+          },
+          opacity: (v2) => {
+            var _a, _b;
+            return `backdrop-opacity-${(_b = (_a = customTheme["backdrop-opacity"]) === null || _a === void 0 ? void 0 : _a[v2]) !== null && _b !== void 0 ? _b : `[${v2}]`}`;
+          },
+          saturate: (v2) => {
+            var _a, _b;
+            return `backdrop-saturate-${(_b = (_a = customTheme["backdrop-saturate"]) === null || _a === void 0 ? void 0 : _a[v2]) !== null && _b !== void 0 ? _b : `[${v2}]`}`;
+          },
+          sepia: (v2) => {
+            var _a, _b;
+            return `backdrop-sepia-${(_b = (_a = customTheme["backdrop-sepia"]) === null || _a === void 0 ? void 0 : _a[v2]) !== null && _b !== void 0 ? _b : `[${v2}]`}`;
+          }
+        }, vals = getCustomVal(val).replace(/\(.+?\)/g, (v2) => v2.replace(/_/g, "")).split(")_").map((v2) => `${v2})`);
+        vals[vals.length - 1] = vals[vals.length - 1].slice(0, -1);
+        let canUse = !0;
+        const res = vals.map((v2) => {
+          var _a;
+          let canUsePipeV = !1, pipeV = "";
+          return useAllDefaultValues && (pipeV = (_a = getFilterDefaultVal(v2) || { "opacity(0)": "backdrop-opacity-0", "opacity(0.05)": "backdrop-opacity-5", "opacity(0.1)": "backdrop-opacity-10", "opacity(0.2)": "backdrop-opacity-20", "opacity(0.25)": "backdrop-opacity-25", "opacity(0.3)": "backdrop-opacity-30", "opacity(0.4)": "backdrop-opacity-40", "opacity(0.5)": "backdrop-opacity-50", "opacity(0.6)": "backdrop-opacity-60", "opacity(0.7)": "backdrop-opacity-70", "opacity(0.75)": "backdrop-opacity-75", "opacity(0.8)": "backdrop-opacity-80", "opacity(0.9)": "backdrop-opacity-90", "opacity(0.95)": "backdrop-opacity-95", "opacity(1)": "backdrop-opacity-100" }[v2]) !== null && _a !== void 0 ? _a : "", pipeV.length > 0 && (pipeV = pipeV.startsWith("backdrop-opacity") ? pipeV : `backdrop-${pipeV}`, canUsePipeV = !0)), pipeV = pipeV.length > 0 ? pipeV : v2.replace(/^([a-zA-Z0-9_-]+)\((.+?)\)$/, (r2, k2, v3) => {
+            var _a2, _b;
+            return canUsePipeV = !0, (_b = (_a2 = backdropFilterValConfig[k2]) === null || _a2 === void 0 ? void 0 : _a2.call(backdropFilterValConfig, v3)) !== null && _b !== void 0 ? _b : canUse = !1;
+          }), canUsePipeV ? pipeV : "";
+        });
+        return canUse ? `backdrop-filter ${[...new Set(res)].join(" ")}` : `[backdrop-filter:${getCustomVal(val)}]`;
+      }
+    ],
+    [
+      "backface-visibility",
+      {
+        visible: "[backface-visibility:visible]",
+        hidden: "[backface-visibility:hidden]"
+      }
+    ],
+    [
+      "background",
+      (val) => {
+        var _a;
+        return (_a = Object.assign(Object.assign(Object.assign({}, propertyMap.get("background-attachment")), propertyMap.get("background-repeat")), { transparent: "bg-transparent", currentColor: "bg-current", currentcolor: "bg-current", none: "bg-none", bottom: "bg-bottom", center: "bg-center", left: "bg-left", "left bottom": "bg-left-bottom", "left top": "bg-left-top", right: "bg-right", "right bottom": "bg-right-bottom", "right top": "bg-right-top", top: "bg-top", auto: "bg-auto", cover: "bg-cover", contain: "bg-contain" })[val]) !== null && _a !== void 0 ? _a : `bg-[${getCustomVal(val)}]`;
+      }
+    ],
+    [
+      "background-attachment",
+      {
+        fixed: "bg-fixed",
+        local: "bg-local",
+        scroll: "bg-scroll"
+      }
+    ],
+    [
+      "background-blend-mode",
+      {
+        normal: "bg-blend-normal",
+        multiply: "bg-blend-multiply",
+        screen: "bg-blend-screen",
+        overlay: "bg-blend-overlay",
+        darken: "bg-blend-darken",
+        lighten: "bg-blend-lighten",
+        "color-dodge": "bg-blend-color-dodge",
+        "color-burn": "bg-blend-color-burn",
+        "hard-light": "bg-blend-hard-light",
+        "soft-light": "bg-blend-soft-light",
+        difference: "bg-blend-difference",
+        exclusion: "bg-blend-exclusion",
+        hue: "bg-blend-hue",
+        saturation: "bg-blend-saturation",
+        color: "bg-blend-color",
+        luminosity: "bg-blend-luminosity"
+      }
+    ],
+    [
+      "background-clip",
+      {
+        "border-box": "bg-clip-border",
+        "padding-box": "bg-clip-padding",
+        "content-box": "bg-clip-content",
+        text: "bg-clip-text"
+      }
+    ],
+    [
+      "background-color",
+      (val) => {
+        var _a;
+        return (_a = { transparent: "bg-transparent", currentColor: "bg-current", currentcolor: "bg-current" }[val]) !== null && _a !== void 0 ? _a : isColor(val, !0) ? `bg-[${getCustomVal(val)}]` : "";
+      }
+    ],
+    [
+      "background-image",
+      (val) => {
+        var _a;
+        return (_a = { none: "bg-none" }[val]) !== null && _a !== void 0 ? _a : `bg-[${getCustomVal(val)}]`;
+      }
+    ],
+    [
+      "background-origin",
+      {
+        "border-box": "bg-origin-border",
+        "padding-box": "bg-origin-padding",
+        "content-box": "bg-origin-content"
+      }
+    ],
+    [
+      "background-position",
+      (val) => {
+        var _a;
+        return (_a = {
+          bottom: "bg-bottom",
+          center: "bg-center",
+          left: "bg-left",
+          "left bottom": "bg-left-bottom",
+          "left top": "bg-left-top",
+          right: "bg-right",
+          "right bottom": "bg-right-bottom",
+          "right top": "bg-right-top",
+          top: "bg-top"
+        }[val]) !== null && _a !== void 0 ? _a : `bg-[${getCustomVal(val)}]`;
+      }
+    ],
+    [
+      "background-repeat",
+      {
+        repeat: "bg-repeat",
+        "no-repeat": "bg-no-repeat",
+        "repeat-x": "bg-repeat-x",
+        "repeat-y": "bg-repeat-y",
+        round: "bg-repeat-round",
+        space: "bg-repeat-space"
+      }
+    ],
+    [
+      "background-size",
+      (val) => {
+        var _a;
+        return (_a = {
+          auto: "bg-auto",
+          cover: "bg-cover",
+          contain: "bg-contain"
+        }[val]) !== null && _a !== void 0 ? _a : `[background-size:${getCustomVal(val)}]`;
+      }
+    ],
+    [
+      "border",
+      (val) => (val = val.replace(/\(.+?\)/, (v2) => v2.replace(/\s/g, "")), val.split(" ").filter((v2) => v2 !== "").map((v2) => {
+        var _a, _b;
+        return isUnit(v2) || isColor(v2) ? (_a = { transparent: "border-transparent", currentColor: "border-current", currentcolor: "border-current" }[val]) !== null && _a !== void 0 ? _a : `border-[${v2}]` : (_b = propertyMap.get("border-style")[v2]) !== null && _b !== void 0 ? _b : "";
+      }).filter((v2) => v2 !== "").join(" "))
+    ],
+    [
+      "border-bottom",
+      (val) => isUnit(val) ? `border-b-[${getCustomVal(val)}]` : `[border-bottom:${getCustomVal(val)}]`
+    ],
+    [
+      "border-bottom-color",
+      (val) => isColor(val, !0) ? `[border-bottom-color:${getCustomVal(val)}]` : ""
+    ],
+    [
+      "border-bottom-left-radius",
+      (val) => {
+        var _a;
+        return (_a = { 0: "rounded-bl-none", "0px": "rounded-bl-none" }[val]) !== null && _a !== void 0 ? _a : isUnit(val) ? `rounded-bl${(useAllDefaultValues && getBorderRadiusDefaultVal(val) || `-[${getCustomVal(val)}]`).replace(/null$/, "")}` : "";
+      }
+    ],
+    [
+      "border-bottom-right-radius",
+      (val) => {
+        var _a;
+        return (_a = { 0: "rounded-br-none", "0px": "rounded-br-none" }[val]) !== null && _a !== void 0 ? _a : isUnit(val) ? `rounded-br${(useAllDefaultValues && getBorderRadiusDefaultVal(val) || `-[${getCustomVal(val)}]`).replace(/null$/, "")}` : "";
+      }
+    ],
+    [
+      "border-bottom-style",
+      (val) => propertyMap.get("border-style")[val] ? `[border-bottom-style:${val}]` : ""
+    ],
+    [
+      "border-bottom-width",
+      (val) => isUnit(val) ? `border-b-[${getCustomVal(val)}]` : ""
+    ],
+    [
+      "border-collapse",
+      {
+        collapse: "border-collapse",
+        separate: "border-separate"
+      }
+    ],
+    [
+      "border-color",
+      (val) => {
+        var _a;
+        return (_a = {
+          transparent: "border-transparent",
+          currentColor: "border-current",
+          currentcolor: "border-current"
+        }[val]) !== null && _a !== void 0 ? _a : isColor(val) ? `border-[${getCustomVal(val)}]` : "";
+      }
+    ],
+    [
+      "border-image",
+      (val) => `[border-image:${getCustomVal(val)}]`
+    ],
+    [
+      "border-image-outset",
+      (val) => `[border-image-outset:${getCustomVal(val)}]`
+    ],
+    [
+      "border-image-repeat",
+      (val) => `[border-image-repeat:${getCustomVal(val)}]`
+    ],
+    [
+      "border-image-slice",
+      (val) => `[border-image-slice:${getCustomVal(val)}]`
+    ],
+    [
+      "border-image-source",
+      (val) => `[border-image-source:${getCustomVal(val)}]`
+    ],
+    [
+      "border-image-width",
+      (val) => isUnit(val) ? `[border-image-width:${getCustomVal(val)}]` : ""
+    ],
+    [
+      "border-left",
+      (val) => isUnit(val) ? `border-l-[${getCustomVal(val)}]` : `[border-left:${getCustomVal(val)}]`
+    ],
+    [
+      "border-left-color",
+      (val) => isColor(val, !0) ? `[border-left-color:${getCustomVal(val)}]` : ""
+    ],
+    [
+      "border-left-style",
+      (val) => propertyMap.get("border-style")[val] ? `[border-left-style:${val}]` : ""
+    ],
+    [
+      "border-left-width",
+      (val) => isUnit(val) ? `border-l-[${getCustomVal(val)}]` : ""
+    ],
+    [
+      "border-radius",
+      (val) => {
+        const r2 = { 0: "rounded-none", "0px": "rounded-none" }[val];
+        if (r2)
+          return r2;
+        if (val.includes("/"))
+          return `rounded-[${getCustomVal(val)}]`;
+        let vals = val.split(" ").filter((v2) => v2 !== "");
+        return vals.filter((v2) => !isUnit(v2)).length > 0 ? "" : (vals = vals.map((v2) => (useAllDefaultValues && getBorderRadiusDefaultVal(v2) || `-[${v2}]`).replace(/null$/, "")), vals.length === 1 ? `rounded${vals[0]}` : vals.length === 2 ? `rounded-tl${vals[0]} rounded-br${vals[0]} rounded-tr${vals[1]} rounded-bl${vals[1]}` : vals.length === 3 ? `rounded-tl${vals[0]} rounded-br${vals[2]} rounded-tr${vals[1]} rounded-bl${vals[1]}` : vals.length === 4 ? `rounded-tl${vals[0]} rounded-br${vals[2]} rounded-tr${vals[1]} rounded-bl${vals[3]}` : "");
+      }
+    ],
+    [
+      "border-right",
+      (val) => isUnit(val) ? `border-r-[${getCustomVal(val)}]` : `[border-right:${getCustomVal(val)}]`
+    ],
+    [
+      "border-right-color",
+      (val) => isColor(val, !0) ? `[border-right-color:${getCustomVal(val)}]` : ""
+    ],
+    [
+      "border-right-style",
+      (val) => propertyMap.get("border-style")[val] ? `[border-right-style:${val}]` : ""
+    ],
+    [
+      "border-right-width",
+      (val) => isUnit(val) ? `border-r-[${getCustomVal(val)}]` : ""
+    ],
+    [
+      "border-spacing",
+      (val) => isUnit(val) ? `[border-spacing:${getCustomVal(val)}]` : ""
+    ],
+    [
+      "border-style",
+      {
+        solid: "border-solid",
+        dashed: "border-dashed",
+        dotted: "border-dotted",
+        double: "border-double",
+        none: "border-none"
+      }
+    ],
+    [
+      "border-top",
+      (val) => isUnit(val) ? `border-t-[${getCustomVal(val)}]` : `[border-top:${getCustomVal(val)}]`
+    ],
+    [
+      "border-top-color",
+      (val) => isColor(val, !0) ? `[border-top-color:${getCustomVal(val)}]` : ""
+    ],
+    [
+      "border-top-left-radius",
+      (val) => {
+        var _a;
+        return (_a = { 0: "rounded-tl-none", "0px": "rounded-tl-none" }[val]) !== null && _a !== void 0 ? _a : isUnit(val) ? `rounded-tl${(useAllDefaultValues && getBorderRadiusDefaultVal(val) || `-[${getCustomVal(val)}]`).replace(/null$/, "")}` : "";
+      }
+    ],
+    [
+      "border-top-right-radius",
+      (val) => {
+        var _a;
+        return (_a = { 0: "rounded-tr-none", "0px": "rounded-tr-none" }[val]) !== null && _a !== void 0 ? _a : isUnit(val) ? `rounded-tr${(useAllDefaultValues && getBorderRadiusDefaultVal(val) || `-[${getCustomVal(val)}]`).replace(/null$/, "")}` : "";
+      }
+    ],
+    [
+      "border-top-style",
+      (val) => propertyMap.get("border-style")[val] ? `[border-top-style:${val}]` : ""
+    ],
+    [
+      "border-top-width",
+      (val) => isUnit(val) ? `border-t-[${getCustomVal(val)}]` : ""
+    ],
+    [
+      "border-width",
+      (val) => isUnit(val) ? `border-[${getCustomVal(val)}]` : ""
+    ],
+    [
+      "bottom",
+      (val) => {
+        const t2 = hasNegative(val);
+        return isUnit(val) ? `${t2[0]}bottom-${getUnitMetacharactersVal(t2[1], [CustomSelect.vw, CustomSelect.vh]) || `[${t2[1]}]`}` : "";
+      }
+    ],
+    [
+      "box-align",
+      {
+        initial: "[box-align:initial]",
+        start: "[box-align:inherit]",
+        end: "[box-align:unset]",
+        center: "[box-align:unset]",
+        baseline: "[box-align:unset]",
+        stretch: "[box-align:unset]"
+      }
+    ],
+    [
+      "box-decoration-break",
+      {
+        slice: "decoration-slice",
+        clone: "decoration-clone"
+      }
+    ],
+    [
+      "box-direction",
+      {
+        initial: "[box-direction:initial]",
+        normal: "[box-direction:normal]",
+        reverse: "[box-direction:reverse]",
+        inherit: "[box-direction:inherit]"
+      }
+    ],
+    [
+      "box-flex",
+      (val) => `[box-flex:${getCustomVal(val)}]`
+    ],
+    [
+      "box-flex-group",
+      (val) => `[box-flex-group:${getCustomVal(val)}]`
+    ],
+    [
+      "box-lines",
+      {
+        single: "[box-lines:single]",
+        multiple: "[box-lines:multiple]",
+        initial: "[box-lines:initial]"
+      }
+    ],
+    [
+      "box-ordinal-group",
+      (val) => `[box-ordinal-group:${getCustomVal(val)}]`
+    ],
+    [
+      "box-orient",
+      {
+        horizontal: "[box-orient:horizontal]",
+        vertical: "[box-orient:vertical]",
+        "inline-axis": "[box-orient:inline-axis]",
+        "block-axis": "[box-orient:block-axis]",
+        inherit: "[box-orient:inherit]",
+        initial: "[box-orient:initial]"
+      }
+    ],
+    [
+      "box-pack",
+      {
+        start: "[box-pack:start]",
+        end: "[box-pack:end]",
+        center: "[box-pack:center]",
+        justify: "[box-pack:justify]",
+        initial: "[box-pack:initial]"
+      }
+    ],
+    [
+      "box-shadow",
+      (val) => `[box-shadow:${getCustomVal(val)}]`
+    ],
+    [
+      "box-sizing",
+      {
+        "border-box": "box-border",
+        "content-box": "box-content"
+      }
+    ],
+    [
+      "caption-side",
+      {
+        top: "[caption-side:top]",
+        bottom: "[caption-side:bottom]",
+        inherit: "[caption-side:inherit]",
+        initial: "[caption-side:initial]"
+      }
+    ],
+    [
+      "clear",
+      {
+        left: "clear-left",
+        right: "clear-right",
+        both: "clear-both",
+        none: "clear-none"
+      }
+    ],
+    [
+      "clip",
+      (val) => `[clip:${getCustomVal(val)}]`
+    ],
+    [
+      "clip-path",
+      (val) => `[clip-path:${getCustomVal(val)}]`
+    ],
+    [
+      "color",
+      (val) => {
+        var _a;
+        return (_a = { transparent: "text-transparent", currentColor: "text-current", currentcolor: "text-current" }[val]) !== null && _a !== void 0 ? _a : isColor(val, !0) ? `text-[${getCustomVal(val)}]` : "";
+      }
+    ],
+    [
+      "color-scheme",
+      (val) => `[color-scheme:${getCustomVal(val)}]`
+    ],
+    [
+      "column-count",
+      (val) => `[column-count:${getCustomVal(val)}]`
+    ],
+    [
+      "column-fill",
+      {
+        balance: "[column-fill:balance]",
+        auto: "[column-fill:auto]",
+        initial: "[column-fill:initial]"
+      }
+    ],
+    [
+      "column-gap",
+      (val) => {
+        var _a;
+        return (_a = { 0: "gap-x-0" }[val]) !== null && _a !== void 0 ? _a : isUnit(val) ? `gap-x-[${val}]` : "";
+      }
+    ],
+    [
+      "column-rule",
+      (val) => `[column-rule:${getCustomVal(val)}]`
+    ],
+    [
+      "column-rule-color",
+      (val) => isColor(val, !0) ? `[column-rule-color:${getCustomVal(val)}]` : ""
+    ],
+    [
+      "column-rule-style",
+      {
+        none: "[column-rule-style:none]",
+        hidden: "[column-rule-style:hidden]",
+        dotted: "[column-rule-style:dotted]",
+        dashed: "[column-rule-style:dashed]",
+        solid: "[column-rule-style:solid]",
+        double: "[column-rule-style:double]",
+        groove: "[column-rule-style:groove]",
+        ridge: "[column-rule-style:ridge]",
+        inset: "[column-rule-style:inset]",
+        outset: "[column-rule-style:outset]",
+        initial: "[column-rule-style:initial]"
+      }
+    ],
+    [
+      "column-rule-width",
+      (val) => isUnit(val) ? `[column-rule-width:${val}]` : ""
+    ],
+    [
+      "column-span",
+      (val) => `[column-span:${getCustomVal(val)}]`
+    ],
+    [
+      "column-width",
+      (val) => isUnit(val) ? `[column-width:${val}]` : ""
+    ],
+    [
+      "columns",
+      (val) => `[columns:${getCustomVal(val)}]`
+    ],
+    [
+      "contain-intrinsic-size",
+      (val) => `[contain-intrinsic-size:${getCustomVal(val)}]`
+    ],
+    [
+      "content",
+      (val) => `content-[${getCustomVal(val)}]`
+    ],
+    [
+      "content-visibility",
+      (val) => `[content-visibility:${getCustomVal(val)}]`
+    ],
+    [
+      "counter-increment",
+      (val) => `[content-increment:${getCustomVal(val)}]`
+    ],
+    [
+      "counter-reset",
+      (val) => `[counter-reset:${getCustomVal(val)}]`
+    ],
+    [
+      "counter-set",
+      (val) => `[counter-set:${getCustomVal(val)}]`
+    ],
+    [
+      "cursor",
+      {
+        auto: "cursor-auto",
+        default: "cursor-default",
+        pointer: "cursor-pointer",
+        wait: "cursor-wait",
+        text: "cursor-text",
+        move: "cursor-move",
+        help: "cursor-help",
+        "not-allowed": "cursor-not-allowed"
+      }
+    ],
+    [
+      "direction",
+      {
+        ltr: "[direction:ltr]",
+        rtl: "[direction:rtl]",
+        inherit: "[direction:inherit]",
+        initial: "[direction:initial]"
+      }
+    ],
+    [
+      "display",
+      {
+        block: "block",
+        "inline-block": "inline-block",
+        inline: "inline",
+        flex: "flex",
+        "inline-flex": "inline-flex",
+        table: "table",
+        "inline-table": "inline-table",
+        "table-caption": "table-caption",
+        "table-cell": "table-cell",
+        "table-column": "table-column",
+        "table-column-group": "table-column-group",
+        "table-footer-group": "table-footer-group",
+        "table-header-group": "table-header-group",
+        "table-row-group": "table-row-group",
+        "table-row": "table-row",
+        "flow-root": "flow-root",
+        grid: "grid",
+        "inline-grid": "inline-grid",
+        contents: "contents",
+        "list-item": "list-item",
+        none: "hidden"
+      }
+    ],
+    [
+      "empty-cells",
+      {
+        hide: "[empty-cells:hide]",
+        show: "[empty-cells:show]",
+        inherit: "[empty-cells:inherit]",
+        initial: "[empty-cells:initial]"
+      }
+    ],
+    [
+      "fill",
+      (val) => {
+        var _a;
+        return (_a = { currentColor: "fill-current", currentcolor: "fill-current" }[val]) !== null && _a !== void 0 ? _a : isColor(val, !0) ? `fill-[${getCustomVal(val)}]` : "";
+      }
+    ],
+    [
+      "filter",
+      (val) => {
+        const defaultVal = { none: "filter-none" }[val];
+        if (defaultVal)
+          return defaultVal;
+        const filterValConfig = {
+          blur: (v2) => {
+            var _a, _b;
+            return `blur-${(_b = (_a = customTheme.blur) === null || _a === void 0 ? void 0 : _a[v2]) !== null && _b !== void 0 ? _b : `[${v2}]`}`;
+          },
+          brightness: (v2) => {
+            var _a, _b;
+            return `brightness-${(_b = (_a = customTheme.brightness) === null || _a === void 0 ? void 0 : _a[v2]) !== null && _b !== void 0 ? _b : `[${v2}]`}`;
+          },
+          contrast: (v2) => {
+            var _a, _b;
+            return `contrast-${(_b = (_a = customTheme.contrast) === null || _a === void 0 ? void 0 : _a[v2]) !== null && _b !== void 0 ? _b : `[${v2}]`}`;
+          },
+          grayscale: (v2) => {
+            var _a, _b;
+            return `grayscale-${(_b = (_a = customTheme.grayscale) === null || _a === void 0 ? void 0 : _a[v2]) !== null && _b !== void 0 ? _b : `[${v2}]`}`;
+          },
+          "hue-rotate": (v2) => {
+            var _a, _b;
+            const t2 = hasNegative(v2);
+            return `${t2[0]}hue-rotate-${(_b = (_a = customTheme.grayscale) === null || _a === void 0 ? void 0 : _a[t2[1]]) !== null && _b !== void 0 ? _b : `[${t2[1]}]`}`;
+          },
+          invert: (v2) => {
+            var _a, _b;
+            return `invert-${(_b = (_a = customTheme.invert) === null || _a === void 0 ? void 0 : _a[v2]) !== null && _b !== void 0 ? _b : `[${v2}]`}`;
+          },
+          saturate: (v2) => {
+            var _a, _b;
+            return `saturate-${(_b = (_a = customTheme.saturate) === null || _a === void 0 ? void 0 : _a[v2]) !== null && _b !== void 0 ? _b : `[${v2}]`}`;
+          },
+          sepia: (v2) => {
+            var _a, _b;
+            return `sepia-${(_b = (_a = customTheme.sepia) === null || _a === void 0 ? void 0 : _a[v2]) !== null && _b !== void 0 ? _b : `[${v2}]`}`;
+          }
+        }, vals = getCustomVal(val).replace(/\(.+?\)/g, (v2) => v2.replace(/_/g, "")).split(")_").map((v2) => `${v2})`);
+        vals[vals.length - 1] = vals[vals.length - 1].slice(0, -1);
+        let canUse = !0;
+        const res = vals.map((v2) => {
+          var _a;
+          let canUsePipeV = !1, pipeV = "";
+          return useAllDefaultValues && (pipeV = (_a = getFilterDefaultVal(v2)) !== null && _a !== void 0 ? _a : "", pipeV.length > 0 && (canUsePipeV = !0)), pipeV = pipeV.length > 0 ? pipeV : v2.replace(/^([a-zA-Z0-9_-]+)\((.+?)\)$/, (r2, k2, v3) => {
+            var _a2, _b;
+            return canUsePipeV = !0, (_b = (_a2 = filterValConfig[k2]) === null || _a2 === void 0 ? void 0 : _a2.call(filterValConfig, v3)) !== null && _b !== void 0 ? _b : canUse = !1;
+          }), canUsePipeV ? pipeV : "";
+        });
+        return canUse ? `filter ${[...new Set(res)].join(" ")}` : `[filter:${getCustomVal(val)}]`;
+      }
+    ],
+    [
+      "flex",
+      (val) => {
+        var _a;
+        return (_a = { "1 1 0%": "flex-1", "1 1 auto": "flex-auto", "0 1 auto": "flex-initial", none: "flex-none" }[val]) !== null && _a !== void 0 ? _a : `flex-[${getCustomVal(val)}]`;
+      }
+    ],
+    [
+      "flex-basis",
+      (val) => isUnit(val) ? `[flex-basis:${val}]` : ""
+    ],
+    [
+      "flex-direction",
+      {
+        row: "flex-row",
+        "row-reverse": "flex-row-reverse",
+        column: "flex-col",
+        "column-reverse": "flex-col-reverse"
+      }
+    ],
+    [
+      "flex-flow",
+      (val) => `[flex-flow:${getCustomVal(val)}]`
+    ],
+    [
+      "flex-grow",
+      (val) => {
+        var _a;
+        return isUnit(val) ? (_a = { 0: "flex-grow-0", 1: "flex-grow" }[val]) !== null && _a !== void 0 ? _a : `flex-grow-[${val}]` : "";
+      }
+    ],
+    [
+      "flex-shrink",
+      (val) => {
+        var _a;
+        return isUnit(val) ? (_a = { 0: "flex-shrink-0", 1: "flex-shrink" }[val]) !== null && _a !== void 0 ? _a : `flex-shrink-[${val}]` : "";
+      }
+    ],
+    [
+      "flex-wrap",
+      {
+        wrap: "flex-wrap",
+        "wrap-reverse": "flex-wrap-reverse",
+        nowrap: "flex-nowrap"
+      }
+    ],
+    [
+      "float",
+      {
+        right: "float-right",
+        left: "float-left",
+        none: "float-none"
+      }
+    ],
+    [
+      "font",
+      (val) => `[font:${getCustomVal(val)}]`
+    ],
+    [
+      "font-family",
+      (val) => `font-[${getCustomVal(val)}]`
+    ],
+    [
+      "font-size",
+      (val) => isUnit(val) ? `text-[${val}]` : ""
+    ],
+    [
+      "font-size-adjust",
+      (val) => isUnit(val) ? `[font-size-adjust:${val}]` : ""
+    ],
+    [
+      "-webkit-font-smoothing",
+      {
+        antialiased: "antialiased",
+        auto: "subpixel-antialiased"
+      }
+    ],
+    [
+      "-moz-osx-font-smoothing",
+      {
+        grayscale: "antialiased",
+        auto: "subpixel-antialiased"
+      }
+    ],
+    [
+      "font-stretch",
+      {
+        wider: "[font-stretch:wider]",
+        narrower: "[font-stretch:narrower]",
+        "ultra-condensed": "[font-stretch:ultra-condensed]",
+        "extra-condensed": "[font-stretch:extra-condensed]",
+        condensed: "[font-stretch:condensed]",
+        "semi-condensed": "[font-stretch:semi-condensed]",
+        normal: "[font-stretch:normal]",
+        "semi-expanded": "[font-stretch:semi-expanded]",
+        expanded: "[font-stretch:expanded]",
+        "extra-expanded": "[font-stretch:extra-expanded]",
+        "ultra-expanded": "[font-stretch:ultra-expanded]",
+        inherit: "[font-stretch:inherit]",
+        initial: "[font-stretch:initial]"
+      }
+    ],
+    [
+      "font-style",
+      {
+        italic: "italic",
+        normal: "not-italic"
+      }
+    ],
+    [
+      "font-variant",
+      {
+        normal: "[font-variant:normal]",
+        "small-caps": "[font-variant:small-caps]",
+        inherit: "[font-variant:inherit]",
+        initial: "[font-variant:initial]"
+      }
+    ],
+    [
+      "font-variant-numeric",
+      {
+        normal: "normal-nums",
+        ordinal: "ordinal",
+        "slashed-zero": "slashed-zero",
+        "lining-nums": "lining-nums",
+        "oldstyle-nums": "oldstyle-nums",
+        "proportional-nums": "proportional-nums",
+        "tabular-nums": "tabular-nums",
+        "diagonal-fractions": "diagonal-fractions",
+        "stacked-fractions": "stacked-fractions"
+      }
+    ],
+    [
+      "font-variation-settings",
+      (val) => `[font-variation-settings:${getCustomVal(val)}]`
+    ],
+    [
+      "font-weight",
+      (val) => isUnit(val) ? `font-[${val}]` : ""
+    ],
+    [
+      "gap",
+      (val) => {
+        var _a;
+        return (_a = { 0: "gap-0" }[val]) !== null && _a !== void 0 ? _a : isUnit(val) ? `gap-[${val}]` : "";
+      }
+    ],
+    [
+      "grid",
+      (val) => `[grid:${getCustomVal(val)}]`
+    ],
+    [
+      "grid-area",
+      (val) => `[grid-area:${getCustomVal(val)}]`
+    ],
+    [
+      "grid-auto-columns",
+      (val) => {
+        var _a;
+        return (_a = {
+          auto: "auto-cols-auto",
+          "min-content": "auto-cols-min",
+          "max-content": "auto-cols-max",
+          "minmax(0, 1fr)": "auto-cols-fr"
+        }[val]) !== null && _a !== void 0 ? _a : `auto-cols-[${getCustomVal(val)}]`;
+      }
+    ],
+    [
+      "grid-auto-flow",
+      (val) => {
+        var _a;
+        return (_a = {
+          row: "grid-flow-row",
+          column: "grid-flow-col",
+          row_dense: "grid-flow-row-dense",
+          column_dense: "grid-flow-col-dense"
+        }[getCustomVal(val)]) !== null && _a !== void 0 ? _a : "";
+      }
+    ],
+    [
+      "grid-auto-rows",
+      (val) => {
+        var _a;
+        return (_a = {
+          auto: "auto-rows-auto",
+          "min-content": "auto-rows-min",
+          "max-content": "auto-rows-max",
+          "minmax(0, 1fr)": "auto-rows-fr"
+        }[val]) !== null && _a !== void 0 ? _a : `auto-rows-[${getCustomVal(val)}]`;
+      }
+    ],
+    [
+      "grid-column",
+      (val) => {
+        var _a;
+        return (_a = {
+          auto: "col-auto",
+          "span 1 / span 1": "col-span-1",
+          "span 2 / span 2": "col-span-2",
+          "span 3 / span 3": "col-span-3",
+          "span 4 / span 4": "col-span-4",
+          "span 5 / span 5": "col-span-5",
+          "span 6 / span 6": "col-span-6",
+          "span 7 / span 7": "col-span-7",
+          "span 8 / span 8": "col-span-8",
+          "span 9 / span 9": "col-span-9",
+          "span 10 / span 10": "col-span-10",
+          "span 11 / span 11": "col-span-11",
+          "span 12 / span 12": "col-span-12",
+          "1 / -1": "col-span-full"
+        }[val]) !== null && _a !== void 0 ? _a : `col-[${getCustomVal(val)}]`;
+      }
+    ],
+    [
+      "grid-column-end",
+      (val) => {
+        var _a;
+        return (_a = {
+          1: "col-end-1",
+          2: "col-end-2",
+          3: "col-end-3",
+          4: "col-end-4",
+          5: "col-end-5",
+          6: "col-end-6",
+          7: "col-end-7",
+          8: "col-end-8",
+          9: "col-end-9",
+          10: "col-end-10",
+          11: "col-end-11",
+          12: "col-end-12",
+          13: "col-end-13",
+          auto: "col-end-auto"
+        }[val]) !== null && _a !== void 0 ? _a : `col-end-[${getCustomVal(val)}]`;
+      }
+    ],
+    [
+      "grid-column-gap",
+      (val) => {
+        var _a;
+        return (_a = { 0: "gap-x-0" }[val]) !== null && _a !== void 0 ? _a : isUnit(val) ? `gap-x-[${val}]` : "";
+      }
+    ],
+    [
+      "grid-column-start",
+      (val) => {
+        var _a;
+        return (_a = {
+          1: "col-start-1",
+          2: "col-start-2",
+          3: "col-start-3",
+          4: "col-start-4",
+          5: "col-start-5",
+          6: "col-start-6",
+          7: "col-start-7",
+          8: "col-start-8",
+          9: "col-start-9",
+          10: "col-start-10",
+          11: "col-start-11",
+          12: "col-start-12",
+          13: "col-start-13",
+          auto: "col-start-auto"
+        }[val]) !== null && _a !== void 0 ? _a : `col-start-[${getCustomVal(val)}]`;
+      }
+    ],
+    [
+      "grid-gap",
+      (val) => {
+        var _a;
+        return (_a = { 0: "gap-0" }[val]) !== null && _a !== void 0 ? _a : isUnit(val) ? `gap-[${val}]` : "";
+      }
+    ],
+    [
+      "grid-row",
+      (val) => {
+        var _a;
+        return (_a = {
+          auto: "row-auto",
+          "span 1 / span 1": "row-span-1",
+          "span 2 / span 2": "row-span-2",
+          "span 3 / span 3": "row-span-3",
+          "span 4 / span 4": "row-span-4",
+          "span 5 / span 5": "row-span-5",
+          "span 6 / span 6": "row-span-6",
+          "1 / -1": "row-span-full"
+        }[val]) !== null && _a !== void 0 ? _a : `row-[${getCustomVal(val)}]`;
+      }
+    ],
+    [
+      "grid-row-end",
+      (val) => {
+        var _a;
+        return (_a = {
+          1: "row-end-1",
+          2: "row-end-2",
+          3: "row-end-3",
+          4: "row-end-4",
+          5: "row-end-5",
+          6: "row-end-6",
+          7: "row-end-7",
+          auto: "row-end-auto"
+        }[val]) !== null && _a !== void 0 ? _a : `row-end-[${getCustomVal(val)}]`;
+      }
+    ],
+    [
+      "grid-row-gap",
+      (val) => {
+        var _a;
+        return (_a = { 0: "gap-y-0" }[val]) !== null && _a !== void 0 ? _a : isUnit(val) ? `gap-y-[${val}]` : "";
+      }
+    ],
+    [
+      "grid-row-start",
+      (val) => {
+        var _a;
+        return (_a = {
+          1: "row-start-1",
+          2: "row-start-2",
+          3: "row-start-3",
+          4: "row-start-4",
+          5: "row-start-5",
+          6: "row-start-6",
+          7: "row-start-7",
+          auto: "row-start-auto"
+        }[val]) !== null && _a !== void 0 ? _a : `row-start-[${getCustomVal(val)}]`;
+      }
+    ],
+    [
+      "grid-rows",
+      (val) => `[grid-rows:${getCustomVal(val)}]`
+    ],
+    [
+      "grid-template",
+      (val) => `[grid-template:${getCustomVal(val)}]`
+    ],
+    [
+      "grid-template-areas",
+      (val) => `[grid-template-areas:${getCustomVal(val)}]`
+    ],
+    [
+      "grid-template-columns",
+      (val) => {
+        var _a;
+        return (_a = {
+          "repeat(1,minmax(0,1fr))": "grid-cols-1",
+          "repeat(2,minmax(0,1fr))": "grid-cols-2",
+          "repeat(3,minmax(0,1fr))": "grid-cols-3",
+          "repeat(4,minmax(0,1fr))": "grid-cols-4",
+          "repeat(5,minmax(0,1fr))": "grid-cols-5",
+          "repeat(6,minmax(0,1fr))": "grid-cols-6",
+          "repeat(7,minmax(0,1fr))": "grid-cols-7",
+          "repeat(8,minmax(0,1fr))": "grid-cols-8",
+          "repeat(9,minmax(0,1fr))": "grid-cols-9",
+          "repeat(10,minmax(0,1fr))": "grid-cols-10",
+          "repeat(11,minmax(0,1fr))": "grid-cols-11",
+          "repeat(12,minmax(0,1fr))": "grid-cols-12",
+          none: "grid-cols-none"
+        }[getCustomVal(val).replace(/_/g, "")]) !== null && _a !== void 0 ? _a : `grid-cols-[${getCustomVal(val)}]`;
+      }
+    ],
+    [
+      "grid-template-rows",
+      (val) => {
+        var _a;
+        return (_a = {
+          "repeat(1,minmax(0,1fr))": "grid-rows-1",
+          "repeat(2,minmax(0,1fr))": "grid-rows-2",
+          "repeat(3,minmax(0,1fr))": "grid-rows-3",
+          "repeat(4,minmax(0,1fr))": "grid-rows-4",
+          "repeat(5,minmax(0,1fr))": "grid-rows-5",
+          "repeat(6,minmax(0,1fr))": "grid-rows-6",
+          none: "grid-rows-none"
+        }[getCustomVal(val).replace(/_/g, "")]) !== null && _a !== void 0 ? _a : `grid-rows-[${getCustomVal(val)}]`;
+      }
+    ],
+    [
+      "hanging-punctuation",
+      {
+        none: "[hanging-punctuation:none]",
+        first: "[hanging-punctuation:first]",
+        last: "[hanging-punctuation:last]",
+        "allow-end": "[hanging-punctuation:allow-end]",
+        "force-end": "[hanging-punctuation:force-end]",
+        initial: "[hanging-punctuation:initial]"
+      }
+    ],
+    [
+      "height",
+      (val) => isUnit(val) ? `h-${getUnitMetacharactersVal(val, [CustomSelect.vw]) || `[${val}]`}` : ""
+    ],
+    [
+      "icon",
+      (val) => `[icon:${getCustomVal(val)}]`
+    ],
+    [
+      "image-orientation",
+      (val) => `[image-orientation:${getCustomVal(val)}]`
+    ],
+    [
+      "justify-content",
+      {
+        "flex-start": "justify-start",
+        "flex-end": "justify-end",
+        center: "justify-center",
+        "space-between": "justify-between",
+        "space-around": "justify-around",
+        "space-evenly": "justify-evenly"
+      }
+    ],
+    [
+      "justify-items",
+      {
+        start: "justify-items-start",
+        end: "justify-items-end",
+        center: "justify-items-center",
+        stretch: "justify-items-stretch"
+      }
+    ],
+    [
+      "justify-self",
+      {
+        auto: "justify-self-auto",
+        start: "justify-self-start",
+        end: "justify-self-end",
+        center: "justify-self-center",
+        stretch: "justify-self-stretch"
+      }
+    ],
+    [
+      "left",
+      (val) => {
+        const t2 = hasNegative(val);
+        return isUnit(val) ? `${t2[0]}left-${getUnitMetacharactersVal(t2[1], [CustomSelect.vw, CustomSelect.vh]) || `[${t2[1]}]`}` : "";
+      }
+    ],
+    [
+      "letter-spacing",
+      (val) => {
+        var _a;
+        return (_a = { "-0.05em": "tracking-tighter", "-0.025em": "tracking-tight", "0em": "tracking-normal", "0.025em": "tracking-wide", "0.05em": "tracking-wider", "0.1em": "tracking-widest" }[val]) !== null && _a !== void 0 ? _a : isUnit(val) ? `tracking-[${val}]` : "";
+      }
+    ],
+    [
+      "line-height",
+      (val) => {
+        var _a;
+        return (_a = { 1: "leading-none", 2: "leading-loose", "1.25": "leading-tight", "1.375": "leading-snug", "1.5": "leading-normal", "1.625": "leading-relaxed" }[val]) !== null && _a !== void 0 ? _a : isUnit(val) ? `leading-[${val}]` : "";
+      }
+    ],
+    [
+      "list-style",
+      (val) => `[list-style:${getCustomVal(val)}]`
+    ],
+    [
+      "list-style-image",
+      (val) => `[list-style-image:${getCustomVal(val)}]`
+    ],
+    [
+      "list-style-position",
+      (val) => {
+        var _a;
+        return (_a = {
+          inside: "list-inside",
+          outside: "list-outside"
+        }[val]) !== null && _a !== void 0 ? _a : `[list-style-position:${getCustomVal(val)}]`;
+      }
+    ],
+    [
+      "list-style-type",
+      (val) => {
+        var _a;
+        return (_a = {
+          none: "list-none",
+          disc: "list-disc",
+          decimal: "list-decimal"
+        }[val]) !== null && _a !== void 0 ? _a : `list-[${getCustomVal(val)}]`;
+      }
+    ],
+    [
+      "logical-height",
+      (val) => isUnit(val) ? `[logical-height:${val}]` : ""
+    ],
+    [
+      "logical-width",
+      (val) => isUnit(val) ? `[logical-width:${val}]` : ""
+    ],
+    [
+      "isolation",
+      {
+        isolate: "isolate",
+        auto: "isolation-auto"
+      }
+    ],
+    [
+      "margin",
+      (val) => {
+        const v2 = ((val2) => {
+          const r2 = { 0: "m_0", "0px": "m_0", auto: "m_auto" }[val2];
+          if (r2)
+            return r2;
+          let vals = val2.split(" ").filter((v3) => v3 !== "");
+          return vals.filter((v3) => !isUnit(v3)).length > 0 ? "" : (useAllDefaultValues ? vals = vals.map((v3) => {
+            var _a;
+            return (_a = getRemDefaultVal(v3)) !== null && _a !== void 0 ? _a : `[${v3}]`;
+          }) : vals = vals.map((v3) => `[${v3}]`), vals.length === 1 || new Set(vals).size === 1 ? `m_${vals[0]}` : vals.length === 2 ? `mx_${vals[1]} my_${vals[0]}` : vals.length === 3 ? vals[0] === vals[2] ? `mx_${vals[1]} my_${vals[0]}` : `mt_${vals[0]} mx_${vals[1]} mb_${vals[2]}` : vals.length === 4 ? vals[0] === vals[2] ? vals[1] === vals[3] ? `mx_${vals[1]} my_${vals[0]}` : `ml_${vals[3]} mr_${vals[1]} my_${vals[0]}` : vals[1] === vals[3] ? vals[0] === vals[2] ? `mx_${vals[1]} my_${vals[0]}` : `ml_${vals[3]} mr_${vals[1]} my_${vals[0]}` : `mt_${vals[0]} mr_${vals[1]} mb_${vals[2]} ml_${vals[3]}` : "");
+        })(val);
+        return v2 === "" ? "" : v2.split(" ").map((t2) => t2.includes("-") ? `-${t2.replace("-", "").replace("_", "-")}` : t2.replace("_", "-")).join(" ");
+      }
+    ],
+    [
+      "margin-bottom",
+      (val) => {
+        var _a;
+        const t2 = hasNegative(val);
+        return (_a = { 0: "mb-0", "0px": "mb-0", auto: "mb-auto" }[val]) !== null && _a !== void 0 ? _a : isUnit(val) ? `${t2[0]}mb-${useAllDefaultValues && getRemDefaultVal(t2[1]) || `[${t2[1]}]`}` : "";
+      }
+    ],
+    [
+      "margin-left",
+      (val) => {
+        var _a;
+        const t2 = hasNegative(val);
+        return (_a = { 0: "ml-0", "0px": "ml-0", auto: "ml-auto" }[val]) !== null && _a !== void 0 ? _a : isUnit(val) ? `${t2[0]}ml-${useAllDefaultValues && getRemDefaultVal(t2[1]) || `[${t2[1]}]`}` : "";
+      }
+    ],
+    [
+      "margin-right",
+      (val) => {
+        var _a;
+        const t2 = hasNegative(val);
+        return (_a = { 0: "mr-0", "0px": "mr-0", auto: "mr-auto" }[val]) !== null && _a !== void 0 ? _a : isUnit(val) ? `${t2[0]}mr-${useAllDefaultValues && getRemDefaultVal(t2[1]) || `[${t2[1]}]`}` : "";
+      }
+    ],
+    [
+      "margin-top",
+      (val) => {
+        var _a;
+        const t2 = hasNegative(val);
+        return (_a = { 0: "mt-0", "0px": "mt-0", auto: "mt-auto" }[val]) !== null && _a !== void 0 ? _a : isUnit(val) ? `${t2[0]}mt-${useAllDefaultValues && getRemDefaultVal(t2[1]) || `[${t2[1]}]`}` : "";
+      }
+    ],
+    [
+      "mask",
+      (val) => `[mask:${getCustomVal(val)}]`
+    ],
+    [
+      "mask-clip",
+      (val) => `[mask-clip:${getCustomVal(val)}]`
+    ],
+    [
+      "mask-composite",
+      (val) => `[mask-composite:${getCustomVal(val)}]`
+    ],
+    [
+      "mask-image",
+      (val) => `[mask-image:${getCustomVal(val)}]`
+    ],
+    [
+      "mask-origin",
+      (val) => `[mask-origin:${getCustomVal(val)}]`
+    ],
+    [
+      "mask-position",
+      (val) => `[mask-position:${getCustomVal(val)}]`
+    ],
+    [
+      "mask-repeat",
+      (val) => `[mask-repeat:${getCustomVal(val)}]`
+    ],
+    [
+      "mask-size",
+      (val) => `[mask-size:${getCustomVal(val)}]`
+    ],
+    [
+      "max-height",
+      (val) => {
+        var _a;
+        return isUnit(val) ? (_a = { "0px": "max-h-0", "100%": "max-h-full", "100vh": "max-h-screen" }[val]) !== null && _a !== void 0 ? _a : `[${val}]` : "";
+      }
+    ],
+    [
+      "max-width",
+      (val) => {
+        var _a;
+        return isUnit(val) ? (_a = { none: "max-w-none", "100%": "max-w-full", "min-content": "max-w-min", "max-content": "max-w-max" }[val]) !== null && _a !== void 0 ? _a : `[${val}]` : "";
+      }
+    ],
+    [
+      "min-height",
+      (val) => {
+        var _a;
+        return isUnit(val) ? (_a = { "0px": "min-h-0", "100%": "min-h-full", "100vh": "min-h-screen" }[val]) !== null && _a !== void 0 ? _a : `[${val}]` : "";
+      }
+    ],
+    [
+      "min-width",
+      (val) => {
+        var _a;
+        return isUnit(val) ? (_a = { "0px": "min-w-0", "100%": "min-w-full", "min-content": "min-w-min", "max-content": "min-w-max" }[val]) !== null && _a !== void 0 ? _a : `[${val}]` : "";
+      }
+    ],
+    [
+      "mix-blend-mode",
+      {
+        normal: "mix-blend-normal",
+        multiply: "mix-blend-multiply",
+        screen: "mix-blend-screen",
+        overlay: "mix-blend-overlay",
+        darken: "mix-blend-darken",
+        lighten: "mix-blend-lighten",
+        "color-dodge": "mix-blend-color-dodge",
+        "color-burn": "mix-blend-color-burn",
+        "hard-light": "mix-blend-hard-light",
+        "soft-light": "mix-blend-soft-light",
+        difference: "mix-blend-difference",
+        exclusion: "mix-blend-exclusion",
+        hue: "mix-blend-hue",
+        saturation: "mix-blend-saturation",
+        color: "mix-blend-color",
+        luminosity: "mix-blend-luminosity"
+      }
+    ],
+    [
+      "nav-down",
+      (val) => `[nav-down:${getCustomVal(val)}]`
+    ],
+    [
+      "nav-index",
+      (val) => isUnit(val) ? `[nav-index:${val}]` : ""
+    ],
+    [
+      "nav-left",
+      (val) => isUnit(val) ? `[nav-left:${val}]` : ""
+    ],
+    [
+      "nav-right",
+      (val) => isUnit(val) ? `[nav-right:${val}]` : ""
+    ],
+    [
+      "nav-up",
+      (val) => isUnit(val) ? `[nav-up:${val}]` : ""
+    ],
+    [
+      "object-fit",
+      {
+        contain: "object-contain",
+        cover: "object-cover",
+        fill: "object-fill",
+        none: "object-none",
+        "scale-down": "object-scale-down"
+      }
+    ],
+    [
+      "object-position",
+      (val) => {
+        var _a;
+        return (_a = {
+          bottom: "object-bottom",
+          center: "object-center",
+          left: "object-left",
+          left_bottom: "object-left-bottom",
+          left_top: "object-left-top",
+          right: "object-right",
+          right_bottom: "object-right-bottom",
+          right_top: "object-right-top",
+          top: "object-top"
+        }[getCustomVal(val)]) !== null && _a !== void 0 ? _a : "";
+      }
+    ],
+    [
+      "opacity",
+      (val) => {
+        var _a;
+        return (_a = { 0: "opacity-0", 1: "opacity-100", "0.05": "opacity-5", "0.1": "opacity-10", "0.2": "opacity-20", "0.25": "opacity-25", "0.3": "opacity-30", "0.4": "opacity-40", "0.5": "opacity-50", "0.6": "opacity-60", "0.7": "opacity-70", "0.75": "opacity-75", "0.8": "opacity-80", "0.9": "opacity-90", "0.95": "opacity-95" }[val]) !== null && _a !== void 0 ? _a : isUnit(val) ? `opacity-[${val}]` : "";
+      }
+    ],
+    [
+      "order",
+      (val) => {
+        var _a;
+        return (_a = { 0: "order-none", 1: "order-1", 2: "order-2", 3: "order-3", 4: "order-4", 5: "order-5", 6: "order-6", 7: "order-7", 8: "order-8", 9: "order-9", 10: "order-10", 11: "order-11", 12: "order-12", 9999: "order-last", "-9999": "order-first" }[val]) !== null && _a !== void 0 ? _a : isUnit(val) ? `order-[${val}]` : "";
+      }
+    ],
+    [
+      "outline",
+      (val) => `outline-[${getCustomVal(val)}]`
+    ],
+    [
+      "outline-color",
+      (val) => isColor(val, !0) ? `outline-[${getCustomVal(val)}]` : ""
+    ],
+    [
+      "outline-offset",
+      (val) => isUnit(val) ? `outline-offset-[${val}]` : ""
+    ],
+    [
+      "outline-style",
+      {
+        none: "outline-[none]",
+        dotted: "outline-dotted",
+        dashed: "outline-dashed",
+        solid: "[outline-style:solid]",
+        double: "outline-double",
+        groove: "[outline-style:groove]",
+        ridge: "[outline-style:ridge]",
+        inset: "[outline-style:inset]",
+        outset: "[outline-style:outset]"
+      }
+    ],
+    [
+      "outline-width",
+      (val) => isUnit(val) ? `outline-[${val}]` : ""
+    ],
+    [
+      "overflow",
+      {
+        auto: "overflow-auto",
+        hidden: "overflow-hidden",
+        visible: "overflow-visible",
+        scroll: "overflow-scroll"
+      }
+    ],
+    [
+      "overflow-anchor",
+      (val) => `[overflow-anchor:${getCustomVal(val)}]`
+    ],
+    [
+      "overflow-wrap",
+      (val) => {
+        var _a;
+        return (_a = { "break-word": "break-words" }[val]) !== null && _a !== void 0 ? _a : `[overflow-wrap:${getCustomVal(val)}]`;
+      }
+    ],
+    [
+      "overflow-x",
+      {
+        auto: "overflow-x-auto",
+        hidden: "overflow-x-hidden",
+        visible: "overflow-x-visible",
+        scroll: "overflow-x-scroll"
+      }
+    ],
+    [
+      "overflow-y",
+      {
+        auto: "overflow-y-auto",
+        hidden: "overflow-y-hidden",
+        visible: "overflow-y-visible",
+        scroll: "overflow-y-scroll"
+      }
+    ],
+    [
+      "overscroll-behavior",
+      {
+        auto: "overscroll-auto",
+        contain: "overscroll-contain",
+        none: "overscroll-none"
+      }
+    ],
+    [
+      "overscroll-behavior-x",
+      {
+        auto: "overscroll-x-auto",
+        contain: "overscroll-x-contain",
+        none: "overscroll-x-none"
+      }
+    ],
+    [
+      "overscroll-behavior-y",
+      {
+        auto: "overscroll-y-auto",
+        contain: "overscroll-y-contain",
+        none: "overscroll-y-none"
+      }
+    ],
+    [
+      "padding",
+      (val) => {
+        const r2 = { 0: "p-0", "0px": "p-0" }[val];
+        if (r2)
+          return r2;
+        let vals = val.split(" ").filter((v2) => v2 !== "");
+        return vals.filter((v2) => !isUnit(v2)).length > 0 ? "" : (useAllDefaultValues ? vals = vals.map((v2) => {
+          var _a;
+          return (_a = getRemDefaultVal(v2)) !== null && _a !== void 0 ? _a : `[${v2}]`;
+        }) : vals = vals.map((v2) => `[${v2}]`), vals.length === 1 || new Set(vals).size === 1 ? `p-${vals[0]}` : vals.length === 2 ? `px-${vals[1]} py-${vals[0]}` : vals.length === 3 ? vals[0] === vals[2] ? `px-${vals[1]} py-${vals[0]}` : `pt-${vals[0]} px-${vals[1]} pb-${vals[2]}` : vals.length === 4 ? vals[0] === vals[2] ? vals[1] === vals[3] ? `px-${vals[1]} py-${vals[0]}` : `pl-${vals[3]} pr-${vals[1]} py-${vals[0]}` : vals[1] === vals[3] ? vals[0] === vals[2] ? `px-${vals[1]} py-${vals[0]}` : `pl-${vals[3]} pr-${vals[1]} py-${vals[0]}` : `pt-${vals[0]} pr-${vals[1]} pb-${vals[2]} pl-${vals[3]}` : "");
+      }
+    ],
+    [
+      "padding-bottom",
+      (val) => {
+        var _a;
+        return (_a = { 0: "pb-0", "0px": "pb-0" }[val]) !== null && _a !== void 0 ? _a : isUnit(val) ? `pb-${useAllDefaultValues && getRemDefaultVal(val) || `[${val}]`}` : "";
+      }
+    ],
+    [
+      "padding-left",
+      (val) => {
+        var _a;
+        return (_a = { 0: "pl-0", "0px": "pl-0" }[val]) !== null && _a !== void 0 ? _a : isUnit(val) ? `pl-${useAllDefaultValues && getRemDefaultVal(val) || `[${val}]`}` : "";
+      }
+    ],
+    [
+      "padding-right",
+      (val) => {
+        var _a;
+        return (_a = { 0: "pr-0", "0px": "pr-0" }[val]) !== null && _a !== void 0 ? _a : isUnit(val) ? `pr-${useAllDefaultValues && getRemDefaultVal(val) || `[${val}]`}` : "";
+      }
+    ],
+    [
+      "padding-top",
+      (val) => {
+        var _a;
+        return (_a = { 0: "pt-0", "0px": "pt-0" }[val]) !== null && _a !== void 0 ? _a : isUnit(val) ? `pt-${useAllDefaultValues && getRemDefaultVal(val) || `[${val}]`}` : "";
+      }
+    ],
+    [
+      "page-break-after",
+      {
+        auto: "[page-break-after:auto]",
+        always: "[page-break-after:always]",
+        avoid: "[page-break-after:avoid]",
+        left: "[page-break-after:left]",
+        right: "[page-break-after:right]",
+        inherit: "[page-break-after:inherit]",
+        initial: "[page-break-after:initial]"
+      }
+    ],
+    [
+      "page-break-before",
+      {
+        auto: "[page-break-before:auto]",
+        always: "[page-break-before:always]",
+        avoid: "[page-break-before:avoid]",
+        left: "[page-break-before:left]",
+        right: "[page-break-before:right]",
+        inherit: "[page-break-before:inherit]",
+        initial: "[page-break-before:initial]"
+      }
+    ],
+    [
+      "page-break-inside",
+      {
+        auto: "[page-break-inside:auto]",
+        avoid: "[page-break-inside:avoid]",
+        inherit: "[page-break-inside:inherit]",
+        initial: "[page-break-inside:initial]"
+      }
+    ],
+    [
+      "perspective",
+      (val) => isUnit(val) ? `[perspective:${val}]` : ""
+    ],
+    [
+      "perspective-origin",
+      (val) => `[perspective-origin:${getCustomVal(val)}]`
+    ],
+    [
+      "place-content",
+      {
+        center: "place-content-center",
+        start: "place-content-start",
+        end: "place-content-end",
+        "space-between": "place-content-between",
+        "space-around": "place-content-around",
+        "space-evenly": "place-content-evenly",
+        stretch: "place-content-stretch"
+      }
+    ],
+    [
+      "place-items",
+      {
+        start: "place-items-start",
+        end: "place-items-end",
+        center: "place-items-center",
+        stretch: "place-items-stretch"
+      }
+    ],
+    [
+      "place-self",
+      {
+        auto: "place-self-auto",
+        start: "place-self-start",
+        end: "place-self-end",
+        center: "place-self-center",
+        stretch: "place-self-stretch"
+      }
+    ],
+    [
+      "pointer-events",
+      {
+        none: "pointer-events-none",
+        auto: "pointer-events-auto"
+      }
+    ],
+    [
+      "position",
+      {
+        static: "static",
+        fixed: "fixed",
+        absolute: "absolute",
+        relative: "relative",
+        sticky: "sticky"
+      }
+    ],
+    [
+      "punctuation-trim",
+      {
+        none: "[punctuation-trim:none]",
+        start: "[punctuation-trim:start]",
+        end: "[punctuation-trim:end]",
+        "allow-end": "[punctuation-trim:allow-end]",
+        adjacent: "[punctuation-trim:adjacent]",
+        initial: "[punctuation-trim:initial]"
+      }
+    ],
+    [
+      "quotes",
+      (val) => `[quotes:${getCustomVal(val)}]`
+    ],
+    [
+      "resize",
+      {
+        none: "resize-none",
+        vertical: "resize-y",
+        horizontal: "resize-x",
+        both: "resize"
+      }
+    ],
+    [
+      "right",
+      (val) => {
+        const t2 = hasNegative(val);
+        return isUnit(val) ? `${t2[0]}right-${getUnitMetacharactersVal(t2[1], [CustomSelect.vw, CustomSelect.vh]) || `[${t2[1]}]`}` : "";
+      }
+    ],
+    [
+      "rotation",
+      (val) => `[rotation:${getCustomVal(val)}]`
+    ],
+    [
+      "row-gap",
+      (val) => {
+        var _a;
+        return (_a = { 0: "gap-y-0" }[val]) !== null && _a !== void 0 ? _a : isUnit(val) ? `gap-y-[${val}]` : "";
+      }
+    ],
+    [
+      "scroll-snap-align",
+      (val) => `[scroll-snap-align:${getCustomVal(val)}]`
+    ],
+    [
+      "scroll-snap-stop",
+      (val) => `[scroll-snap-stop:${getCustomVal(val)}]`
+    ],
+    [
+      "scroll-snap-type",
+      (val) => `[scroll-snap-type:${getCustomVal(val)}]`
+    ],
+    [
+      "scrollbar-width",
+      (val) => isUnit(val) ? `[scrollbar-width:${val}]` : ""
+    ],
+    [
+      "shape-image-threshold",
+      (val) => `[shape-image-threshold:${getCustomVal(val)}]`
+    ],
+    [
+      "shape-margin",
+      (val) => `[shape-margin:${getCustomVal(val)}]`
+    ],
+    [
+      "shape-outside",
+      (val) => `[shape-outside:${getCustomVal(val)}]`
+    ],
+    [
+      "stroke",
+      (val) => {
+        var _a;
+        return (_a = {
+          currentColor: "stroke-current",
+          currentcolor: "stroke-current"
+        }[val]) !== null && _a !== void 0 ? _a : isColor(val, !0) ? `stroke-[${getCustomVal(val)}]` : "";
+      }
+    ],
+    [
+      "stroke-width",
+      (val) => isUnit(val) ? `stroke-[${val}]` : ""
+    ],
+    [
+      "tab-size",
+      (val) => isUnit(val) ? `[tab-size:${val}]` : ""
+    ],
+    [
+      "table-layout",
+      {
+        auto: "table-auto",
+        fixed: "table-fixed"
+      }
+    ],
+    [
+      "target",
+      (val) => `[target:${getCustomVal(val)}]`
+    ],
+    [
+      "target-name",
+      (val) => `[target-name:${getCustomVal(val)}]`
+    ],
+    [
+      "target-new",
+      {
+        window: "[target-new:window]",
+        tab: "[target-new:tab]",
+        none: "[target-new:none]",
+        initial: "[target-new:initial]"
+      }
+    ],
+    [
+      "target-position",
+      {
+        above: "[target-position:above]",
+        behind: "[target-position:behind]",
+        front: "[target-position:front]",
+        back: "[target-position:back]",
+        initial: "[target-position:initial]"
+      }
+    ],
+    [
+      "text-align",
+      {
+        left: "text-left",
+        center: "text-center",
+        right: "text-right",
+        justify: "text-justify"
+      }
+    ],
+    [
+      "text-align-last",
+      {
+        auto: "[text-align-last:auto]",
+        left: "[text-align-last:left]",
+        right: "[text-align-last:right]",
+        center: "[text-align-last:center]",
+        justify: "[text-align-last:justify]",
+        start: "[text-align-last:start]",
+        end: "[text-align-last:end]",
+        initial: "[text-align-last:initial]",
+        inherit: "[text-align-last:inherit]"
+      }
+    ],
+    [
+      "text-decoration",
+      {
+        underline: "underline",
+        "line-through": "line-through",
+        none: "no-underline"
+      }
+    ],
+    [
+      "text-decoration-color",
+      (val) => isColor(val, !0) ? `[text-decoration-color:${getCustomVal(val)}]` : ""
+    ],
+    [
+      "text-decoration-line",
+      {
+        none: "[text-decoration-line:none]",
+        underline: "[text-decoration-line:underline]",
+        overline: "[text-decoration-line:overline]",
+        "line-through": "[text-decoration-line:line-through]",
+        initial: "[text-decoration-line:initial]",
+        inherit: "[text-decoration-line:inherit]"
+      }
+    ],
+    [
+      "text-decoration-skip-ink",
+      (val) => `[text-decoration-skip-ink:${getCustomVal(val)}]`
+    ],
+    [
+      "text-decoration-style",
+      {
+        solid: "[text-decoration-style:solid]",
+        double: "[text-decoration-style:double]",
+        dotted: "[text-decoration-style:dotted]",
+        dashed: "[text-decoration-style:dashed]",
+        wavy: "[text-decoration-style:wavy]",
+        initial: "[text-decoration-style:initial]",
+        inherit: "[text-decoration-style:inherit]"
+      }
+    ],
+    [
+      "text-emphasis-color",
+      (val) => isColor(val, !0) ? `[text-emphasis-color:${getCustomVal(val)}]` : ""
+    ],
+    [
+      "text-emphasis-position",
+      (val) => `[text-emphasis-position:${getCustomVal(val)}]`
+    ],
+    [
+      "text-emphasis-style",
+      (val) => `[text-emphasis-style:${getCustomVal(val)}]`
+    ],
+    [
+      "text-indent",
+      (val) => isUnit(val) ? `[text-indent:${val}]` : ""
+    ],
+    [
+      "text-justify",
+      {
+        auto: "[text-justify:auto]",
+        none: "[text-justify:none]",
+        "inter-word": "[text-justify:inter-word]",
+        "inter-ideograph": "[text-justify:inter-ideograph]",
+        "inter-cluster": "[text-justify:inter-cluster]",
+        distribute: "[text-justify:distribute]",
+        kashida: "[text-justify:kashida]",
+        initial: "[text-justify:initial]"
+      }
+    ],
+    [
+      "text-orientation",
+      (val) => `[text-orientation:${getCustomVal(val)}]`
+    ],
+    [
+      "text-outline",
+      (val) => `[text-outline:${getCustomVal(val)}]`
+    ],
+    [
+      "text-overflow",
+      (val) => {
+        var _a;
+        return (_a = {
+          ellipsis: "overflow-ellipsis",
+          clip: "overflow-clip"
+        }[val]) !== null && _a !== void 0 ? _a : `[text-overflow:${getCustomVal(val)}]`;
+      }
+    ],
+    [
+      "text-shadow",
+      (val) => `[text-shadow:${getCustomVal(val)}]`
+    ],
+    [
+      "text-transform",
+      {
+        uppercase: "uppercase",
+        lowercase: "lowercase",
+        capitalize: "capitalize",
+        none: "normal-case"
+      }
+    ],
+    [
+      "text-underline-offset",
+      (val) => `[text-underline-offset:${getCustomVal(val)}]`
+    ],
+    [
+      "text-underline-position",
+      (val) => `[text-underline-position:${getCustomVal(val)}]`
+    ],
+    [
+      "text-wrap",
+      {
+        normal: "[text-wrap:normal]",
+        none: "[text-wrap:none]",
+        unrestricted: "[text-wrap:unrestricted]",
+        suppress: "[text-wrap:suppress]",
+        initial: "[text-wrap:initial]"
+      }
+    ],
+    [
+      "top",
+      (val) => {
+        const t2 = hasNegative(val);
+        return isUnit(val) ? `${t2[0]}top-${getUnitMetacharactersVal(t2[1], [CustomSelect.vw, CustomSelect.vh]) || `[${t2[1]}]`}` : "";
+      }
+    ],
+    [
+      "transform",
+      (val) => {
+        const defaultVal = { none: "transform-none" }[val];
+        if (defaultVal)
+          return defaultVal;
+        const scaleDefaultVs = {
+          0: "0",
+          1: "100",
+          ".5": "50",
+          ".75": "75",
+          ".9": "90",
+          ".95": "95",
+          "1.05": "105",
+          "1.1": "110",
+          "1.25": "125",
+          "1.5": "150"
+        }, rotateDefaultVs = {
+          "0deg": "0",
+          "1deg": "1",
+          "2deg": "2",
+          "3deg": "3",
+          "6deg": "6",
+          "12deg": "12",
+          "45deg": "45",
+          "90deg": "90",
+          "180deg": "180"
+        }, skewDefaultVs = {
+          "0deg": "0",
+          "1deg": "1",
+          "2deg": "2",
+          "3deg": "3",
+          "6deg": "6",
+          "12deg": "12"
+        }, translateDefaultVs = {
+          "0px": "0",
+          "1px": "px",
+          "0.125rem": "0.5",
+          "0.25rem": "1",
+          "0.375rem": "1.5",
+          "0.5rem": "2",
+          "0.625rem": "2.5",
+          "0.75rem": "3",
+          "0.875rem": "3.5",
+          "1rem": "4",
+          "1.25rem": "5",
+          "1.5rem": "6",
+          "1.75rem": "7",
+          "2rem": "8",
+          "2.25rem": "9",
+          "2.5rem": "10",
+          "2.75rem": "11",
+          "3rem": "12",
+          "3.5rem": "14",
+          "4rem": "16",
+          "5rem": "20",
+          "6rem": "24",
+          "7rem": "28",
+          "8rem": "32",
+          "9rem": "36",
+          "10rem": "40",
+          "11rem": "44",
+          "12rem": "48",
+          "13rem": "52",
+          "14rem": "56",
+          "15rem": "60",
+          "16rem": "64",
+          "18rem": "72",
+          "20rem": "80",
+          "24rem": "96",
+          "50%": "1/2",
+          "33.33%": "1/3",
+          "66.66%": "2/3",
+          "25%": "1/4",
+          "75%": "3/4",
+          "100%": "full"
+        }, transformValConfig = {
+          scale: (v2) => {
+            var _a;
+            const vs = v2.split(",");
+            if (vs.length !== 3)
+              return vs[0] === vs[1] || vs.length === 1 ? `scale-${((_a = customTheme.scale) === null || _a === void 0 ? void 0 : _a[vs[0]]) || useAllDefaultValues && scaleDefaultVs[vs[0]] || `[${vs[0]}]`}` : vs.map((v3, idx) => {
+                var _a2;
+                return `scale-${idx === 0 ? "x" : "y"}-${((_a2 = customTheme.scale) === null || _a2 === void 0 ? void 0 : _a2[v3]) || useAllDefaultValues && scaleDefaultVs[v3] || `[${v3}]`}`;
+              }).join(" ");
+          },
+          scaleX: (v2) => {
+            var _a;
+            return `scale-x-${((_a = customTheme.scale) === null || _a === void 0 ? void 0 : _a[v2]) || useAllDefaultValues && scaleDefaultVs[v2] || `[${v2}]`}`;
+          },
+          scaleY: (v2) => {
+            var _a;
+            return `scale-y-${((_a = customTheme.scale) === null || _a === void 0 ? void 0 : _a[v2]) || useAllDefaultValues && scaleDefaultVs[v2] || `[${v2}]`}`;
+          },
+          rotate: (v2) => {
+            var _a, _b;
+            const vs = v2.split(",");
+            if (vs.length > 1) {
+              if (vs.length === 3 && ["0", "0deg"].findIndex((v3) => v3 === vs[0]) > -1 && ["0", "0deg"].findIndex((v3) => v3 === vs[1]) > -1) {
+                const t3 = hasNegative(vs[2]);
+                return `${t3[0]}rotate-${((_a = customTheme.rotate) === null || _a === void 0 ? void 0 : _a[t3[1]]) || useAllDefaultValues && rotateDefaultVs[t3[1]] || `[${t3[1]}]`}`;
+              }
+              return;
+            }
+            const t2 = hasNegative(vs[0]);
+            return `${t2[0]}rotate-${((_b = customTheme.rotate) === null || _b === void 0 ? void 0 : _b[t2[1]]) || useAllDefaultValues && rotateDefaultVs[t2[1]] || `[${t2[1]}]`}`;
+          },
+          rotateZ: (v2) => {
+            var _a;
+            const t2 = hasNegative(v2);
+            return `${t2[0]}rotate-${((_a = customTheme.rotate) === null || _a === void 0 ? void 0 : _a[t2[1]]) || useAllDefaultValues && rotateDefaultVs[t2[1]] || `[${t2[1]}]`}`;
+          },
+          translate: (v2) => {
+            const vs = v2.split(",");
+            if (vs.length !== 3)
+              return vs.map((v3, idx) => {
+                var _a;
+                const t2 = hasNegative(v3);
+                return /^\d+\.[1-9]{2,}%$/.test(t2[1]) && (t2[1] = `${Number(t2[1].slice(0, -1)).toFixed(6).replace(/(\.[1-9]{2})\d+/, "$1")}%`), `${t2[0]}translate-${idx === 0 ? "x" : "y"}-${((_a = customTheme.translate) === null || _a === void 0 ? void 0 : _a[t2[1]]) || useAllDefaultValues && translateDefaultVs[t2[1]] || `[${t2[1]}]`}`;
+              }).join(" ");
+          },
+          translateX: (v2) => {
+            var _a;
+            const t2 = hasNegative(v2);
+            return /^\d+\.[1-9]{2,}%$/.test(t2[1]) && (t2[1] = `${Number(t2[1].slice(0, -1)).toFixed(6).replace(/(\.[1-9]{2})\d+/, "$1")}%`), `${t2[0]}translate-x-${((_a = customTheme.translate) === null || _a === void 0 ? void 0 : _a[t2[1]]) || useAllDefaultValues && translateDefaultVs[t2[1]] || `[${t2[1]}]`}`;
+          },
+          translateY: (v2) => {
+            var _a;
+            const t2 = hasNegative(v2);
+            return /^\d+\.[1-9]{2,}%$/.test(t2[1]) && (t2[1] = `${Number(t2[1].slice(0, -1)).toFixed(6).replace(/(\.[1-9]{2})\d+/, "$1")}%`), `${t2[0]}translate-y-${((_a = customTheme.translate) === null || _a === void 0 ? void 0 : _a[t2[1]]) || useAllDefaultValues && translateDefaultVs[t2[1]] || `[${t2[1]}]`}`;
+          },
+          skew: (v2) => {
+            const vs = v2.split(",");
+            if (vs.length !== 3)
+              return vs.map((v3, idx) => {
+                var _a;
+                const t2 = hasNegative(v3);
+                return `${t2[0]}skew-${idx === 0 ? "x" : "y"}-${((_a = customTheme.skew) === null || _a === void 0 ? void 0 : _a[t2[1]]) || useAllDefaultValues && skewDefaultVs[t2[1]] || `[${t2[1]}]`}`;
+              }).join(" ");
+          },
+          skewX: (v2) => {
+            var _a;
+            const t2 = hasNegative(v2);
+            return `${t2[0]}skew-x-${((_a = customTheme.skew) === null || _a === void 0 ? void 0 : _a[t2[1]]) || useAllDefaultValues && skewDefaultVs[t2[1]] || `[${t2[1]}]`}`;
+          },
+          skewY: (v2) => {
+            var _a;
+            const t2 = hasNegative(v2);
+            return `${t2[0]}skew-y-${((_a = customTheme.skew) === null || _a === void 0 ? void 0 : _a[t2[1]]) || useAllDefaultValues && skewDefaultVs[t2[1]] || `[${t2[1]}]`}`;
+          }
+        }, vals = getCustomVal(val).replace(/\(.+?\)/g, (v2) => v2.replace(/_/g, "")).split(")_").map((v2) => `${v2})`);
+        vals[vals.length - 1] = vals[vals.length - 1].slice(0, -1);
+        let canUse = !0;
+        const res = vals.map((v2) => {
+          let canUsePipeV = !1;
+          const pipeV = v2.replace(/^([a-zA-Z0-9_-]+)\((.+?)\)$/, (r2, k2, v3) => {
+            var _a, _b;
+            canUsePipeV = !0;
+            const tmpRes = (_b = (_a = transformValConfig[k2]) === null || _a === void 0 ? void 0 : _a.call(transformValConfig, v3)) !== null && _b !== void 0 ? _b : canUse = !1;
+            return typeof tmpRes == "string" ? tmpRes : "";
+          });
+          return canUsePipeV ? pipeV : "";
+        });
+        return canUse ? `transform ${[...new Set(res)].join(" ")}` : `[transform:${getCustomVal(val)}]`;
+      }
+    ],
+    [
+      "transform-origin",
+      (val) => {
+        var _a;
+        return (_a = {
+          center: "origin-center",
+          top: "origin-top",
+          top_right: "origin-top-right",
+          right: "origin-right",
+          bottom_right: "origin-bottom-right",
+          bottom: "origin-bottom",
+          bottom_left: "origin-bottom-left",
+          left: "origin-left",
+          top_left: "origin-top-left"
+        }[getCustomVal(val)]) !== null && _a !== void 0 ? _a : `origin-[${getCustomVal(val)}]`;
+      }
+    ],
+    [
+      "transform-style",
+      {
+        flat: "[transform-style:flat]",
+        "preserve-3d": "[transform-style:preserve-3d]",
+        initial: "[transform-style:initial]"
+      }
+    ],
+    [
+      "transition",
+      (val) => val === "none" ? "transition-none" : `[transition:${getCustomVal(val)}]`
+    ],
+    [
+      "transition-delay",
+      (val) => {
+        var _a;
+        return val = val.replace(/^([.\d]+)s$/, (v2, $1) => `${($1 * 1e3).toFixed(6).replace(/\.?0+$/, "")}ms`), (_a = {
+          "75ms": "delay-75",
+          "100ms": "delay-100",
+          "150ms": "delay-150",
+          "200ms": "delay-200",
+          "300ms": "delay-300",
+          "500ms": "delay-500",
+          "700ms": "delay-700",
+          "1000ms": "delay-1000"
+        }[val]) !== null && _a !== void 0 ? _a : /^[.\d]+[ms]{1,2}$/.test(val) ? `delay-[${getCustomVal(val)}]` : "";
+      }
+    ],
+    [
+      "transition-duration",
+      (val) => {
+        var _a;
+        return val = val.replace(/^([.\d]+)s$/, (v2, $1) => `${($1 * 1e3).toFixed(6).replace(/\.?0+$/, "")}ms`), (_a = {
+          "75ms": "duration-75",
+          "100ms": "duration-100",
+          "150ms": "duration-150",
+          "200ms": "duration-200",
+          "300ms": "duration-300",
+          "500ms": "duration-500",
+          "700ms": "duration-700",
+          "1000ms": "duration-1000"
+        }[val]) !== null && _a !== void 0 ? _a : /^[.\d]+[ms]{1,2}$/.test(val) ? `duration-[${getCustomVal(val)}]` : "";
+      }
+    ],
+    [
+      "transition-property",
+      (val) => `[transition-property:${getCustomVal(val)}]`
+    ],
+    [
+      "transition-timing-function",
+      (val) => {
+        var _a;
+        return val = val.replace(/\s/g, ""), (_a = {
+          linear: "ease-linear",
+          "cubic-bezier(0.4,0,1,1)": "ease-in",
+          "cubic-bezier(0,0,0.2,1)": "ease-out",
+          "cubic-bezier(0.4,0,0.2,1)": "ease-in-out",
+          ease: "ease-[ease]",
+          "ease-in": "ease-in",
+          "ease-out": "ease-out",
+          "ease-in-out": "ease-in-out"
+        }[val]) !== null && _a !== void 0 ? _a : val.startsWith("cubic-bezier") ? `ease-[${getCustomVal(val)}]` : "";
+      }
+    ],
+    [
+      "unicode-bidi",
+      {
+        normal: "[unicode-bidi:normal]",
+        embed: "[unicode-bidi:embed]",
+        "bidi-override": "[unicode-bidi:bidi-override]",
+        initial: "[unicode-bidi:initial]",
+        inherit: "[unicode-bidi:inherit]"
+      }
+    ],
+    [
+      "user-select",
+      {
+        none: "select-none",
+        text: "select-text",
+        all: "select-all",
+        auto: "select-auto"
+      }
+    ],
+    [
+      "vertical-align",
+      {
+        baseline: "align-baseline",
+        top: "align-top",
+        middle: "align-middle",
+        bottom: "align-bottom",
+        "text-top": "align-text-top",
+        "text-bottom": "align-text-bottom"
+      }
+    ],
+    [
+      "visibility",
+      {
+        visible: "visible",
+        hidden: "invisible"
+      }
+    ],
+    [
+      "white-space",
+      {
+        normal: "whitespace-normal",
+        nowrap: "whitespace-nowrap",
+        pre: "whitespace-pre",
+        "pre-line": "whitespace-pre-line",
+        "pre-wrap": "whitespace-pre-wrap"
+      }
+    ],
+    [
+      "width",
+      (val) => isUnit(val) ? `w-${useAllDefaultValues && getRemDefaultVal(val) || getUnitMetacharactersVal(val, [CustomSelect.vh]) || `[${val}]`}` : ""
+    ],
+    [
+      "word-break",
+      {
+        "break-all": "break-all",
+        normal: "[word-break:normal]",
+        "keep-all": "[word-break:keep-all]",
+        initial: "[word-break:initial]"
+      }
+    ],
+    [
+      "word-spacing",
+      (val) => isUnit(val) ? `[word-spacing:${val}]` : ""
+    ],
+    [
+      "word-wrap",
+      {
+        normal: "[word-wrap:normal]",
+        "break-word": "[word-wrap:break-word]",
+        initial: "[word-wrap:initial]"
+      }
+    ],
+    [
+      "writing-mode",
+      (val) => `[writing-mode:${getCustomVal(val)}]`
+    ],
+    [
+      "z-index",
+      (val) => {
+        var _a;
+        return (_a = {
+          0: "z-0",
+          10: "z-10",
+          20: "z-20",
+          30: "z-30",
+          40: "z-40",
+          50: "z-50",
+          auto: "z-auto"
+        }[val]) !== null && _a !== void 0 ? _a : typeof val == "number" ? `z-[${val}]` : "";
+      }
+    ]
+  ]), parsingCode = (code) => {
+    code = code.replace(/[\n\r]/g, "").trim();
+    const tmpCodes = [];
+    let index = 0, isSelectorName = !0, bracketsCount = 0;
+    for (let i2 = 0; i2 < code.length; i2++) {
+      const char = code[i2];
+      if (["{", "}"].includes(char))
+        if (char === "{")
+          bracketsCount++ === 0 ? isSelectorName = !1 : tmpCodes[index][isSelectorName ? "selectorName" : "cssCode"] += char;
+        else if (--bracketsCount === 0) {
+          const cssCode = tmpCodes[index].cssCode;
+          typeof cssCode == "string" && cssCode.includes("{") && (tmpCodes[index].cssCode = parsingCode(cssCode)), index++, isSelectorName = !0;
+        } else
+          tmpCodes[index][isSelectorName ? "selectorName" : "cssCode"] += char;
+      else
+        tmpCodes[index] || (tmpCodes[index] = {
+          selectorName: "",
+          cssCode: ""
+        }), tmpCodes[index][isSelectorName ? "selectorName" : "cssCode"] += char;
+    }
+    return tmpCodes.map((v2) => ({
+      selectorName: v2.selectorName.trim(),
+      cssCode: typeof v2.cssCode == "string" ? v2.cssCode.trim() : v2.cssCode
+    }));
+  }, moreDefaultMediaVals = {
+    "@media(min-width:640px)": "sm",
+    "@media(min-width:768px)": "md",
+    "@media(min-width:1024px)": "lg",
+    "@media(min-width:1280px)": "xl",
+    "@media(min-width:1536px)": "2xl",
+    "@media_not_all_and(min-width:640px)": "max-sm",
+    "@media_not_all_and(min-width:768px)": "max-md",
+    "@media_not_all_and(min-width:1024px)": "max-lg",
+    "@media_not_all_and(min-width:1280px)": "max-xl",
+    "@media_not_all_and(min-width:1536px)": "max-2xl"
+  };
+  let moreDefaultValuesMap = {
+    top: {
+      "0px": "top-0",
+      "1px": "top-px",
+      "0.125rem": "top-0.5",
+      "0.25rem": "top-1",
+      "0.375rem": "top-1.5",
+      "0.5rem": "top-2",
+      "0.625rem": "top-2.5",
+      "0.75rem": "top-3",
+      "0.875rem": "top-3.5",
+      "1rem": "top-4",
+      "1.25rem": "top-5",
+      "1.5rem": "top-6",
+      "1.75rem": "top-7",
+      "2rem": "top-8",
+      "2.25rem": "top-9",
+      "2.5rem": "top-10",
+      "2.75rem": "top-11",
+      "3rem": "top-12",
+      "3.5rem": "top-14",
+      "4rem": "top-16",
+      "5rem": "top-20",
+      "6rem": "top-24",
+      "7rem": "top-28",
+      "8rem": "top-32",
+      "9rem": "top-36",
+      "10rem": "top-40",
+      "11rem": "top-44",
+      "12rem": "top-48",
+      "13rem": "top-52",
+      "14rem": "top-56",
+      "15rem": "top-60",
+      "16rem": "top-64",
+      "18rem": "top-72",
+      "20rem": "top-80",
+      "24rem": "top-96",
+      auto: "top-auto",
+      "50%": "top-2/4",
+      "33.333333%": "top-1/3",
+      "66.666667%": "top-2/3",
+      "25%": "top-1/4",
+      "75%": "top-3/4",
+      "100%": "top-full",
+      "-1px": "-top-px",
+      "-0.125rem": "-top-0.5",
+      "-0.25rem": "-top-1",
+      "-0.375rem": "-top-1.5",
+      "-0.5rem": "-top-2",
+      "-0.625rem": "-top-2.5",
+      "-0.75rem": "-top-3",
+      "-0.875rem": "-top-3.5",
+      "-1rem": "-top-4",
+      "-1.25rem": "-top-5",
+      "-1.5rem": "-top-6",
+      "-1.75rem": "-top-7",
+      "-2rem": "-top-8",
+      "-2.25rem": "-top-9",
+      "-2.5rem": "-top-10",
+      "-2.75rem": "-top-11",
+      "-3rem": "-top-12",
+      "-3.5rem": "-top-14",
+      "-4rem": "-top-16",
+      "-5rem": "-top-20",
+      "-6rem": "-top-24",
+      "-7rem": "-top-28",
+      "-8rem": "-top-32",
+      "-9rem": "-top-36",
+      "-10rem": "-top-40",
+      "-11rem": "-top-44",
+      "-12rem": "-top-48",
+      "-13rem": "-top-52",
+      "-14rem": "-top-56",
+      "-15rem": "-top-60",
+      "-16rem": "-top-64",
+      "-18rem": "-top-72",
+      "-20rem": "-top-80",
+      "-24rem": "-top-96",
+      "-50%": "-top-2/4",
+      "-33.333333%": "-top-1/3",
+      "-66.666667%": "-top-2/3",
+      "-25%": "-top-1/4",
+      "-75%": "-top-3/4",
+      "-100%": "-top-full"
+    },
+    bottom: {
+      "0px": "bottom-0",
+      "1px": "bottom-px",
+      "0.125rem": "bottom-0.5",
+      "0.25rem": "bottom-1",
+      "0.375rem": "bottom-1.5",
+      "0.5rem": "bottom-2",
+      "0.625rem": "bottom-2.5",
+      "0.75rem": "bottom-3",
+      "0.875rem": "bottom-3.5",
+      "1rem": "bottom-4",
+      "1.25rem": "bottom-5",
+      "1.5rem": "bottom-6",
+      "1.75rem": "bottom-7",
+      "2rem": "bottom-8",
+      "2.25rem": "bottom-9",
+      "2.5rem": "bottom-10",
+      "2.75rem": "bottom-11",
+      "3rem": "bottom-12",
+      "3.5rem": "bottom-14",
+      "4rem": "bottom-16",
+      "5rem": "bottom-20",
+      "6rem": "bottom-24",
+      "7rem": "bottom-28",
+      "8rem": "bottom-32",
+      "9rem": "bottom-36",
+      "10rem": "bottom-40",
+      "11rem": "bottom-44",
+      "12rem": "bottom-48",
+      "13rem": "bottom-52",
+      "14rem": "bottom-56",
+      "15rem": "bottom-60",
+      "16rem": "bottom-64",
+      "18rem": "bottom-72",
+      "20rem": "bottom-80",
+      "24rem": "bottom-96",
+      auto: "bottom-auto",
+      "50%": "bottom-2/4",
+      "33.333333%": "bottom-1/3",
+      "66.666667%": "bottom-2/3",
+      "25%": "bottom-1/4",
+      "75%": "bottom-3/4",
+      "100%": "bottom-full",
+      "-1px": "-bottom-px",
+      "-0.125rem": "-bottom-0.5",
+      "-0.25rem": "-bottom-1",
+      "-0.375rem": "-bottom-1.5",
+      "-0.5rem": "-bottom-2",
+      "-0.625rem": "-bottom-2.5",
+      "-0.75rem": "-bottom-3",
+      "-0.875rem": "-bottom-3.5",
+      "-1rem": "-bottom-4",
+      "-1.25rem": "-bottom-5",
+      "-1.5rem": "-bottom-6",
+      "-1.75rem": "-bottom-7",
+      "-2rem": "-bottom-8",
+      "-2.25rem": "-bottom-9",
+      "-2.5rem": "-bottom-10",
+      "-2.75rem": "-bottom-11",
+      "-3rem": "-bottom-12",
+      "-3.5rem": "-bottom-14",
+      "-4rem": "-bottom-16",
+      "-5rem": "-bottom-20",
+      "-6rem": "-bottom-24",
+      "-7rem": "-bottom-28",
+      "-8rem": "-bottom-32",
+      "-9rem": "-bottom-36",
+      "-10rem": "-bottom-40",
+      "-11rem": "-bottom-44",
+      "-12rem": "-bottom-48",
+      "-13rem": "-bottom-52",
+      "-14rem": "-bottom-56",
+      "-15rem": "-bottom-60",
+      "-16rem": "-bottom-64",
+      "-18rem": "-bottom-72",
+      "-20rem": "-bottom-80",
+      "-24rem": "-bottom-96",
+      "-50%": "-bottom-2/4",
+      "-33.333333%": "-bottom-1/3",
+      "-66.666667%": "-bottom-2/3",
+      "-25%": "-bottom-1/4",
+      "-75%": "-bottom-3/4",
+      "-100%": "-bottom-full"
+    },
+    left: {
+      "0px": "left-0",
+      "1px": "left-px",
+      "0.125rem": "left-0.5",
+      "0.25rem": "left-1",
+      "0.375rem": "left-1.5",
+      "0.5rem": "left-2",
+      "0.625rem": "left-2.5",
+      "0.75rem": "left-3",
+      "0.875rem": "left-3.5",
+      "1rem": "left-4",
+      "1.25rem": "left-5",
+      "1.5rem": "left-6",
+      "1.75rem": "left-7",
+      "2rem": "left-8",
+      "2.25rem": "left-9",
+      "2.5rem": "left-10",
+      "2.75rem": "left-11",
+      "3rem": "left-12",
+      "3.5rem": "left-14",
+      "4rem": "left-16",
+      "5rem": "left-20",
+      "6rem": "left-24",
+      "7rem": "left-28",
+      "8rem": "left-32",
+      "9rem": "left-36",
+      "10rem": "left-40",
+      "11rem": "left-44",
+      "12rem": "left-48",
+      "13rem": "left-52",
+      "14rem": "left-56",
+      "15rem": "left-60",
+      "16rem": "left-64",
+      "18rem": "left-72",
+      "20rem": "left-80",
+      "24rem": "left-96",
+      auto: "left-auto",
+      "50%": "left-2/4",
+      "33.333333%": "left-1/3",
+      "66.666667%": "left-2/3",
+      "25%": "left-1/4",
+      "75%": "left-3/4",
+      "100%": "left-full",
+      "-1px": "-left-px",
+      "-0.125rem": "-left-0.5",
+      "-0.25rem": "-left-1",
+      "-0.375rem": "-left-1.5",
+      "-0.5rem": "-left-2",
+      "-0.625rem": "-left-2.5",
+      "-0.75rem": "-left-3",
+      "-0.875rem": "-left-3.5",
+      "-1rem": "-left-4",
+      "-1.25rem": "-left-5",
+      "-1.5rem": "-left-6",
+      "-1.75rem": "-left-7",
+      "-2rem": "-left-8",
+      "-2.25rem": "-left-9",
+      "-2.5rem": "-left-10",
+      "-2.75rem": "-left-11",
+      "-3rem": "-left-12",
+      "-3.5rem": "-left-14",
+      "-4rem": "-left-16",
+      "-5rem": "-left-20",
+      "-6rem": "-left-24",
+      "-7rem": "-left-28",
+      "-8rem": "-left-32",
+      "-9rem": "-left-36",
+      "-10rem": "-left-40",
+      "-11rem": "-left-44",
+      "-12rem": "-left-48",
+      "-13rem": "-left-52",
+      "-14rem": "-left-56",
+      "-15rem": "-left-60",
+      "-16rem": "-left-64",
+      "-18rem": "-left-72",
+      "-20rem": "-left-80",
+      "-24rem": "-left-96",
+      "-50%": "-left-2/4",
+      "-33.333333%": "-left-1/3",
+      "-66.666667%": "-left-2/3",
+      "-25%": "-left-1/4",
+      "-75%": "-left-3/4",
+      "-100%": "-left-full"
+    },
+    right: {
+      "0px": "right-0",
+      "1px": "right-px",
+      "0.125rem": "right-0.5",
+      "0.25rem": "right-1",
+      "0.375rem": "right-1.5",
+      "0.5rem": "right-2",
+      "0.625rem": "right-2.5",
+      "0.75rem": "right-3",
+      "0.875rem": "right-3.5",
+      "1rem": "right-4",
+      "1.25rem": "right-5",
+      "1.5rem": "right-6",
+      "1.75rem": "right-7",
+      "2rem": "right-8",
+      "2.25rem": "right-9",
+      "2.5rem": "right-10",
+      "2.75rem": "right-11",
+      "3rem": "right-12",
+      "3.5rem": "right-14",
+      "4rem": "right-16",
+      "5rem": "right-20",
+      "6rem": "right-24",
+      "7rem": "right-28",
+      "8rem": "right-32",
+      "9rem": "right-36",
+      "10rem": "right-40",
+      "11rem": "right-44",
+      "12rem": "right-48",
+      "13rem": "right-52",
+      "14rem": "right-56",
+      "15rem": "right-60",
+      "16rem": "right-64",
+      "18rem": "right-72",
+      "20rem": "right-80",
+      "24rem": "right-96",
+      auto: "right-auto",
+      "50%": "right-2/4",
+      "33.333333%": "right-1/3",
+      "66.666667%": "right-2/3",
+      "25%": "right-1/4",
+      "75%": "right-3/4",
+      "100%": "right-full",
+      "-1px": "-right-px",
+      "-0.125rem": "-right-0.5",
+      "-0.25rem": "-right-1",
+      "-0.375rem": "-right-1.5",
+      "-0.5rem": "-right-2",
+      "-0.625rem": "-right-2.5",
+      "-0.75rem": "-right-3",
+      "-0.875rem": "-right-3.5",
+      "-1rem": "-right-4",
+      "-1.25rem": "-right-5",
+      "-1.5rem": "-right-6",
+      "-1.75rem": "-right-7",
+      "-2rem": "-right-8",
+      "-2.25rem": "-right-9",
+      "-2.5rem": "-right-10",
+      "-2.75rem": "-right-11",
+      "-3rem": "-right-12",
+      "-3.5rem": "-right-14",
+      "-4rem": "-right-16",
+      "-5rem": "-right-20",
+      "-6rem": "-right-24",
+      "-7rem": "-right-28",
+      "-8rem": "-right-32",
+      "-9rem": "-right-36",
+      "-10rem": "-right-40",
+      "-11rem": "-right-44",
+      "-12rem": "-right-48",
+      "-13rem": "-right-52",
+      "-14rem": "-right-56",
+      "-15rem": "-right-60",
+      "-16rem": "-right-64",
+      "-18rem": "-right-72",
+      "-20rem": "-right-80",
+      "-24rem": "-right-96",
+      "-50%": "-right-2/4",
+      "-33.333333%": "-right-1/3",
+      "-66.666667%": "-right-2/3",
+      "-25%": "-right-1/4",
+      "-75%": "-right-3/4",
+      "-100%": "-right-full"
+    },
+    gap: {
+      "0px": "gap-0",
+      "0.125rem": "gap-0.5",
+      "0.25rem": "gap-1",
+      "0.375rem": "gap-1.5",
+      "0.5rem": "gap-2",
+      "0.625rem": "gap-2.5",
+      "0.75rem": "gap-3",
+      "0.875rem": "gap-3.5",
+      "1rem": "gap-4",
+      "1.25rem": "gap-5",
+      "1.5rem": "gap-6",
+      "1.75rem": "gap-7",
+      "2rem": "gap-8",
+      "2.25rem": "gap-9",
+      "2.5rem": "gap-10",
+      "2.75rem": "gap-11",
+      "3rem": "gap-12",
+      "3.5rem": "gap-14",
+      "4rem": "gap-16",
+      "5rem": "gap-20",
+      "6rem": "gap-24",
+      "7rem": "gap-28",
+      "8rem": "gap-32",
+      "9rem": "gap-36",
+      "10rem": "gap-40",
+      "11rem": "gap-44",
+      "12rem": "gap-48",
+      "13rem": "gap-52",
+      "14rem": "gap-56",
+      "15rem": "gap-60",
+      "16rem": "gap-64",
+      "18rem": "gap-72",
+      "20rem": "gap-80",
+      "24rem": "gap-96"
+    },
+    "column-gap": {
+      "0px": "gap-x-0",
+      "1px": "gap-x-px",
+      "0.125rem": "gap-x-0.5",
+      "0.25rem": "gap-x-1",
+      "0.375rem": "gap-x-1.5",
+      "0.5rem": "gap-x-2",
+      "0.625rem": "gap-x-2.5",
+      "0.75rem": "gap-x-3",
+      "0.875rem": "gap-x-3.5",
+      "1rem": "gap-x-4",
+      "1.25rem": "gap-x-5",
+      "1.5rem": "gap-x-6",
+      "1.75rem": "gap-x-7",
+      "2rem": "gap-x-8",
+      "2.25rem": "gap-x-9",
+      "2.5rem": "gap-x-10",
+      "2.75rem": "gap-x-11",
+      "3rem": "gap-x-12",
+      "3.5rem": "gap-x-14",
+      "4rem": "gap-x-16",
+      "5rem": "gap-x-20",
+      "6rem": "gap-x-24",
+      "7rem": "gap-x-28",
+      "8rem": "gap-x-32",
+      "9rem": "gap-x-36",
+      "10rem": "gap-x-40",
+      "11rem": "gap-x-44",
+      "12rem": "gap-x-48",
+      "13rem": "gap-x-52",
+      "14rem": "gap-x-56",
+      "15rem": "gap-x-60",
+      "16rem": "gap-x-64",
+      "18rem": "gap-x-72",
+      "20rem": "gap-x-80",
+      "24rem": "gap-x-96"
+    },
+    "row-gap": {
+      "0px": "gap-y-0",
+      "1px": "gap-y-px",
+      "0.125rem": "gap-y-0.5",
+      "0.25rem": "gap-y-1",
+      "0.375rem": "gap-y-1.5",
+      "0.5rem": "gap-y-2",
+      "0.625rem": "gap-y-2.5",
+      "0.75rem": "gap-y-3",
+      "0.875rem": "gap-y-3.5",
+      "1rem": "gap-y-4",
+      "1.25rem": "gap-y-5",
+      "1.5rem": "gap-y-6",
+      "1.75rem": "gap-y-7",
+      "2rem": "gap-y-8",
+      "2.25rem": "gap-y-9",
+      "2.5rem": "gap-y-10",
+      "2.75rem": "gap-y-11",
+      "3rem": "gap-y-12",
+      "3.5rem": "gap-y-14",
+      "4rem": "gap-y-16",
+      "5rem": "gap-y-20",
+      "6rem": "gap-y-24",
+      "7rem": "gap-y-28",
+      "8rem": "gap-y-32",
+      "9rem": "gap-y-36",
+      "10rem": "gap-y-40",
+      "11rem": "gap-y-44",
+      "12rem": "gap-y-48",
+      "13rem": "gap-y-52",
+      "14rem": "gap-y-56",
+      "15rem": "gap-y-60",
+      "16rem": "gap-y-64",
+      "18rem": "gap-y-72",
+      "20rem": "gap-y-80",
+      "24rem": "gap-y-96"
+    },
+    "max-width": {
+      "0rem": "max-w-0",
+      "20rem": "max-w-xs",
+      "24rem": "max-w-sm",
+      "28rem": "max-w-md",
+      "32rem": "max-w-lg",
+      "36rem": "max-w-xl",
+      "42rem": "max-w-2xl",
+      "48rem": "max-w-3xl",
+      "56rem": "max-w-4xl",
+      "64rem": "max-w-5xl",
+      "72rem": "max-w-6xl",
+      "80rem": "max-w-7xl",
+      "65ch": "max-w-prose",
+      "640px": "max-w-screen-sm",
+      "768px": "max-w-screen-md",
+      "1024px": "max-w-screen-lg",
+      "1280px": "max-w-screen-xl",
+      "1536px": "max-w-screen-2xl"
+    },
+    "max-height": {
+      "1px": "max-h-px",
+      "0.125rem": "max-h-0.5",
+      "0.25rem": "max-h-1",
+      "0.375rem": "max-h-1.5",
+      "0.5rem": "max-h-2",
+      "0.625rem": "max-h-2.5",
+      "0.75rem": "max-h-3",
+      "0.875rem": "max-h-3.5",
+      "1rem": "max-h-4",
+      "1.25rem": "max-h-5",
+      "1.5rem": "max-h-6",
+      "1.75rem": "max-h-7",
+      "2rem": "max-h-8",
+      "2.25rem": "max-h-9",
+      "2.5rem": "max-h-10",
+      "2.75rem": "max-h-11",
+      "3rem": "max-h-12",
+      "3.5rem": "max-h-14",
+      "4rem": "max-h-16",
+      "5rem": "max-h-20",
+      "6rem": "max-h-24",
+      "7rem": "max-h-28",
+      "8rem": "max-h-32",
+      "9rem": "max-h-36",
+      "10rem": "max-h-40",
+      "11rem": "max-h-44",
+      "12rem": "max-h-48",
+      "13rem": "max-h-52",
+      "14rem": "max-h-56",
+      "15rem": "max-h-60",
+      "16rem": "max-h-64",
+      "18rem": "max-h-72",
+      "20rem": "max-h-80",
+      "24rem": "max-h-96"
+    },
+    "font-family": {
+      'ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"': "font-sans",
+      'ui-serif, Georgia, Cambria, "Times New Roman", Times, serif': "font-serif",
+      'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace': "font-mono"
+    },
+    "font-weight": {
+      100: "font-thin",
+      200: "font-extralight",
+      300: "font-light",
+      400: "font-normal",
+      500: "font-medium",
+      600: "font-semibold",
+      700: "font-bold",
+      800: "font-extrabold",
+      900: "font-black"
+    },
+    "line-height": {
+      1: "leading-none",
+      2: "leading-loose",
+      ".75rem": "leading-3",
+      "1rem": "leading-4",
+      "1.25rem": "leading-5",
+      "1.5rem": "leading-6",
+      "1.75rem": "leading-7",
+      "2rem": "leading-8",
+      "2.25rem": "leading-9",
+      "2.5rem": "leading-10",
+      "1.25": "leading-tight",
+      "1.375": "leading-snug",
+      "1.5": "leading-normal",
+      "1.625": "leading-relaxed"
+    },
+    "border-width": {
+      "0px": "border-0",
+      "2px": "border-2",
+      "4px": "border-4",
+      "8px": "border-8",
+      "1px": "border"
+    },
+    "border-top-width": {
+      "0px": "border-t-0",
+      "2px": "border-t-2",
+      "4px": "border-t-4",
+      "8px": "border-t-8",
+      "1px": "border-t"
+    },
+    "border-right-width": {
+      "0px": "border-r-0",
+      "2px": "border-r-2",
+      "4px": "border-r-4",
+      "8px": "border-r-8",
+      "1px": "border-r"
+    },
+    "border-bottom-width": {
+      "0px": "border-b-0",
+      "2px": "border-b-2",
+      "4px": "border-b-4",
+      "8px": "border-b-8",
+      "1px": "border-b"
+    },
+    "border-left-width": {
+      "0px": "border-l-0",
+      "2px": "border-l-2",
+      "4px": "border-l-4",
+      "8px": "border-l-8",
+      "1px": "border-l"
+    },
+    transition: {
+      "all 150ms cubic-bezier(0.4, 0, 0.2, 1)": "transition-all",
+      "background-color, border-color, color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter 150ms cubic-bezier(0.4, 0, 0.2, 1)": "transition",
+      "background-color, border-color, color, fill, stroke 150ms cubic-bezier(0.4, 0, 0.2, 1)": "transition-colors",
+      "opacity 150ms cubic-bezier(0.4, 0, 0.2, 1)": "transition-opacity",
+      "box-shadow 150ms cubic-bezier(0.4, 0, 0.2, 1)": "transition-shadow",
+      "transform 150ms cubic-bezier(0.4, 0, 0.2, 1)": "transition-transform"
+    }
+  };
+  const getResultCode = (it, prefix = "", config2) => {
+    if (typeof it.cssCode != "string")
+      return null;
+    const resultVals = it.cssCode.split(";").filter((v2) => v2 !== "").map((v2) => {
+      var _a, _b, _c, _d, _e, _f, _g, _h;
+      let key2 = "", val = "";
+      for (let i2 = 0; i2 < v2.length; i2++) {
+        const c2 = v2[i2];
+        if (c2 !== ":")
+          key2 += c2;
+        else {
+          val = v2.slice(i2 + 1, v2.length).trim();
+          break;
+        }
+      }
+      const pipe = propertyMap.get(key2.trim());
+      let hasImportant = !1;
+      val.includes("!important") && (val = val.replace("!important", "").trim(), hasImportant = !0);
+      let pipeVal = "";
+      if (val === "initial" || val === "inherit" ? pipeVal = `[${key2.trim()}:${val}]` : (config2.customTheme = (_a = config2.customTheme) !== null && _a !== void 0 ? _a : {}, pipeVal = typeof pipe == "function" ? ((_b = config2.customTheme[key2.trim()]) === null || _b === void 0 ? void 0 : _b[val]) || config2.useAllDefaultValues && ((_c = moreDefaultValuesMap[key2.trim()]) === null || _c === void 0 ? void 0 : _c[val]) || pipe(val) : ((_d = config2.customTheme[key2.trim()]) === null || _d === void 0 ? void 0 : _d[val]) || config2.useAllDefaultValues && ((_e = moreDefaultValuesMap[key2.trim()]) === null || _e === void 0 ? void 0 : _e[val]) || ((_f = pipe?.[val]) !== null && _f !== void 0 ? _f : "")), ((_h = (_g = config2.prefix) === null || _g === void 0 ? void 0 : _g.length) !== null && _h !== void 0 ? _h : 0) > 0 && (pipeVal = pipeVal.split(" ").map((v3) => `${v3[0] === "-" ? "-" : ""}${config2.prefix}${v3.replace(/^-/, "")}`).join(" ")), hasImportant) {
+        const getImportantVal = (v3) => (v3[0] === "[" && v3[v3.length - 1] === "]" ? v3 = `${v3.slice(0, -1)}!important]` : v3 = `!${v3}`, v3);
+        pipeVal.includes(" ") && ["backdrop-filter", "filter", "transform"].filter((v3) => pipeVal.startsWith(v3)).length === 0 ? pipeVal = pipeVal.split(" ").map((v3) => getImportantVal(v3)).join(" ") : pipeVal.length > 0 && (pipeVal = getImportantVal(pipeVal));
+      }
+      return it.selectorName.endsWith(":hover") && pipeVal.length > 0 ? ["backdrop-filter", "filter", "transform"].filter((v3) => pipeVal.startsWith(v3)).length > 0 ? pipeVal = `hover:${pipeVal}` : pipeVal = pipeVal.split(" ").map((v3) => `hover:${v3}`).join(" ") : it.selectorName.endsWith(":focus") && pipeVal.length > 0 ? ["backdrop-filter", "filter", "transform"].filter((v3) => pipeVal.startsWith(v3)).length > 0 ? pipeVal = `focus:${pipeVal}` : pipeVal = pipeVal.split(" ").map((v3) => `focus:${v3}`).join(" ") : it.selectorName.endsWith(":active") && pipeVal.length > 0 ? ["backdrop-filter", "filter", "transform"].filter((v3) => pipeVal.startsWith(v3)).length > 0 ? pipeVal = `active:${pipeVal}` : pipeVal = pipeVal.split(" ").map((v3) => `active:${v3}`).join(" ") : it.selectorName.endsWith("::before") && pipeVal.length > 0 ? ["backdrop-filter", "filter", "transform"].filter((v3) => pipeVal.startsWith(v3)).length > 0 ? pipeVal = `before:${pipeVal}` : pipeVal = pipeVal.split(" ").map((v3) => `before:${v3}`).join(" ") : it.selectorName.endsWith("::after") && pipeVal.length > 0 && (["backdrop-filter", "filter", "transform"].filter((v3) => pipeVal.startsWith(v3)).length > 0 ? pipeVal = `after:${pipeVal}` : pipeVal = pipeVal.split(" ").map((v3) => `after:${v3}`).join(" ")), prefix.length > 0 && (["backdrop-filter", "filter", "transform"].filter((v3) => pipeVal.startsWith(v3)).length > 0 ? pipeVal = `${prefix}:${pipeVal}` : pipeVal = pipeVal.split(" ").map((v3) => `${prefix}:${v3}`).join(" ")), pipeVal;
+    }).filter((v2) => v2 !== "");
+    return {
+      selectorName: it.selectorName,
+      resultVal: [...new Set(resultVals)].join(" ")
+    };
+  }, defaultTranslatorConfig = {
+    prefix: "",
+    useAllDefaultValues: !0,
+    customTheme: {}
+  }, CssToTailwindTranslator = (code, config2 = defaultTranslatorConfig) => {
+    var _a, _b;
+    if (specialAttribute.map((v2) => code.includes(v2)).filter((v2) => v2).length > 0)
+      return {
+        code: "SyntaxError",
+        data: []
+      };
+    useAllDefaultValues = (_a = config2.useAllDefaultValues) !== null && _a !== void 0 ? _a : defaultTranslatorConfig.useAllDefaultValues, customTheme = (_b = config2.customTheme) !== null && _b !== void 0 ? _b : defaultTranslatorConfig.customTheme;
+    const dataArray = [];
+    return parsingCode(code).map((it) => typeof it.cssCode == "string" ? getResultCode(it, "", config2) : it.selectorName.includes("@media") ? it.cssCode.map((v2) => {
+      var _a2;
+      const mediaName = getCustomVal(it.selectorName.replace(/\(.+\)/g, (v3) => v3.replace(/\s/g, "")).replace(/\s+\(/g, "(")), res = getResultCode(v2, ((_a2 = customTheme.media) === null || _a2 === void 0 ? void 0 : _a2[it.selectorName]) || config2.useAllDefaultValues && moreDefaultMediaVals[mediaName] || `[${mediaName}]`, config2);
+      return res ? {
+        selectorName: `${it.selectorName}-->${res.selectorName}`,
+        resultVal: res.resultVal
+      } : null;
+    }) : null).filter((v2) => v2 !== null).forEach((v2) => {
+      Array.isArray(v2) ? dataArray.push(...v2) : dataArray.push(v2);
+    }), {
+      code: "OK",
+      data: dataArray
+    };
+  };
   async function getCSS(css2) {
     const {
       currentConfigData: { options }
@@ -3455,9 +6689,9 @@ https://www.w3ctech.com/topic/2226`
 `).filter((raw) => !/^(width|height)/.test(raw)).join(`
 `));
     const postcssPlugins = [];
-    options.pxToViewport && postcssPlugins.push(dist(options.pxToViewport)), postcssPlugins.push(src({})), css2 = (await postcss_1(postcssPlugins).process(`{${css2}}`)).css.replace(/(^\{)|(\}$)/g, "");
+    options.pxToViewport && postcssPlugins.push(postcssPxToViewport(options.pxToViewport)), postcssPlugins.push(postcssDiscardComments({})), css2 = (await postcss$1(postcssPlugins).process(`{${css2}}`)).css.replace(/(^\{)|(\}$)/g, "");
     const { colors: colors2, custom = [] } = options.replace || {};
-    colors2 && (css2 = replace(css2, colors2).content), options.autoHeight && custom.push({
+    if (colors2 && (css2 = replace(css2, colors2).content), options.autoHeight && custom.push({
       reg: "(^|\\n)height:\\s*(.*);",
       new: `
 /* height: $2; */`
@@ -3472,7 +6706,13 @@ https://www.w3ctech.com/topic/2226`
           css2 = css2.replace(reg, "");
         }), css2 = css2 + i2.new);
       }
-    }), await navigator.clipboard.writeText(css2.replace(/^\s*\n/gm, "")), toast({
+    }), options.tailwind) {
+      const {
+        data: [{ resultVal }]
+      } = CssToTailwindTranslator(`{${css2}}`);
+      css2 = resultVal;
+    }
+    await navigator.clipboard.writeText(css2.replace(/^\s*\n/gm, "")), toast({
       title: "复制成功"
     });
   }
@@ -3747,7 +6987,7 @@ https://www.w3ctech.com/topic/2226`
   function themeColor(color, shade = 0) {
     const theme2 = useSvelteUIThemeContext()?.theme || useSvelteUITheme();
     let _shade = "50";
-    return isSvelteUIColor(color) ? (shade !== Number(0) && (_shade = `${shade.toString()}00`), theme2.colors[`${color}${_shade}`]?.value) : color;
+    return isSvelteUIColor(color) ? (shade !== 0 && (_shade = `${shade.toString()}00`), theme2.colors[`${color}${_shade}`]?.value) : color;
   }
   function isSvelteUIColor(color) {
     let valid = !1;
@@ -3809,7 +7049,7 @@ https://www.w3ctech.com/topic/2226`
   }
   function isHexColor(hex) {
     const replaced = hex.replace("#", "");
-    return typeof replaced == "string" && replaced.length === 6 && !Number.isNaN(Number(`0x${replaced}`));
+    return typeof replaced == "string" && replaced.length === 6 && !Number.isNaN(+`0x${replaced}`);
   }
   function hexToRgba(color) {
     const replaced = color.replace("#", ""), parsed = parseInt(replaced, 16), r2 = parsed >> 16 & 255, g2 = parsed >> 8 & 255, b2 = parsed & 255;
@@ -3836,7 +7076,7 @@ https://www.w3ctech.com/topic/2226`
     const { themeColor: themeColor2, rgba: rgba2 } = fns, variants = {
       /** Filled variant */
       filled: {
-        [`${dark.selector} &`]: {
+        darkMode: {
           backgroundColor: themeColor2(color, 8)
         },
         border: "transparent",
@@ -3846,7 +7086,7 @@ https://www.w3ctech.com/topic/2226`
       },
       /** Light variant */
       light: {
-        [`${dark.selector} &`]: {
+        darkMode: {
           backgroundColor: rgba2(themeColor2(color, 8), 0.35),
           color: color === "dark" ? themeColor2("dark", 0) : themeColor2(color, 2),
           "&:hover": { backgroundColor: rgba2(themeColor2(color, 7), 0.45) }
@@ -3858,7 +7098,7 @@ https://www.w3ctech.com/topic/2226`
       },
       /** Outline variant */
       outline: {
-        [`${dark.selector} &`]: {
+        darkMode: {
           border: `1px solid ${themeColor2(color, 4)}`,
           color: `${themeColor2(color, 4)}`,
           "&:hover": { backgroundColor: rgba2(themeColor2(color, 4), 0.05) }
@@ -3872,7 +7112,7 @@ https://www.w3ctech.com/topic/2226`
       },
       /** Subtle variant */
       subtle: {
-        [`${dark.selector} &`]: {
+        darkMode: {
           color: color === "dark" ? themeColor2("dark", 0) : themeColor2(color, 2),
           "&:hover": { backgroundColor: rgba2(themeColor2(color, 8), 0.35) }
         },
@@ -3885,7 +7125,7 @@ https://www.w3ctech.com/topic/2226`
       },
       /** Default variant */
       default: {
-        [`${dark.selector} &`]: {
+        darkMode: {
           border: `1px solid ${themeColor2("dark", 5)}`,
           backgroundColor: themeColor2("dark", 5),
           color: "White",
@@ -6238,11 +9478,13 @@ https://www.w3ctech.com/topic/2226`
       {
         class: (
           /*cx*/
-          ctx[5](
+          ctx[6](
             /*className*/
             ctx[0],
+            /*classes*/
+            ctx[4].root,
             /*getStyles*/
-            ctx[4]({ css: (
+            ctx[5]({ css: (
               /*override*/
               ctx[1]
             ) })
@@ -6270,17 +9512,19 @@ https://www.w3ctech.com/topic/2226`
         switch_instance && mount_component(switch_instance, target, anchor), insert(target, switch_instance_anchor, anchor), current = !0;
       },
       p(ctx2, dirty) {
-        const switch_instance_changes = dirty & /*cx, className, getStyles, override, iconProps*/
-        59 ? get_spread_update(switch_instance_spread_levels, [
-          dirty & /*cx, className, getStyles, override*/
-          51 && {
+        const switch_instance_changes = dirty & /*cx, className, classes, getStyles, override, iconProps*/
+        123 ? get_spread_update(switch_instance_spread_levels, [
+          dirty & /*cx, className, classes, getStyles, override*/
+          115 && {
             class: (
               /*cx*/
-              ctx2[5](
+              ctx2[6](
                 /*className*/
                 ctx2[0],
+                /*classes*/
+                ctx2[4].root,
                 /*getStyles*/
-                ctx2[4]({ css: (
+                ctx2[5]({ css: (
                   /*override*/
                   ctx2[1]
                 ) })
@@ -6325,11 +9569,13 @@ https://www.w3ctech.com/topic/2226`
     return {
       c() {
         span = element("span"), attr(span, "class", span_class_value = /*cx*/
-        ctx[5](
+        ctx[6](
           /*className*/
           ctx[0],
+          /*classes*/
+          ctx[4].root,
           /*getStyles*/
-          ctx[4]({ css: (
+          ctx[5]({ css: (
             /*override*/
             ctx[1]
           ) })
@@ -6341,13 +9587,15 @@ https://www.w3ctech.com/topic/2226`
       p(ctx2, dirty) {
         dirty & /*icon*/
         4 && raw_value !== (raw_value = /*icon*/
-        ctx2[2].outerHTML + "") && (span.innerHTML = raw_value), dirty & /*cx, className, getStyles, override*/
-        51 && span_class_value !== (span_class_value = /*cx*/
-        ctx2[5](
+        ctx2[2].outerHTML + "") && (span.innerHTML = raw_value), dirty & /*cx, className, classes, getStyles, override*/
+        115 && span_class_value !== (span_class_value = /*cx*/
+        ctx2[6](
           /*className*/
           ctx2[0],
+          /*classes*/
+          ctx2[4].root,
           /*getStyles*/
-          ctx2[4]({ css: (
+          ctx2[5]({ css: (
             /*override*/
             ctx2[1]
           ) })
@@ -6365,7 +9613,7 @@ https://www.w3ctech.com/topic/2226`
       return typeof /*icon*/
       ctx2[2] == "function" ? 0 : (
         /*requiresShim*/
-        ctx2[6] ? -1 : 1
+        ctx2[7] ? -1 : 1
       );
     }
     return ~(current_block_type_index = select_block_type(ctx)) && (if_block = if_blocks[current_block_type_index] = if_block_creators[current_block_type_index](ctx)), {
@@ -6396,21 +9644,21 @@ https://www.w3ctech.com/topic/2226`
     let cx2, getStyles, classes, { className = "", override = {}, icon = void 0, iconSize = 16, iconProps = {} } = $$props;
     const requiresShim = typeof HTMLElement > "u" && typeof SVGElement > "u";
     return $$self.$$set = ($$props2) => {
-      "className" in $$props2 && $$invalidate(0, className = $$props2.className), "override" in $$props2 && $$invalidate(1, override = $$props2.override), "icon" in $$props2 && $$invalidate(2, icon = $$props2.icon), "iconSize" in $$props2 && $$invalidate(7, iconSize = $$props2.iconSize), "iconProps" in $$props2 && $$invalidate(3, iconProps = $$props2.iconProps);
+      "className" in $$props2 && $$invalidate(0, className = $$props2.className), "override" in $$props2 && $$invalidate(1, override = $$props2.override), "icon" in $$props2 && $$invalidate(2, icon = $$props2.icon), "iconSize" in $$props2 && $$invalidate(8, iconSize = $$props2.iconSize), "iconProps" in $$props2 && $$invalidate(3, iconProps = $$props2.iconProps);
     }, $$self.$$.update = () => {
       $$self.$$.dirty & /*iconSize*/
-      128 && $$invalidate(5, { cx: cx2, getStyles, classes } = useStyles$5({ iconSize }, { name: "IconRenderer" }), cx2, ($$invalidate(4, getStyles), $$invalidate(7, iconSize)), ($$invalidate(8, classes), $$invalidate(7, iconSize))), $$self.$$.dirty & /*icon, classes*/
-      260 && !requiresShim && (icon instanceof HTMLElement || icon instanceof SVGElement) && icon.classList.add(...classes.icon.split(" "));
+      256 && $$invalidate(6, { cx: cx2, getStyles, classes } = useStyles$5({ iconSize }, { name: "IconRenderer" }), cx2, ($$invalidate(5, getStyles), $$invalidate(8, iconSize)), ($$invalidate(4, classes), $$invalidate(8, iconSize))), $$self.$$.dirty & /*icon, classes*/
+      20 && !requiresShim && (icon instanceof HTMLElement || icon instanceof SVGElement) && icon.classList.add(...classes.icon.split(" "));
     }, [
       className,
       override,
       icon,
       iconProps,
+      classes,
       getStyles,
       cx2,
       requiresShim,
-      iconSize,
-      classes
+      iconSize
     ];
   }
   class IconRenderer extends SvelteComponent {
@@ -6419,27 +9667,27 @@ https://www.w3ctech.com/topic/2226`
         className: 0,
         override: 1,
         icon: 2,
-        iconSize: 7,
+        iconSize: 8,
         iconProps: 3
       });
     }
   }
   const IconRenderer$1 = IconRenderer;
-  function getTextColor(color, variant2, gradient, dark2 = !1) {
+  function getTextColor(theme2, color, variant2, gradient, dark2 = !1) {
     if (color === "dimmed")
-      return dark2 ? "$dark200" : "$gray600";
+      return dark2 ? theme2.fn.themeColor("dark", 2) : theme2.fn.themeColor("gray", 6);
     if (variant2 === "gradient" || gradient)
-      return `$${color}600`;
+      return theme2.fn.themeColor(color, 6);
     if (variant2 === "link")
-      return dark2 ? "$blue400" : "$blue700";
+      return dark2 ? theme2.fn.themeColor("blue", 4) : theme2.fn.themeColor("blue", 7);
     if (variant2 === "text")
-      return dark2 ? `$${color}500` : `$${color}700`;
+      return dark2 ? theme2.fn.themeColor(color, 5) : theme2.fn.themeColor(color, 7);
   }
   const useStyles$4 = createStyles((theme2, { align, color, inherit, inline, lineClamp, size: size2, tracking, transform: transform2, underline, weight, gradient, variant: variant2 }) => ({
     root: {
       focusRing: "auto",
       [`${theme2.dark} &`]: {
-        color: color === "dark" ? "$dark50" : getTextColor(color, variant2, gradient, !0)
+        color: color === "dark" ? "$dark50" : getTextColor(theme2, color, variant2, gradient, !0)
       },
       fontFamily: inherit ? "inherit" : "$standard",
       fontSize: inherit ? "inherit" : typeof size2 == "string" ? `$${size2}` : `${size2}px`,
@@ -6450,7 +9698,7 @@ https://www.w3ctech.com/topic/2226`
       textDecoration: underline ? "underline" : "none",
       textAlign: align,
       cursor: variant2 === "link" ? "pointer" : "inherit",
-      color: color === "green" ? "Black" : getTextColor(color, variant2, gradient),
+      color: color === "green" ? "Black" : getTextColor(theme2, color, variant2, gradient),
       backgroundImage: variant2 === "gradient" ? `linear-gradient(${gradient?.deg}deg, $${gradient?.from}600 0%, $${gradient?.to}600 100%)` : null,
       WebkitBackgroundClip: variant2 === "gradient" ? "text" : null,
       WebkitTextFillColor: variant2 === "gradient" ? "transparent" : null,
@@ -6491,12 +9739,12 @@ https://www.w3ctech.com/topic/2226`
     let current;
     const default_slot_template = (
       /*#slots*/
-      ctx[24].default
+      ctx[25].default
     ), default_slot = create_slot(
       default_slot_template,
       ctx,
       /*$$scope*/
-      ctx[26],
+      ctx[27],
       null
     );
     return {
@@ -6508,21 +9756,21 @@ https://www.w3ctech.com/topic/2226`
       },
       p(ctx2, dirty) {
         default_slot && default_slot.p && (!current || dirty & /*$$scope*/
-        67108864) && update_slot_base(
+        134217728) && update_slot_base(
           default_slot,
           default_slot_template,
           ctx2,
           /*$$scope*/
-          ctx2[26],
+          ctx2[27],
           current ? get_slot_changes(
             default_slot_template,
             /*$$scope*/
-            ctx2[26],
+            ctx2[27],
             dirty,
             null
           ) : get_all_dirty_from_scope(
             /*$$scope*/
-            ctx2[26]
+            ctx2[27]
           ),
           null
         );
@@ -6561,7 +9809,7 @@ https://www.w3ctech.com/topic/2226`
       {
         use: [
           /*forwardEvents*/
-          ctx[10],
+          ctx[11],
           [
             useActions,
             /*use*/
@@ -6572,9 +9820,11 @@ https://www.w3ctech.com/topic/2226`
       {
         class: (
           /*cx*/
-          ctx[9](
+          ctx[10](
             /*className*/
             ctx[2],
+            /*classes*/
+            ctx[9].root,
             /*getStyles*/
             ctx[8]({ css: (
               /*override*/
@@ -6588,10 +9838,10 @@ https://www.w3ctech.com/topic/2226`
         ctx[5] ?? void 0
       ) },
       /*$$restProps*/
-      ctx[11]
+      ctx[12]
     ];
     function box_element_binding(value) {
-      ctx[25](value);
+      ctx[26](value);
     }
     let box_props = {
       $$slots: { default: [create_default_slot$7] },
@@ -6616,18 +9866,18 @@ https://www.w3ctech.com/topic/2226`
           ctx2[6]), dirty & /*err*/
           128 && (error_changes.code = /*err*/
           ctx2[7]), error.$set(error_changes);
-          const box_changes = dirty & /*root, forwardEvents, useActions, use, cx, className, getStyles, override, href, undefined, $$restProps*/
-          3902 ? get_spread_update(box_spread_levels, [
+          const box_changes = dirty & /*root, forwardEvents, useActions, use, cx, className, classes, getStyles, override, href, undefined, $$restProps*/
+          7998 ? get_spread_update(box_spread_levels, [
             dirty & /*root*/
             16 && { root: (
               /*root*/
               ctx2[4]
             ) },
             dirty & /*forwardEvents, useActions, use*/
-            1026 && {
+            2050 && {
               use: [
                 /*forwardEvents*/
-                ctx2[10],
+                ctx2[11],
                 [
                   useActions,
                   /*use*/
@@ -6635,13 +9885,15 @@ https://www.w3ctech.com/topic/2226`
                 ]
               ]
             },
-            dirty & /*cx, className, getStyles, override*/
-            780 && {
+            dirty & /*cx, className, classes, getStyles, override*/
+            1804 && {
               class: (
                 /*cx*/
-                ctx2[9](
+                ctx2[10](
                   /*className*/
                   ctx2[2],
+                  /*classes*/
+                  ctx2[9].root,
                   /*getStyles*/
                   ctx2[8]({ css: (
                     /*override*/
@@ -6656,13 +9908,13 @@ https://www.w3ctech.com/topic/2226`
               ctx2[5] ?? void 0
             ) },
             dirty & /*$$restProps*/
-            2048 && get_spread_object(
+            4096 && get_spread_object(
               /*$$restProps*/
-              ctx2[11]
+              ctx2[12]
             )
           ]) : {};
           dirty & /*$$scope*/
-          67108864 && (box_changes.$$scope = { dirty, ctx: ctx2 }), !updating_element && dirty & /*element*/
+          134217728 && (box_changes.$$scope = { dirty, ctx: ctx2 }), !updating_element && dirty & /*element*/
           1 && (updating_element = !0, box_changes.element = /*element*/
           ctx2[0], add_flush_callback(() => updating_element = !1)), box.$set(box_changes);
         },
@@ -6679,7 +9931,7 @@ https://www.w3ctech.com/topic/2226`
     );
   }
   function instance$d($$self, $$props, $$invalidate) {
-    let cx2, getStyles;
+    let cx2, classes, getStyles;
     const omit_props_names = [
       "use",
       "element",
@@ -6708,12 +9960,12 @@ https://www.w3ctech.com/topic/2226`
       element2 = value, $$invalidate(0, element2);
     }
     return $$self.$$set = ($$new_props) => {
-      $$props = assign(assign({}, $$props), exclude_internal_props($$new_props)), $$invalidate(11, $$restProps = compute_rest_props($$props, omit_props_names)), "use" in $$new_props && $$invalidate(1, use = $$new_props.use), "element" in $$new_props && $$invalidate(0, element2 = $$new_props.element), "class" in $$new_props && $$invalidate(2, className = $$new_props.class), "override" in $$new_props && $$invalidate(3, override = $$new_props.override), "align" in $$new_props && $$invalidate(12, align = $$new_props.align), "color" in $$new_props && $$invalidate(13, color = $$new_props.color), "root" in $$new_props && $$invalidate(4, root2 = $$new_props.root), "transform" in $$new_props && $$invalidate(14, transform2 = $$new_props.transform), "variant" in $$new_props && $$invalidate(15, variant2 = $$new_props.variant), "size" in $$new_props && $$invalidate(16, size2 = $$new_props.size), "weight" in $$new_props && $$invalidate(17, weight = $$new_props.weight), "gradient" in $$new_props && $$invalidate(18, gradient = $$new_props.gradient), "inline" in $$new_props && $$invalidate(19, inline = $$new_props.inline), "lineClamp" in $$new_props && $$invalidate(20, lineClamp = $$new_props.lineClamp), "underline" in $$new_props && $$invalidate(21, underline = $$new_props.underline), "inherit" in $$new_props && $$invalidate(22, inherit = $$new_props.inherit), "href" in $$new_props && $$invalidate(5, href = $$new_props.href), "tracking" in $$new_props && $$invalidate(23, tracking = $$new_props.tracking), "$$scope" in $$new_props && $$invalidate(26, $$scope = $$new_props.$$scope);
+      $$props = assign(assign({}, $$props), exclude_internal_props($$new_props)), $$invalidate(12, $$restProps = compute_rest_props($$props, omit_props_names)), "use" in $$new_props && $$invalidate(1, use = $$new_props.use), "element" in $$new_props && $$invalidate(0, element2 = $$new_props.element), "class" in $$new_props && $$invalidate(2, className = $$new_props.class), "override" in $$new_props && $$invalidate(3, override = $$new_props.override), "align" in $$new_props && $$invalidate(13, align = $$new_props.align), "color" in $$new_props && $$invalidate(14, color = $$new_props.color), "root" in $$new_props && $$invalidate(4, root2 = $$new_props.root), "transform" in $$new_props && $$invalidate(15, transform2 = $$new_props.transform), "variant" in $$new_props && $$invalidate(16, variant2 = $$new_props.variant), "size" in $$new_props && $$invalidate(17, size2 = $$new_props.size), "weight" in $$new_props && $$invalidate(18, weight = $$new_props.weight), "gradient" in $$new_props && $$invalidate(19, gradient = $$new_props.gradient), "inline" in $$new_props && $$invalidate(20, inline = $$new_props.inline), "lineClamp" in $$new_props && $$invalidate(21, lineClamp = $$new_props.lineClamp), "underline" in $$new_props && $$invalidate(22, underline = $$new_props.underline), "inherit" in $$new_props && $$invalidate(23, inherit = $$new_props.inherit), "href" in $$new_props && $$invalidate(5, href = $$new_props.href), "tracking" in $$new_props && $$invalidate(24, tracking = $$new_props.tracking), "$$scope" in $$new_props && $$invalidate(27, $$scope = $$new_props.$$scope);
     }, $$self.$$.update = () => {
       $$self.$$.dirty & /*lineClamp, underline, inline, inherit, gradient, variant, align, color, transform, size, weight, tracking*/
-      16773120 && $$invalidate(
-        9,
-        { cx: cx2, getStyles } = useStyles$4(
+      33546240 && $$invalidate(
+        10,
+        { cx: cx2, classes, getStyles } = useStyles$4(
           {
             lineClamp,
             underline,
@@ -6731,7 +9983,8 @@ https://www.w3ctech.com/topic/2226`
           { name: "Text" }
         ),
         cx2,
-        ($$invalidate(8, getStyles), $$invalidate(20, lineClamp), $$invalidate(21, underline), $$invalidate(19, inline), $$invalidate(22, inherit), $$invalidate(18, gradient), $$invalidate(15, variant2), $$invalidate(12, align), $$invalidate(13, color), $$invalidate(14, transform2), $$invalidate(16, size2), $$invalidate(17, weight), $$invalidate(23, tracking))
+        ($$invalidate(9, classes), $$invalidate(21, lineClamp), $$invalidate(22, underline), $$invalidate(20, inline), $$invalidate(23, inherit), $$invalidate(19, gradient), $$invalidate(16, variant2), $$invalidate(13, align), $$invalidate(14, color), $$invalidate(15, transform2), $$invalidate(17, size2), $$invalidate(18, weight), $$invalidate(24, tracking)),
+        ($$invalidate(8, getStyles), $$invalidate(21, lineClamp), $$invalidate(22, underline), $$invalidate(20, inline), $$invalidate(23, inherit), $$invalidate(19, gradient), $$invalidate(16, variant2), $$invalidate(13, align), $$invalidate(14, color), $$invalidate(15, transform2), $$invalidate(17, size2), $$invalidate(18, weight), $$invalidate(24, tracking))
       );
     }, [
       element2,
@@ -6743,6 +9996,7 @@ https://www.w3ctech.com/topic/2226`
       observable,
       err,
       getStyles,
+      classes,
       cx2,
       forwardEvents,
       $$restProps,
@@ -6770,20 +10024,20 @@ https://www.w3ctech.com/topic/2226`
         element: 0,
         class: 2,
         override: 3,
-        align: 12,
-        color: 13,
+        align: 13,
+        color: 14,
         root: 4,
-        transform: 14,
-        variant: 15,
-        size: 16,
-        weight: 17,
-        gradient: 18,
-        inline: 19,
-        lineClamp: 20,
-        underline: 21,
-        inherit: 22,
+        transform: 15,
+        variant: 16,
+        size: 17,
+        weight: 18,
+        gradient: 19,
+        inline: 20,
+        lineClamp: 21,
+        underline: 22,
+        inherit: 23,
         href: 5,
-        tracking: 23
+        tracking: 24
       });
     }
   }
@@ -6847,7 +10101,7 @@ https://www.w3ctech.com/topic/2226`
       height: typeof size2 == "number" ? `${size2}px` : sizes$1[compact ? `compact-${size2}` : size2].height,
       padding: typeof size2 == "number" ? `0px ${size2}px` : sizes$1[compact ? `compact-${size2}` : size2].padding,
       fontFamily: "$standard",
-      fontWeight: "$SemiBold",
+      fontWeight: "$semibold",
       fontSize: `$${size2}`,
       lineHeight: 1,
       flexGrow: 0,
@@ -6858,29 +10112,32 @@ https://www.w3ctech.com/topic/2226`
       },
       "&:active": {
         transform: "translateY(1px)"
-      },
-      "&.disabled": {
-        pointerEvents: "none",
-        borderColor: "transparent",
-        backgroundColor: "rgb(233, 236, 239)",
-        background: "rgb(233, 236, 239)",
-        color: "rgb(173, 181, 189)",
+      }
+    },
+    loading: {
+      pointerEvents: "none",
+      "&::before": {
+        content: '""',
+        position: "absolute",
+        inset: -1,
+        backgroundColor: "rgba(255, 255, 255, .5)",
+        borderRadius: `$${radius2}`,
         cursor: "not-allowed"
-      },
-      "&.loading": {
-        pointerEvents: "none",
-        "&::before": {
-          content: '""',
-          position: "absolute",
-          inset: -1,
-          backgroundColor: "rgba(255, 255, 255, .5)",
-          borderRadius: `$${radius2}`,
-          cursor: "not-allowed"
-        }
       }
     },
     variants: {
       variation: vFunc(color, gradient)
+    },
+    disabled: {
+      pointerEvents: "none",
+      borderColor: "transparent",
+      backgroundColor: theme2.fn.themeColor("gray", 2),
+      color: theme2.fn.themeColor("gray", 5),
+      cursor: "not-allowed",
+      darkMode: {
+        backgroundColor: theme2.fn.themeColor("dark", 4),
+        color: theme2.fn.themeColor("dark", 6)
+      }
     }
   })), ButtonErrors = Object.freeze([
     {
@@ -7017,7 +10274,7 @@ https://www.w3ctech.com/topic/2226`
   }
   const Ripple$1 = Ripple;
   function add_css$2(target) {
-    append_styles(target, "svelte-1n9fp7y", ".uppercase.svelte-1n9fp7y{text-transform:uppercase}.loader-left.svelte-1n9fp7y{margin-right:10px}.loader-right.svelte-1n9fp7y{margin-left:10px}");
+    append_styles(target, "svelte-5xpm5q", ".uppercase.svelte-5xpm5q{text-transform:uppercase}.left-section.svelte-5xpm5q{margin-right:10px;display:flex;align-items:center;justify-content:center}.right-section.svelte-5xpm5q{margin-left:10px;display:flex;align-items:center;justify-content:center}");
   }
   const get_rightIcon_slot_changes_1 = (dirty) => ({}), get_rightIcon_slot_context_1 = (ctx) => ({}), get_leftIcon_slot_changes_1 = (dirty) => ({}), get_leftIcon_slot_context_1 = (ctx) => ({}), get_rightIcon_slot_changes = (dirty) => ({}), get_rightIcon_slot_context = (ctx) => ({}), get_leftIcon_slot_changes = (dirty) => ({}), get_leftIcon_slot_context = (ctx) => ({});
   function create_else_block$1(ctx) {
@@ -7029,19 +10286,19 @@ https://www.w3ctech.com/topic/2226`
         ctx2[11] && /*loaderPosition*/
         ctx2[5] === "left" ? 0 : (
           /*$$slots*/
-          ctx2[20].leftIcon ? 1 : -1
+          ctx2[21].leftIcon ? 1 : -1
         )
       );
     }
     ~(current_block_type_index = select_block_type_3(ctx)) && (if_block0 = if_blocks[current_block_type_index] = if_block_creators[current_block_type_index](ctx));
     const default_slot_template = (
       /*#slots*/
-      ctx[27].default
+      ctx[28].default
     ), default_slot = create_slot(
       default_slot_template,
       ctx,
       /*$$scope*/
-      ctx[26],
+      ctx[27],
       null
     ), default_slot_or_fallback = default_slot || fallback_block_4();
     let if_block1 = (
@@ -7055,7 +10312,7 @@ https://www.w3ctech.com/topic/2226`
         ctx2[11] && /*loaderPosition*/
         ctx2[5] === "right" ? 0 : (
           /*$$slots*/
-          ctx2[20].rightIcon ? 1 : -1
+          ctx2[21].rightIcon ? 1 : -1
         )
       );
     }
@@ -7063,11 +10320,13 @@ https://www.w3ctech.com/topic/2226`
     let button_levels = [
       {
         class: button_class_value = /*cx*/
-        ctx[16](
+        ctx[18](
           /*className*/
           ctx[3],
+          /*classes*/
+          ctx[17].root,
           /*getStyles*/
-          ctx[17]({
+          ctx[16]({
             css: (
               /*override*/
               ctx[1]
@@ -7078,11 +10337,17 @@ https://www.w3ctech.com/topic/2226`
             )
           }),
           {
-            disabled: (
+            [
+              /*classes*/
+              ctx[17].disabled
+            ]: (
               /*disabled*/
               ctx[9]
             ),
-            loading: (
+            [
+              /*classes*/
+              ctx[17].loading
+            ]: (
               /*loading*/
               ctx[11]
             )
@@ -7094,7 +10359,7 @@ https://www.w3ctech.com/topic/2226`
         ctx[9]
       ) },
       /*$$restProps*/
-      ctx[19],
+      ctx[20],
       { tabindex: "0" }
     ], button_data = {};
     for (let i2 = 0; i2 < button_levels.length; i2 += 1)
@@ -7111,10 +10376,10 @@ https://www.w3ctech.com/topic/2226`
           "uppercase",
           /*uppercase*/
           ctx[12]
-        ), toggle_class(button, "svelte-1n9fp7y", !0);
+        ), toggle_class(button, "svelte-5xpm5q", !0);
       },
       m(target, anchor) {
-        insert(target, button, anchor), ~current_block_type_index && if_blocks[current_block_type_index].m(button, null), append(button, t0), default_slot_or_fallback && default_slot_or_fallback.m(button, null), append(button, t1), if_block1 && if_block1.m(button, null), append(button, t2), ~current_block_type_index_1 && if_blocks_1[current_block_type_index_1].m(button, null), button.autofocus && button.focus(), ctx[29](button), current = !0, mounted || (dispose = [
+        insert(target, button, anchor), ~current_block_type_index && if_blocks[current_block_type_index].m(button, null), append(button, t0), default_slot_or_fallback && default_slot_or_fallback.m(button, null), append(button, t1), if_block1 && if_block1.m(button, null), append(button, t2), ~current_block_type_index_1 && if_blocks_1[current_block_type_index_1].m(button, null), button.autofocus && button.focus(), ctx[30](button), current = !0, mounted || (dispose = [
           action_destroyer(useActions_action = useActions.call(
             null,
             button,
@@ -7123,7 +10388,7 @@ https://www.w3ctech.com/topic/2226`
           )),
           action_destroyer(
             /*forwardEvents*/
-            ctx[18].call(null, button)
+            ctx[19].call(null, button)
           )
         ], mounted = !0);
       },
@@ -7132,21 +10397,21 @@ https://www.w3ctech.com/topic/2226`
         current_block_type_index = select_block_type_3(ctx2), current_block_type_index === previous_block_index ? ~current_block_type_index && if_blocks[current_block_type_index].p(ctx2, dirty) : (if_block0 && (group_outros(), transition_out(if_blocks[previous_block_index], 1, 1, () => {
           if_blocks[previous_block_index] = null;
         }), check_outros()), ~current_block_type_index ? (if_block0 = if_blocks[current_block_type_index], if_block0 ? if_block0.p(ctx2, dirty) : (if_block0 = if_blocks[current_block_type_index] = if_block_creators[current_block_type_index](ctx2), if_block0.c()), transition_in(if_block0, 1), if_block0.m(button, t0)) : if_block0 = null), default_slot && default_slot.p && (!current || dirty & /*$$scope*/
-        67108864) && update_slot_base(
+        134217728) && update_slot_base(
           default_slot,
           default_slot_template,
           ctx2,
           /*$$scope*/
-          ctx2[26],
+          ctx2[27],
           current ? get_slot_changes(
             default_slot_template,
             /*$$scope*/
-            ctx2[26],
+            ctx2[27],
             dirty,
             null
           ) : get_all_dirty_from_scope(
             /*$$scope*/
-            ctx2[26]
+            ctx2[27]
           ),
           null
         ), /*ripple*/
@@ -7158,13 +10423,15 @@ https://www.w3ctech.com/topic/2226`
         current_block_type_index_1 = select_block_type_4(ctx2), current_block_type_index_1 === previous_block_index_1 ? ~current_block_type_index_1 && if_blocks_1[current_block_type_index_1].p(ctx2, dirty) : (if_block2 && (group_outros(), transition_out(if_blocks_1[previous_block_index_1], 1, 1, () => {
           if_blocks_1[previous_block_index_1] = null;
         }), check_outros()), ~current_block_type_index_1 ? (if_block2 = if_blocks_1[current_block_type_index_1], if_block2 ? if_block2.p(ctx2, dirty) : (if_block2 = if_blocks_1[current_block_type_index_1] = if_block_creators_1[current_block_type_index_1](ctx2), if_block2.c()), transition_in(if_block2, 1), if_block2.m(button, null)) : if_block2 = null), set_attributes(button, button_data = get_spread_update(button_levels, [
-          (!current || dirty & /*cx, className, getStyles, override, variant, disabled, loading*/
-          199194 && button_class_value !== (button_class_value = /*cx*/
-          ctx2[16](
+          (!current || dirty & /*cx, className, classes, getStyles, override, variant, disabled, loading*/
+          461338 && button_class_value !== (button_class_value = /*cx*/
+          ctx2[18](
             /*className*/
             ctx2[3],
+            /*classes*/
+            ctx2[17].root,
             /*getStyles*/
-            ctx2[17]({
+            ctx2[16]({
               css: (
                 /*override*/
                 ctx2[1]
@@ -7175,11 +10442,17 @@ https://www.w3ctech.com/topic/2226`
               )
             }),
             {
-              disabled: (
+              [
+                /*classes*/
+                ctx2[17].disabled
+              ]: (
                 /*disabled*/
                 ctx2[9]
               ),
-              loading: (
+              [
+                /*classes*/
+                ctx2[17].loading
+              ]: (
                 /*loading*/
                 ctx2[11]
               )
@@ -7191,8 +10464,8 @@ https://www.w3ctech.com/topic/2226`
             ctx2[9]
           ) },
           dirty & /*$$restProps*/
-          524288 && /*$$restProps*/
-          ctx2[19],
+          1048576 && /*$$restProps*/
+          ctx2[20],
           { tabindex: "0" }
         ])), useActions_action && is_function(useActions_action.update) && dirty & /*use*/
         4 && useActions_action.update.call(
@@ -7209,7 +10482,7 @@ https://www.w3ctech.com/topic/2226`
           "uppercase",
           /*uppercase*/
           ctx2[12]
-        ), toggle_class(button, "svelte-1n9fp7y", !0);
+        ), toggle_class(button, "svelte-5xpm5q", !0);
       },
       i(local) {
         current || (transition_in(if_block0), transition_in(default_slot_or_fallback, local), transition_in(if_block1), transition_in(if_block2), current = !0);
@@ -7218,7 +10491,7 @@ https://www.w3ctech.com/topic/2226`
         transition_out(if_block0), transition_out(default_slot_or_fallback, local), transition_out(if_block1), transition_out(if_block2), current = !1;
       },
       d(detaching) {
-        detaching && detach(button), ~current_block_type_index && if_blocks[current_block_type_index].d(), default_slot_or_fallback && default_slot_or_fallback.d(detaching), if_block1 && if_block1.d(), ~current_block_type_index_1 && if_blocks_1[current_block_type_index_1].d(), ctx[29](null), mounted = !1, run_all(dispose);
+        detaching && detach(button), ~current_block_type_index && if_blocks[current_block_type_index].d(), default_slot_or_fallback && default_slot_or_fallback.d(detaching), if_block1 && if_block1.d(), ~current_block_type_index_1 && if_blocks_1[current_block_type_index_1].d(), ctx[30](null), mounted = !1, run_all(dispose);
       }
     };
   }
@@ -7231,19 +10504,19 @@ https://www.w3ctech.com/topic/2226`
         ctx2[11] && /*loaderPosition*/
         ctx2[5] === "left" ? 0 : (
           /*$$slots*/
-          ctx2[20].leftIcon ? 1 : -1
+          ctx2[21].leftIcon ? 1 : -1
         )
       );
     }
     ~(current_block_type_index = select_block_type_1(ctx)) && (if_block0 = if_blocks[current_block_type_index] = if_block_creators[current_block_type_index](ctx));
     const default_slot_template = (
       /*#slots*/
-      ctx[27].default
+      ctx[28].default
     ), default_slot = create_slot(
       default_slot_template,
       ctx,
       /*$$scope*/
-      ctx[26],
+      ctx[27],
       null
     ), default_slot_or_fallback = default_slot || fallback_block_1();
     let if_block1 = (
@@ -7257,7 +10530,7 @@ https://www.w3ctech.com/topic/2226`
         ctx2[11] && /*loaderPosition*/
         ctx2[5] === "right" ? 0 : (
           /*$$slots*/
-          ctx2[20].rightIcon ? 1 : -1
+          ctx2[21].rightIcon ? 1 : -1
         )
       );
     }
@@ -7269,11 +10542,13 @@ https://www.w3ctech.com/topic/2226`
       ) },
       {
         class: a_class_value = /*cx*/
-        ctx[16](
+        ctx[18](
           /*className*/
           ctx[3],
+          /*classes*/
+          ctx[17].root,
           /*getStyles*/
-          ctx[17]({
+          ctx[16]({
             css: (
               /*override*/
               ctx[1]
@@ -7302,7 +10577,7 @@ https://www.w3ctech.com/topic/2226`
         ctx[8] ? "_blank" : "_self"
       },
       /*$$restProps*/
-      ctx[19],
+      ctx[20],
       { tabindex: "0" }
     ], a_data = {};
     for (let i2 = 0; i2 < a_levels.length; i2 += 1)
@@ -7319,10 +10594,10 @@ https://www.w3ctech.com/topic/2226`
           "uppercase",
           /*uppercase*/
           ctx[12]
-        ), toggle_class(a2, "svelte-1n9fp7y", !0);
+        ), toggle_class(a2, "svelte-5xpm5q", !0);
       },
       m(target, anchor) {
-        insert(target, a2, anchor), ~current_block_type_index && if_blocks[current_block_type_index].m(a2, null), append(a2, t0), default_slot_or_fallback && default_slot_or_fallback.m(a2, null), append(a2, t1), if_block1 && if_block1.m(a2, null), append(a2, t2), ~current_block_type_index_1 && if_blocks_1[current_block_type_index_1].m(a2, null), ctx[28](a2), current = !0, mounted || (dispose = [
+        insert(target, a2, anchor), ~current_block_type_index && if_blocks[current_block_type_index].m(a2, null), append(a2, t0), default_slot_or_fallback && default_slot_or_fallback.m(a2, null), append(a2, t1), if_block1 && if_block1.m(a2, null), append(a2, t2), ~current_block_type_index_1 && if_blocks_1[current_block_type_index_1].m(a2, null), ctx[29](a2), current = !0, mounted || (dispose = [
           action_destroyer(useActions_action = useActions.call(
             null,
             a2,
@@ -7331,7 +10606,7 @@ https://www.w3ctech.com/topic/2226`
           )),
           action_destroyer(
             /*forwardEvents*/
-            ctx[18].call(null, a2)
+            ctx[19].call(null, a2)
           )
         ], mounted = !0);
       },
@@ -7340,21 +10615,21 @@ https://www.w3ctech.com/topic/2226`
         current_block_type_index = select_block_type_1(ctx2), current_block_type_index === previous_block_index ? ~current_block_type_index && if_blocks[current_block_type_index].p(ctx2, dirty) : (if_block0 && (group_outros(), transition_out(if_blocks[previous_block_index], 1, 1, () => {
           if_blocks[previous_block_index] = null;
         }), check_outros()), ~current_block_type_index ? (if_block0 = if_blocks[current_block_type_index], if_block0 ? if_block0.p(ctx2, dirty) : (if_block0 = if_blocks[current_block_type_index] = if_block_creators[current_block_type_index](ctx2), if_block0.c()), transition_in(if_block0, 1), if_block0.m(a2, t0)) : if_block0 = null), default_slot && default_slot.p && (!current || dirty & /*$$scope*/
-        67108864) && update_slot_base(
+        134217728) && update_slot_base(
           default_slot,
           default_slot_template,
           ctx2,
           /*$$scope*/
-          ctx2[26],
+          ctx2[27],
           current ? get_slot_changes(
             default_slot_template,
             /*$$scope*/
-            ctx2[26],
+            ctx2[27],
             dirty,
             null
           ) : get_all_dirty_from_scope(
             /*$$scope*/
-            ctx2[26]
+            ctx2[27]
           ),
           null
         ), /*ripple*/
@@ -7371,13 +10646,15 @@ https://www.w3ctech.com/topic/2226`
             /*href*/
             ctx2[7]
           ) },
-          (!current || dirty & /*cx, className, getStyles, override, variant, disabled, loading*/
-          199194 && a_class_value !== (a_class_value = /*cx*/
-          ctx2[16](
+          (!current || dirty & /*cx, className, classes, getStyles, override, variant, disabled, loading*/
+          461338 && a_class_value !== (a_class_value = /*cx*/
+          ctx2[18](
             /*className*/
             ctx2[3],
+            /*classes*/
+            ctx2[17].root,
             /*getStyles*/
-            ctx2[17]({
+            ctx2[16]({
               css: (
                 /*override*/
                 ctx2[1]
@@ -7404,8 +10681,8 @@ https://www.w3ctech.com/topic/2226`
           256 && a_target_value !== (a_target_value = /*external*/
           ctx2[8] ? "_blank" : "_self")) && { target: a_target_value },
           dirty & /*$$restProps*/
-          524288 && /*$$restProps*/
-          ctx2[19],
+          1048576 && /*$$restProps*/
+          ctx2[20],
           { tabindex: "0" }
         ])), useActions_action && is_function(useActions_action.update) && dirty & /*use*/
         4 && useActions_action.update.call(
@@ -7422,7 +10699,7 @@ https://www.w3ctech.com/topic/2226`
           "uppercase",
           /*uppercase*/
           ctx2[12]
-        ), toggle_class(a2, "svelte-1n9fp7y", !0);
+        ), toggle_class(a2, "svelte-5xpm5q", !0);
       },
       i(local) {
         current || (transition_in(if_block0), transition_in(default_slot_or_fallback, local), transition_in(if_block1), transition_in(if_block2), current = !0);
@@ -7431,7 +10708,7 @@ https://www.w3ctech.com/topic/2226`
         transition_out(if_block0), transition_out(default_slot_or_fallback, local), transition_out(if_block1), transition_out(if_block2), current = !1;
       },
       d(detaching) {
-        detaching && detach(a2), ~current_block_type_index && if_blocks[current_block_type_index].d(), default_slot_or_fallback && default_slot_or_fallback.d(detaching), if_block1 && if_block1.d(), ~current_block_type_index_1 && if_blocks_1[current_block_type_index_1].d(), ctx[28](null), mounted = !1, run_all(dispose);
+        detaching && detach(a2), ~current_block_type_index && if_blocks[current_block_type_index].d(), default_slot_or_fallback && default_slot_or_fallback.d(detaching), if_block1 && if_block1.d(), ~current_block_type_index_1 && if_blocks_1[current_block_type_index_1].d(), ctx[29](null), mounted = !1, run_all(dispose);
       }
     };
   }
@@ -7439,38 +10716,38 @@ https://www.w3ctech.com/topic/2226`
     let span, current;
     const leftIcon_slot_template = (
       /*#slots*/
-      ctx[27].leftIcon
+      ctx[28].leftIcon
     ), leftIcon_slot = create_slot(
       leftIcon_slot_template,
       ctx,
       /*$$scope*/
-      ctx[26],
+      ctx[27],
       get_leftIcon_slot_context_1
     ), leftIcon_slot_or_fallback = leftIcon_slot || fallback_block_5();
     return {
       c() {
-        span = element("span"), leftIcon_slot_or_fallback && leftIcon_slot_or_fallback.c(), attr(span, "class", "loader-left svelte-1n9fp7y");
+        span = element("span"), leftIcon_slot_or_fallback && leftIcon_slot_or_fallback.c(), attr(span, "class", "left-section svelte-5xpm5q");
       },
       m(target, anchor) {
         insert(target, span, anchor), leftIcon_slot_or_fallback && leftIcon_slot_or_fallback.m(span, null), current = !0;
       },
       p(ctx2, dirty) {
         leftIcon_slot && leftIcon_slot.p && (!current || dirty & /*$$scope*/
-        67108864) && update_slot_base(
+        134217728) && update_slot_base(
           leftIcon_slot,
           leftIcon_slot_template,
           ctx2,
           /*$$scope*/
-          ctx2[26],
+          ctx2[27],
           current ? get_slot_changes(
             leftIcon_slot_template,
             /*$$scope*/
-            ctx2[26],
+            ctx2[27],
             dirty,
             get_leftIcon_slot_changes_1
           ) : get_all_dirty_from_scope(
             /*$$scope*/
-            ctx2[26]
+            ctx2[27]
           ),
           get_leftIcon_slot_context_1
         );
@@ -7505,7 +10782,7 @@ https://www.w3ctech.com/topic/2226`
       }
     }), {
       c() {
-        span = element("span"), create_component(loader.$$.fragment), attr(span, "class", "loader-left svelte-1n9fp7y");
+        span = element("span"), create_component(loader.$$.fragment), attr(span, "class", "left-section svelte-5xpm5q");
       },
       m(target, anchor) {
         insert(target, span, anchor), mount_component(loader, span, null), current = !0;
@@ -7583,38 +10860,38 @@ https://www.w3ctech.com/topic/2226`
     let span, current;
     const rightIcon_slot_template = (
       /*#slots*/
-      ctx[27].rightIcon
+      ctx[28].rightIcon
     ), rightIcon_slot = create_slot(
       rightIcon_slot_template,
       ctx,
       /*$$scope*/
-      ctx[26],
+      ctx[27],
       get_rightIcon_slot_context_1
     ), rightIcon_slot_or_fallback = rightIcon_slot || fallback_block_3();
     return {
       c() {
-        span = element("span"), rightIcon_slot_or_fallback && rightIcon_slot_or_fallback.c(), attr(span, "class", "loader-right svelte-1n9fp7y");
+        span = element("span"), rightIcon_slot_or_fallback && rightIcon_slot_or_fallback.c(), attr(span, "class", "right-section svelte-5xpm5q");
       },
       m(target, anchor) {
         insert(target, span, anchor), rightIcon_slot_or_fallback && rightIcon_slot_or_fallback.m(span, null), current = !0;
       },
       p(ctx2, dirty) {
         rightIcon_slot && rightIcon_slot.p && (!current || dirty & /*$$scope*/
-        67108864) && update_slot_base(
+        134217728) && update_slot_base(
           rightIcon_slot,
           rightIcon_slot_template,
           ctx2,
           /*$$scope*/
-          ctx2[26],
+          ctx2[27],
           current ? get_slot_changes(
             rightIcon_slot_template,
             /*$$scope*/
-            ctx2[26],
+            ctx2[27],
             dirty,
             get_rightIcon_slot_changes_1
           ) : get_all_dirty_from_scope(
             /*$$scope*/
-            ctx2[26]
+            ctx2[27]
           ),
           get_rightIcon_slot_context_1
         );
@@ -7649,7 +10926,7 @@ https://www.w3ctech.com/topic/2226`
       }
     }), {
       c() {
-        span = element("span"), create_component(loader.$$.fragment), attr(span, "class", "loader-right svelte-1n9fp7y");
+        span = element("span"), create_component(loader.$$.fragment), attr(span, "class", "right-section svelte-5xpm5q");
       },
       m(target, anchor) {
         insert(target, span, anchor), mount_component(loader, span, null), current = !0;
@@ -7693,38 +10970,38 @@ https://www.w3ctech.com/topic/2226`
     let span, current;
     const leftIcon_slot_template = (
       /*#slots*/
-      ctx[27].leftIcon
+      ctx[28].leftIcon
     ), leftIcon_slot = create_slot(
       leftIcon_slot_template,
       ctx,
       /*$$scope*/
-      ctx[26],
+      ctx[27],
       get_leftIcon_slot_context
     ), leftIcon_slot_or_fallback = leftIcon_slot || fallback_block_2();
     return {
       c() {
-        span = element("span"), leftIcon_slot_or_fallback && leftIcon_slot_or_fallback.c(), attr(span, "class", "loader-left svelte-1n9fp7y");
+        span = element("span"), leftIcon_slot_or_fallback && leftIcon_slot_or_fallback.c(), attr(span, "class", "left-section svelte-5xpm5q");
       },
       m(target, anchor) {
         insert(target, span, anchor), leftIcon_slot_or_fallback && leftIcon_slot_or_fallback.m(span, null), current = !0;
       },
       p(ctx2, dirty) {
         leftIcon_slot && leftIcon_slot.p && (!current || dirty & /*$$scope*/
-        67108864) && update_slot_base(
+        134217728) && update_slot_base(
           leftIcon_slot,
           leftIcon_slot_template,
           ctx2,
           /*$$scope*/
-          ctx2[26],
+          ctx2[27],
           current ? get_slot_changes(
             leftIcon_slot_template,
             /*$$scope*/
-            ctx2[26],
+            ctx2[27],
             dirty,
             get_leftIcon_slot_changes
           ) : get_all_dirty_from_scope(
             /*$$scope*/
-            ctx2[26]
+            ctx2[27]
           ),
           get_leftIcon_slot_context
         );
@@ -7759,7 +11036,7 @@ https://www.w3ctech.com/topic/2226`
       }
     }), {
       c() {
-        span = element("span"), create_component(loader.$$.fragment), attr(span, "class", "loader-left svelte-1n9fp7y");
+        span = element("span"), create_component(loader.$$.fragment), attr(span, "class", "left-section svelte-5xpm5q");
       },
       m(target, anchor) {
         insert(target, span, anchor), mount_component(loader, span, null), current = !0;
@@ -7837,38 +11114,38 @@ https://www.w3ctech.com/topic/2226`
     let span, current;
     const rightIcon_slot_template = (
       /*#slots*/
-      ctx[27].rightIcon
+      ctx[28].rightIcon
     ), rightIcon_slot = create_slot(
       rightIcon_slot_template,
       ctx,
       /*$$scope*/
-      ctx[26],
+      ctx[27],
       get_rightIcon_slot_context
     ), rightIcon_slot_or_fallback = rightIcon_slot || fallback_block$1();
     return {
       c() {
-        span = element("span"), rightIcon_slot_or_fallback && rightIcon_slot_or_fallback.c(), attr(span, "class", "loader-right svelte-1n9fp7y");
+        span = element("span"), rightIcon_slot_or_fallback && rightIcon_slot_or_fallback.c(), attr(span, "class", "right-section svelte-5xpm5q");
       },
       m(target, anchor) {
         insert(target, span, anchor), rightIcon_slot_or_fallback && rightIcon_slot_or_fallback.m(span, null), current = !0;
       },
       p(ctx2, dirty) {
         rightIcon_slot && rightIcon_slot.p && (!current || dirty & /*$$scope*/
-        67108864) && update_slot_base(
+        134217728) && update_slot_base(
           rightIcon_slot,
           rightIcon_slot_template,
           ctx2,
           /*$$scope*/
-          ctx2[26],
+          ctx2[27],
           current ? get_slot_changes(
             rightIcon_slot_template,
             /*$$scope*/
-            ctx2[26],
+            ctx2[27],
             dirty,
             get_rightIcon_slot_changes
           ) : get_all_dirty_from_scope(
             /*$$scope*/
-            ctx2[26]
+            ctx2[27]
           ),
           get_rightIcon_slot_context
         );
@@ -7903,7 +11180,7 @@ https://www.w3ctech.com/topic/2226`
       }
     }), {
       c() {
-        span = element("span"), create_component(loader.$$.fragment), attr(span, "class", "loader-right svelte-1n9fp7y");
+        span = element("span"), create_component(loader.$$.fragment), attr(span, "class", "right-section svelte-5xpm5q");
       },
       m(target, anchor) {
         insert(target, span, anchor), mount_component(loader, span, null), current = !0;
@@ -7997,7 +11274,7 @@ https://www.w3ctech.com/topic/2226`
     };
   }
   function instance$b($$self, $$props, $$invalidate) {
-    let getStyles, cx2;
+    let cx2, classes, getStyles;
     const omit_props_names = [
       "use",
       "element",
@@ -8040,13 +11317,13 @@ https://www.w3ctech.com/topic/2226`
       });
     }
     return $$self.$$set = ($$new_props) => {
-      $$props = assign(assign({}, $$props), exclude_internal_props($$new_props)), $$invalidate(19, $$restProps = compute_rest_props($$props, omit_props_names)), "use" in $$new_props && $$invalidate(2, use = $$new_props.use), "element" in $$new_props && $$invalidate(0, element2 = $$new_props.element), "class" in $$new_props && $$invalidate(3, className = $$new_props.class), "override" in $$new_props && $$invalidate(1, override = $$new_props.override), "variant" in $$new_props && $$invalidate(4, variant2 = $$new_props.variant), "color" in $$new_props && $$invalidate(21, color = $$new_props.color), "size" in $$new_props && $$invalidate(22, size2 = $$new_props.size), "radius" in $$new_props && $$invalidate(23, radius2 = $$new_props.radius), "gradient" in $$new_props && $$invalidate(24, gradient = $$new_props.gradient), "loaderPosition" in $$new_props && $$invalidate(5, loaderPosition = $$new_props.loaderPosition), "loaderProps" in $$new_props && $$invalidate(6, loaderProps = $$new_props.loaderProps), "href" in $$new_props && $$invalidate(7, href = $$new_props.href), "external" in $$new_props && $$invalidate(8, external = $$new_props.external), "disabled" in $$new_props && $$invalidate(9, disabled = $$new_props.disabled), "compact" in $$new_props && $$invalidate(10, compact = $$new_props.compact), "loading" in $$new_props && $$invalidate(11, loading = $$new_props.loading), "uppercase" in $$new_props && $$invalidate(12, uppercase = $$new_props.uppercase), "fullSize" in $$new_props && $$invalidate(25, fullSize = $$new_props.fullSize), "ripple" in $$new_props && $$invalidate(13, ripple = $$new_props.ripple), "$$scope" in $$new_props && $$invalidate(26, $$scope = $$new_props.$$scope);
+      $$props = assign(assign({}, $$props), exclude_internal_props($$new_props)), $$invalidate(20, $$restProps = compute_rest_props($$props, omit_props_names)), "use" in $$new_props && $$invalidate(2, use = $$new_props.use), "element" in $$new_props && $$invalidate(0, element2 = $$new_props.element), "class" in $$new_props && $$invalidate(3, className = $$new_props.class), "override" in $$new_props && $$invalidate(1, override = $$new_props.override), "variant" in $$new_props && $$invalidate(4, variant2 = $$new_props.variant), "color" in $$new_props && $$invalidate(22, color = $$new_props.color), "size" in $$new_props && $$invalidate(23, size2 = $$new_props.size), "radius" in $$new_props && $$invalidate(24, radius2 = $$new_props.radius), "gradient" in $$new_props && $$invalidate(25, gradient = $$new_props.gradient), "loaderPosition" in $$new_props && $$invalidate(5, loaderPosition = $$new_props.loaderPosition), "loaderProps" in $$new_props && $$invalidate(6, loaderProps = $$new_props.loaderProps), "href" in $$new_props && $$invalidate(7, href = $$new_props.href), "external" in $$new_props && $$invalidate(8, external = $$new_props.external), "disabled" in $$new_props && $$invalidate(9, disabled = $$new_props.disabled), "compact" in $$new_props && $$invalidate(10, compact = $$new_props.compact), "loading" in $$new_props && $$invalidate(11, loading = $$new_props.loading), "uppercase" in $$new_props && $$invalidate(12, uppercase = $$new_props.uppercase), "fullSize" in $$new_props && $$invalidate(26, fullSize = $$new_props.fullSize), "ripple" in $$new_props && $$invalidate(13, ripple = $$new_props.ripple), "$$scope" in $$new_props && $$invalidate(27, $$scope = $$new_props.$$scope);
     }, $$self.$$.update = () => {
       $$self.$$.dirty & /*observable*/
       16384 && observable && $$invalidate(1, override = { display: "none" }), $$self.$$.dirty & /*color, compact, fullSize, gradient, radius, size, variant*/
-      65012752 && $$invalidate(
-        17,
-        { getStyles, cx: cx2 } = useStyles$3(
+      130024464 && $$invalidate(
+        18,
+        { cx: cx2, classes, getStyles } = useStyles$3(
           {
             color,
             compact,
@@ -8058,8 +11335,9 @@ https://www.w3ctech.com/topic/2226`
           },
           { name: "Button" }
         ),
-        getStyles,
-        ($$invalidate(16, cx2), $$invalidate(21, color), $$invalidate(10, compact), $$invalidate(25, fullSize), $$invalidate(24, gradient), $$invalidate(23, radius2), $$invalidate(22, size2), $$invalidate(4, variant2))
+        cx2,
+        ($$invalidate(17, classes), $$invalidate(22, color), $$invalidate(10, compact), $$invalidate(26, fullSize), $$invalidate(25, gradient), $$invalidate(24, radius2), $$invalidate(23, size2), $$invalidate(4, variant2)),
+        ($$invalidate(16, getStyles), $$invalidate(22, color), $$invalidate(10, compact), $$invalidate(26, fullSize), $$invalidate(25, gradient), $$invalidate(24, radius2), $$invalidate(23, size2), $$invalidate(4, variant2))
       );
     }, [
       element2,
@@ -8078,8 +11356,9 @@ https://www.w3ctech.com/topic/2226`
       ripple,
       observable,
       err,
-      cx2,
       getStyles,
+      classes,
+      cx2,
       forwardEvents,
       $$restProps,
       $$slots,
@@ -8108,10 +11387,10 @@ https://www.w3ctech.com/topic/2226`
           class: 3,
           override: 1,
           variant: 4,
-          color: 21,
-          size: 22,
-          radius: 23,
-          gradient: 24,
+          color: 22,
+          size: 23,
+          radius: 24,
+          gradient: 25,
           loaderPosition: 5,
           loaderProps: 6,
           href: 7,
@@ -8120,7 +11399,7 @@ https://www.w3ctech.com/topic/2226`
           compact: 10,
           loading: 11,
           uppercase: 12,
-          fullSize: 25,
+          fullSize: 26,
           ripple: 13
         },
         add_css$2
@@ -8614,6 +11893,8 @@ https://www.w3ctech.com/topic/2226`
           ctx[16](
             /*className*/
             ctx[2],
+            /*classes*/
+            ctx[15].root,
             /*getStyles*/
             ctx[14]({ css: (
               /*override*/
@@ -8645,20 +11926,22 @@ https://www.w3ctech.com/topic/2226`
           mount_component(box, target, anchor), current = !0;
         },
         p(ctx2, [dirty]) {
-          const box_changes = dirty & /*use, cx, className, getStyles, override, $$restProps*/
-          213006 ? get_spread_update(box_spread_levels, [
+          const box_changes = dirty & /*use, cx, className, classes, getStyles, override, $$restProps*/
+          245774 ? get_spread_update(box_spread_levels, [
             dirty & /*use*/
             2 && { use: (
               /*use*/
               ctx2[1]
             ) },
-            dirty & /*cx, className, getStyles, override*/
-            81932 && {
+            dirty & /*cx, className, classes, getStyles, override*/
+            114700 && {
               class: (
                 /*cx*/
                 ctx2[16](
                   /*className*/
                   ctx2[2],
+                  /*classes*/
+                  ctx2[15].root,
                   /*getStyles*/
                   ctx2[14]({ css: (
                     /*override*/
@@ -8788,12 +12071,12 @@ https://www.w3ctech.com/topic/2226`
     let current;
     const default_slot_template = (
       /*#slots*/
-      ctx[14].default
+      ctx[15].default
     ), default_slot = create_slot(
       default_slot_template,
       ctx,
       /*$$scope*/
-      ctx[16],
+      ctx[17],
       null
     );
     return {
@@ -8805,21 +12088,21 @@ https://www.w3ctech.com/topic/2226`
       },
       p(ctx2, dirty) {
         default_slot && default_slot.p && (!current || dirty & /*$$scope*/
-        65536) && update_slot_base(
+        131072) && update_slot_base(
           default_slot,
           default_slot_template,
           ctx2,
           /*$$scope*/
-          ctx2[16],
+          ctx2[17],
           current ? get_slot_changes(
             default_slot_template,
             /*$$scope*/
-            ctx2[16],
+            ctx2[17],
             dirty,
             null
           ) : get_all_dirty_from_scope(
             /*$$scope*/
-            ctx2[16]
+            ctx2[17]
           ),
           null
         );
@@ -8845,9 +12128,11 @@ https://www.w3ctech.com/topic/2226`
       {
         class: (
           /*cx*/
-          ctx[5](
+          ctx[6](
             /*className*/
             ctx[2],
+            /*classes*/
+            ctx[5].root,
             /*getStyles*/
             ctx[4]({ css: (
               /*override*/
@@ -8857,10 +12142,10 @@ https://www.w3ctech.com/topic/2226`
         )
       },
       /*$$restProps*/
-      ctx[6]
+      ctx[7]
     ];
     function box_element_binding(value) {
-      ctx[15](value);
+      ctx[16](value);
     }
     let box_props = {
       $$slots: { default: [create_default_slot$4] },
@@ -8879,20 +12164,22 @@ https://www.w3ctech.com/topic/2226`
           mount_component(box, target, anchor), current = !0;
         },
         p(ctx2, [dirty]) {
-          const box_changes = dirty & /*use, cx, className, getStyles, override, $$restProps*/
-          126 ? get_spread_update(box_spread_levels, [
+          const box_changes = dirty & /*use, cx, className, classes, getStyles, override, $$restProps*/
+          254 ? get_spread_update(box_spread_levels, [
             dirty & /*use*/
             2 && { use: (
               /*use*/
               ctx2[1]
             ) },
-            dirty & /*cx, className, getStyles, override*/
-            60 && {
+            dirty & /*cx, className, classes, getStyles, override*/
+            124 && {
               class: (
                 /*cx*/
-                ctx2[5](
+                ctx2[6](
                   /*className*/
                   ctx2[2],
+                  /*classes*/
+                  ctx2[5].root,
                   /*getStyles*/
                   ctx2[4]({ css: (
                     /*override*/
@@ -8902,13 +12189,13 @@ https://www.w3ctech.com/topic/2226`
               )
             },
             dirty & /*$$restProps*/
-            64 && get_spread_object(
+            128 && get_spread_object(
               /*$$restProps*/
-              ctx2[6]
+              ctx2[7]
             )
           ]) : {};
           dirty & /*$$scope*/
-          65536 && (box_changes.$$scope = { dirty, ctx: ctx2 }), !updating_element && dirty & /*element*/
+          131072 && (box_changes.$$scope = { dirty, ctx: ctx2 }), !updating_element && dirty & /*element*/
           1 && (updating_element = !0, box_changes.element = /*element*/
           ctx2[0], add_flush_callback(() => updating_element = !1)), box.$set(box_changes);
         },
@@ -8925,7 +12212,7 @@ https://www.w3ctech.com/topic/2226`
     );
   }
   function instance$8($$self, $$props, $$invalidate) {
-    let cx2, getStyles;
+    let cx2, classes, getStyles;
     const omit_props_names = [
       "use",
       "element",
@@ -8943,15 +12230,15 @@ https://www.w3ctech.com/topic/2226`
       element2 = value, $$invalidate(0, element2);
     }
     return $$self.$$set = ($$new_props) => {
-      $$props = assign(assign({}, $$props), exclude_internal_props($$new_props)), $$invalidate(6, $$restProps = compute_rest_props($$props, omit_props_names)), "use" in $$new_props && $$invalidate(1, use = $$new_props.use), "element" in $$new_props && $$invalidate(0, element2 = $$new_props.element), "class" in $$new_props && $$invalidate(2, className = $$new_props.class), "override" in $$new_props && $$invalidate(3, override = $$new_props.override), "position" in $$new_props && $$invalidate(7, position = $$new_props.position), "noWrap" in $$new_props && $$invalidate(8, noWrap = $$new_props.noWrap), "grow" in $$new_props && $$invalidate(9, grow = $$new_props.grow), "spacing" in $$new_props && $$invalidate(10, spacing = $$new_props.spacing), "direction" in $$new_props && $$invalidate(11, direction = $$new_props.direction), "align" in $$new_props && $$invalidate(12, align = $$new_props.align), "$$scope" in $$new_props && $$invalidate(16, $$scope = $$new_props.$$scope);
+      $$props = assign(assign({}, $$props), exclude_internal_props($$new_props)), $$invalidate(7, $$restProps = compute_rest_props($$props, omit_props_names)), "use" in $$new_props && $$invalidate(1, use = $$new_props.use), "element" in $$new_props && $$invalidate(0, element2 = $$new_props.element), "class" in $$new_props && $$invalidate(2, className = $$new_props.class), "override" in $$new_props && $$invalidate(3, override = $$new_props.override), "position" in $$new_props && $$invalidate(8, position = $$new_props.position), "noWrap" in $$new_props && $$invalidate(9, noWrap = $$new_props.noWrap), "grow" in $$new_props && $$invalidate(10, grow = $$new_props.grow), "spacing" in $$new_props && $$invalidate(11, spacing = $$new_props.spacing), "direction" in $$new_props && $$invalidate(12, direction = $$new_props.direction), "align" in $$new_props && $$invalidate(13, align = $$new_props.align), "$$scope" in $$new_props && $$invalidate(17, $$scope = $$new_props.$$scope);
     }, $$self.$$.update = () => {
       $$self.$$.dirty & /*element*/
       1 && onMount(() => {
-        $$invalidate(13, children2 = element2.childElementCount);
+        $$invalidate(14, children2 = element2.childElementCount);
       }), $$self.$$.dirty & /*align, children, direction, grow, noWrap, position, spacing*/
-      16256 && $$invalidate(
-        5,
-        { cx: cx2, getStyles } = useStyles$1(
+      32512 && $$invalidate(
+        6,
+        { cx: cx2, classes, getStyles } = useStyles$1(
           {
             align,
             children: children2,
@@ -8964,7 +12251,8 @@ https://www.w3ctech.com/topic/2226`
           { name: "Group" }
         ),
         cx2,
-        ($$invalidate(4, getStyles), $$invalidate(12, align), $$invalidate(13, children2), $$invalidate(11, direction), $$invalidate(9, grow), $$invalidate(8, noWrap), $$invalidate(7, position), $$invalidate(10, spacing), $$invalidate(0, element2))
+        ($$invalidate(5, classes), $$invalidate(13, align), $$invalidate(14, children2), $$invalidate(12, direction), $$invalidate(10, grow), $$invalidate(9, noWrap), $$invalidate(8, position), $$invalidate(11, spacing), $$invalidate(0, element2)),
+        ($$invalidate(4, getStyles), $$invalidate(13, align), $$invalidate(14, children2), $$invalidate(12, direction), $$invalidate(10, grow), $$invalidate(9, noWrap), $$invalidate(8, position), $$invalidate(11, spacing), $$invalidate(0, element2))
       );
     }, [
       element2,
@@ -8972,6 +12260,7 @@ https://www.w3ctech.com/topic/2226`
       className,
       override,
       getStyles,
+      classes,
       cx2,
       $$restProps,
       position,
@@ -8993,12 +12282,12 @@ https://www.w3ctech.com/topic/2226`
         element: 0,
         class: 2,
         override: 3,
-        position: 7,
-        noWrap: 8,
-        grow: 9,
-        spacing: 10,
-        direction: 11,
-        align: 12
+        position: 8,
+        noWrap: 9,
+        grow: 10,
+        spacing: 11,
+        direction: 12,
+        align: 13
       });
     }
   }
@@ -9011,20 +12300,17 @@ https://www.w3ctech.com/topic/2226`
   }, useStyles = createStyles((theme2, { icon, iconWidth, invalid, multiline, radius: radius2, rightSectionWidth, size: size2, variant: variant2, showRightSection }) => ({
     root: {
       darkMode: {
-        "& .input": variant2 === "headless" ? {} : {
-          color: "$dark50"
-        },
         "&:disabled": {
-          backgroundColor: "$dark600"
+          backgroundColor: theme2.fn.themeColor("dark", 6)
         },
         "&::placeholder": {
-          color: "$dark300"
+          color: theme2.fn.themeColor("dark", 3)
         }
       },
       position: "relative"
     },
-    input: variant2 === "headless" ? {} : {
-      height: multiline ? variant2 === "unstyled" ? void 0 : "auto" : typeof size2 == "number" ? `${size2}px` : sizes[size2] ?? sizes.md,
+    input: variant2 !== "headless" ? {
+      height: multiline ? "auto" : typeof size2 == "number" ? `${size2}px` : sizes[size2] ?? sizes.md,
       WebkitTapHighlightColor: "transparent",
       lineHeight: multiline ? "$md" : `${sizes[size2] - 2}px`,
       appearance: "none",
@@ -9040,18 +12326,18 @@ https://www.w3ctech.com/topic/2226`
       paddingRight: (variant2 === "default" || variant2 === "filled") && showRightSection ? rightSectionWidth : null,
       borderRadius: variant2 === "default" || variant2 === "filled" ? `$${radius2}` : null,
       "&:disabled": {
-        backgroundColor: "$gray100",
-        color: "$dark200",
+        backgroundColor: theme2.fn.themeColor("gray", 1),
+        color: theme2.fn.themeColor("dark", 2),
         opacity: 0.6,
         cursor: "not-allowed",
         "&::placeholder": {
-          color: "$dark200"
+          color: theme2.fn.themeColor("dark", 2)
         }
       },
       "&::placeholder": {
         opacity: 1,
         userSelect: "none",
-        color: "$gray500"
+        color: theme2.fn.themeColor("gray", 5)
       },
       "&::-webkit-inner-spin-button, &::-webkit-outer-spin-button, &::-webkit-search-decoration, &::-webkit-search-cancel-button, &::-webkit-search-results-button, &::-webkit-search-results-decoration": {
         appearance: "none"
@@ -9059,103 +12345,107 @@ https://www.w3ctech.com/topic/2226`
       "&[type=number]": {
         MozAppearance: "textfield"
       },
-      "&.defaultVariant": {
-        [`${theme2.dark} &`]: {
-          border: "1px solid $dark500",
-          backgroundColor: "$dark800",
-          "&:focus, &:focus-within": {
-            borderColor: "$blue800"
-          }
-        },
-        border: "1px solid $gray400",
-        backgroundColor: "White",
-        transition: "border-color 100ms ease",
-        "&:focus, &:focus-within": {
-          outline: "none",
-          borderColor: "$blue500"
-        }
+      darkMode: {
+        color: theme2.fn.themeColor("dark", 0)
+      }
+    } : {},
+    defaultVariant: {
+      border: `1px solid ${theme2.fn.themeColor("gray", 4)}`,
+      backgroundColor: "White",
+      transition: "border-color 100ms ease",
+      minHeight: sizes[size2] ?? sizes.md,
+      "&:focus, &:focus-within": {
+        outline: "none",
+        borderColor: theme2.fn.themeColor("blue", 5)
       },
-      "&.filledVariant": {
-        [`${theme2.dark} &`]: {
-          backgroundColor: "$dark500",
-          "&:focus, &:focus-within": {
-            borderColor: "$blue800 !important"
-          }
-        },
-        border: "1px solid transparent",
-        backgroundColor: "$gray100",
+      darkMode: {
+        border: `1px solid ${theme2.fn.themeColor("dark", 5)}`,
+        backgroundColor: theme2.fn.themeColor("dark", 8),
         "&:focus, &:focus-within": {
-          outline: "none",
-          borderColor: "$blue500 !important"
+          borderColor: theme2.fn.themeColor("blue", 8)
         }
+      }
+    },
+    filledVariant: {
+      border: "1px solid transparent",
+      backgroundColor: theme2.fn.themeColor("gray", 1),
+      minHeight: sizes[size2] ?? sizes.md,
+      "&:focus, &:focus-within": {
+        outline: "none",
+        borderColor: `${theme2.fn.themeColor("blue", 5)} !important`
       },
-      "&.unstyledVariant": {
-        [`${theme2.dark} &`]: {
-          color: "$dark50"
-        },
-        borderWidth: 0,
-        color: "Black",
+      darkMode: {
+        backgroundColor: theme2.fn.themeColor("dark", 5),
+        "&:focus, &:focus-within": {
+          borderColor: `${theme2.fn.themeColor("blue", 8)} !important`
+        }
+      }
+    },
+    unstyledVariant: {
+      height: multiline ? void 0 : "auto",
+      borderWidth: 0,
+      color: "Black",
+      backgroundColor: "transparent",
+      minHeight: 28,
+      outline: 0,
+      "&:focus, &:focus-within": {
+        outline: "none",
+        borderColor: "transparent"
+      },
+      "&:disabled": {
         backgroundColor: "transparent",
-        minHeight: 28,
-        outline: 0,
         "&:focus, &:focus-within": {
           outline: "none",
           borderColor: "transparent"
-        },
-        "&:disabled": {
-          backgroundColor: "transparent",
-          "&:focus, &:focus-within": {
-            outline: "none",
-            borderColor: "transparent"
-          }
         }
       }
     },
     withIcon: {
-      paddingLeft: typeof iconWidth == "number" ? iconWidth : sizes[size2] ?? sizes.md
+      paddingLeft: typeof iconWidth == "number" ? `${iconWidth}px` : sizes[size2] ?? sizes.md
     },
     disabled: {
-      darkMode: {
-        backgroundColor: "$dark600 !important"
-      },
-      backgroundColor: "$gray100 !important",
-      color: "$dark200 !important",
+      backgroundColor: theme2.fn.themeColor("gray", 1),
+      color: theme2.fn.themeColor("dark", 2),
       opacity: 0.6,
       cursor: "not-allowed",
       "&::placeholder": {
-        color: "$dark200 !important"
+        color: theme2.fn.themeColor("dark", 2)
+      },
+      darkMode: {
+        backgroundColor: theme2.fn.themeColor("dark", 6),
+        borderColor: theme2.fn.themeColor("dark", 4)
       }
     },
     invalid: {
-      darkMode: {
-        color: "$red600 !important",
-        borderColor: "$red600 !important",
-        "&::placeholder": {
-          color: "$red600 !important"
-        }
-      },
-      color: "$red700 !important",
-      borderColor: "$red700 !important",
+      color: theme2.fn.themeColor("red", 7),
+      borderColor: theme2.fn.themeColor("red", 7),
       "&::placeholder": {
         opacity: 1,
-        color: "$red700 !important"
+        color: theme2.fn.themeColor("red", 7)
+      },
+      darkMode: {
+        color: theme2.fn.themeColor("red", 6),
+        borderColor: theme2.fn.themeColor("red", 6),
+        "&::placeholder": {
+          color: theme2.fn.themeColor("red", 6)
+        }
       }
     },
     icon: {
-      darkMode: {
-        color: invalid ? "red600" : "$dark200"
-      },
       pointerEvents: "none",
       position: "absolute",
       zIndex: 1,
       left: 0,
-      top: 8,
+      top: 0,
       bottom: 0,
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
-      width: sizes[size2] ?? sizes.md,
-      color: invalid ? "$red700" : "$gray500"
+      width: iconWidth ? `${iconWidth}px` : sizes[size2] ?? sizes.md,
+      color: invalid ? theme2.fn.themeColor("red", 7) : theme2.fn.themeColor("gray", 5),
+      darkMode: {
+        color: invalid ? theme2.fn.themeColor("red", 6) : theme2.fn.themeColor("dark", 2)
+      }
     },
     rightSection: {
       position: "absolute",
@@ -9169,15 +12459,11 @@ https://www.w3ctech.com/topic/2226`
     }
   })), get_rightSection_slot_changes$2 = (dirty) => ({}), get_rightSection_slot_context$2 = (ctx) => ({});
   function create_if_block_4(ctx) {
-    let iconrenderer, current;
+    let div, iconrenderer, div_class_value, current;
     const iconrenderer_spread_levels = [
       { icon: (
         /*icon*/
         ctx[6]
-      ) },
-      { className: (
-        /*classes*/
-        ctx[22].icon
       ) },
       /*iconProps*/
       ctx[7],
@@ -9188,32 +12474,30 @@ https://www.w3ctech.com/topic/2226`
       iconrenderer_props = assign(iconrenderer_props, iconrenderer_spread_levels[i2]);
     return iconrenderer = new IconRenderer$1({ props: iconrenderer_props }), {
       c() {
-        create_component(iconrenderer.$$.fragment);
+        div = element("div"), create_component(iconrenderer.$$.fragment), attr(div, "class", div_class_value = /*classes*/
+        ctx[23].icon);
       },
       m(target, anchor) {
-        mount_component(iconrenderer, target, anchor), current = !0;
+        insert(target, div, anchor), mount_component(iconrenderer, div, null), current = !0;
       },
       p(ctx2, dirty) {
-        const iconrenderer_changes = dirty[0] & /*icon, classes, iconProps*/
-        4194496 ? get_spread_update(iconrenderer_spread_levels, [
+        const iconrenderer_changes = dirty[0] & /*icon, iconProps*/
+        192 ? get_spread_update(iconrenderer_spread_levels, [
           dirty[0] & /*icon*/
           64 && { icon: (
             /*icon*/
             ctx2[6]
-          ) },
-          dirty[0] & /*classes*/
-          4194304 && { className: (
-            /*classes*/
-            ctx2[22].icon
           ) },
           dirty[0] & /*iconProps*/
           128 && get_spread_object(
             /*iconProps*/
             ctx2[7]
           ),
-          iconrenderer_spread_levels[3]
+          iconrenderer_spread_levels[2]
         ]) : {};
-        iconrenderer.$set(iconrenderer_changes);
+        iconrenderer.$set(iconrenderer_changes), (!current || dirty[0] & /*classes*/
+        8388608 && div_class_value !== (div_class_value = /*classes*/
+        ctx2[23].icon)) && attr(div, "class", div_class_value);
       },
       i(local) {
         current || (transition_in(iconrenderer.$$.fragment, local), current = !0);
@@ -9222,7 +12506,7 @@ https://www.w3ctech.com/topic/2226`
         transition_out(iconrenderer.$$.fragment, local), current = !1;
       },
       d(detaching) {
-        destroy_component(iconrenderer, detaching);
+        detaching && detach(div), destroy_component(iconrenderer);
       }
     };
   }
@@ -9232,7 +12516,7 @@ https://www.w3ctech.com/topic/2226`
       {
         use: [
           /*forwardEvents*/
-          ctx[24],
+          ctx[25],
           [
             useActions,
             /*use*/
@@ -9247,34 +12531,35 @@ https://www.w3ctech.com/topic/2226`
       {
         class: (
           /*cx*/
-          ctx[23](
+          ctx[24](
             /*className*/
             ctx[3],
             {
               [
                 /*classes*/
-                ctx[22].disabled
+                ctx[23].disabled
               ]: (
                 /*disabled*/
                 ctx[14]
               ),
               [
                 /*classes*/
-                ctx[22].invalid
+                ctx[23].invalid
               ]: (
                 /*invalid*/
                 ctx[15]
               ),
               [
                 /*classes*/
-                ctx[22].withIcon
+                ctx[23].withIcon
               ]: (
                 /*icon*/
                 ctx[6]
               )
             },
-            `${/*variant*/
-            ctx[13]}Variant`
+            /*classes*/
+            ctx[23][`${/*variant*/
+            ctx[13]}Variant`] ?? {}
           )
         )
       },
@@ -9294,14 +12579,18 @@ https://www.w3ctech.com/topic/2226`
         /*type*/
         ctx[17]
       ) },
+      { autofocus: (
+        /*autofocus*/
+        ctx[19]
+      ) },
       /*$$restProps*/
-      ctx[28]
+      ctx[29]
     ];
     function switch_instance_element_binding(value) {
-      ctx[37](value);
+      ctx[38](value);
     }
     function switch_instance_value_binding(value) {
-      ctx[38](value);
+      ctx[39](value);
     }
     var switch_value = (
       /*root*/
@@ -9330,13 +12619,13 @@ https://www.w3ctech.com/topic/2226`
         switch_instance && mount_component(switch_instance, target, anchor), insert(target, switch_instance_anchor, anchor), current = !0;
       },
       p(ctx2, dirty) {
-        const switch_instance_changes = dirty[0] & /*forwardEvents, use, invalid, cx, className, classes, disabled, icon, variant, required, id, type, $$restProps*/
-        297990220 ? get_spread_update(switch_instance_spread_levels, [
+        const switch_instance_changes = dirty[0] & /*forwardEvents, use, invalid, cx, className, classes, disabled, icon, variant, required, id, type, autofocus, $$restProps*/
+        596310092 ? get_spread_update(switch_instance_spread_levels, [
           dirty[0] & /*forwardEvents, use*/
-          16777220 && {
+          33554436 && {
             use: [
               /*forwardEvents*/
-              ctx2[24],
+              ctx2[25],
               [
                 useActions,
                 /*use*/
@@ -9350,37 +12639,38 @@ https://www.w3ctech.com/topic/2226`
             ctx2[15]
           ) },
           dirty[0] & /*cx, className, classes, disabled, invalid, icon, variant*/
-          12640328 && {
+          25223240 && {
             class: (
               /*cx*/
-              ctx2[23](
+              ctx2[24](
                 /*className*/
                 ctx2[3],
                 {
                   [
                     /*classes*/
-                    ctx2[22].disabled
+                    ctx2[23].disabled
                   ]: (
                     /*disabled*/
                     ctx2[14]
                   ),
                   [
                     /*classes*/
-                    ctx2[22].invalid
+                    ctx2[23].invalid
                   ]: (
                     /*invalid*/
                     ctx2[15]
                   ),
                   [
                     /*classes*/
-                    ctx2[22].withIcon
+                    ctx2[23].withIcon
                   ]: (
                     /*icon*/
                     ctx2[6]
                   )
                 },
-                `${/*variant*/
-                ctx2[13]}Variant`
+                /*classes*/
+                ctx2[23][`${/*variant*/
+                ctx2[13]}Variant`] ?? {}
               )
             )
           },
@@ -9404,14 +12694,19 @@ https://www.w3ctech.com/topic/2226`
             /*type*/
             ctx2[17]
           ) },
+          dirty[0] & /*autofocus*/
+          524288 && { autofocus: (
+            /*autofocus*/
+            ctx2[19]
+          ) },
           dirty[0] & /*$$restProps*/
-          268435456 && get_spread_object(
+          536870912 && get_spread_object(
             /*$$restProps*/
-            ctx2[28]
+            ctx2[29]
           )
         ]) : {};
         if (dirty[1] & /*$$scope*/
-        256 && (switch_instance_changes.$$scope = { dirty, ctx: ctx2 }), !updating_element && dirty[0] & /*element*/
+        512 && (switch_instance_changes.$$scope = { dirty, ctx: ctx2 }), !updating_element && dirty[0] & /*element*/
         1 && (updating_element = !0, switch_instance_changes.element = /*element*/
         ctx2[0], add_flush_callback(() => updating_element = !1)), !updating_value && dirty[0] & /*value*/
         2 && (updating_value = !0, switch_instance_changes.value = /*value*/
@@ -9442,10 +12737,10 @@ https://www.w3ctech.com/topic/2226`
   function create_if_block_2$1(ctx) {
     let previous_tag = (
       /*castRoot*/
-      ctx[25]()
+      ctx[26]()
     ), svelte_element_anchor, current, svelte_element = (
       /*castRoot*/
-      ctx[25]() && create_dynamic_element(ctx)
+      ctx[26]() && create_dynamic_element(ctx)
     );
     return {
       c() {
@@ -9456,12 +12751,12 @@ https://www.w3ctech.com/topic/2226`
       },
       p(ctx2, dirty) {
         /*castRoot*/
-        ctx2[25]() ? previous_tag ? safe_not_equal(
+        ctx2[26]() ? previous_tag ? safe_not_equal(
           previous_tag,
           /*castRoot*/
-          ctx2[25]()
+          ctx2[26]()
         ) ? (svelte_element.d(1), svelte_element = create_dynamic_element(ctx2), svelte_element.c(), svelte_element.m(svelte_element_anchor.parentNode, svelte_element_anchor)) : svelte_element.p(ctx2, dirty) : (svelte_element = create_dynamic_element(ctx2), svelte_element.c(), svelte_element.m(svelte_element_anchor.parentNode, svelte_element_anchor)) : previous_tag && (svelte_element.d(1), svelte_element = null), previous_tag = /*castRoot*/
-        ctx2[25]();
+        ctx2[26]();
       },
       i(local) {
         current || (transition_in(svelte_element), current = !0);
@@ -9504,39 +12799,44 @@ https://www.w3ctech.com/topic/2226`
         /*autocomplete*/
         ctx[16]
       ) },
+      { autofocus: (
+        /*autofocus*/
+        ctx[19]
+      ) },
       { "aria-invalid": (
         /*invalid*/
         ctx[15]
       ) },
       {
         class: input_class_value = /*cx*/
-        ctx[23](
+        ctx[24](
           /*className*/
           ctx[3],
           /*classes*/
-          ctx[22].input,
+          ctx[23].input,
           {
             [
               /*classes*/
-              ctx[22].disabled
+              ctx[23].disabled
             ]: (
               /*disabled*/
               ctx[14]
             ),
             [
               /*classes*/
-              ctx[22].invalid
+              ctx[23].invalid
             ]: (
               /*invalid*/
               ctx[15]
             )
           },
-          `${/*variant*/
-          ctx[13]}Variant`
+          /*classes*/
+          ctx[23][`${/*variant*/
+          ctx[13]}Variant`] ?? {}
         )
       },
       /*$$restProps*/
-      ctx[28]
+      ctx[29]
     ], input_data = {};
     for (let i2 = 0; i2 < input_levels.length; i2 += 1)
       input_data = assign(input_data, input_levels[i2]);
@@ -9544,23 +12844,13 @@ https://www.w3ctech.com/topic/2226`
       c() {
         input2 = element("input"), set_attributes(input2, input_data), toggle_class(
           input2,
-          "disabled",
-          /*disabled*/
-          ctx[14]
-        ), toggle_class(
-          input2,
-          "invalid",
-          /*invalid*/
-          ctx[15]
-        ), toggle_class(
-          input2,
           "withIcon",
           /*icon*/
           ctx[6]
         );
       },
       m(target, anchor) {
-        insert(target, input2, anchor), input2.value = input_data.value, input2.autofocus && input2.focus(), ctx[35](input2), mounted || (dispose = [
+        insert(target, input2, anchor), input2.value = input_data.value, input2.autofocus && input2.focus(), ctx[36](input2), mounted || (dispose = [
           action_destroyer(useActions_action = useActions.call(
             null,
             input2,
@@ -9569,13 +12859,13 @@ https://www.w3ctech.com/topic/2226`
           )),
           action_destroyer(
             /*forwardEvents*/
-            ctx[24].call(null, input2)
+            ctx[25].call(null, input2)
           ),
           listen(
             input2,
             "input",
             /*onInput*/
-            ctx[27]
+            ctx[28]
           )
         ], mounted = !0);
       },
@@ -9617,55 +12907,51 @@ https://www.w3ctech.com/topic/2226`
             /*autocomplete*/
             ctx2[16]
           ) },
+          dirty[0] & /*autofocus*/
+          524288 && { autofocus: (
+            /*autofocus*/
+            ctx2[19]
+          ) },
           dirty[0] & /*invalid*/
           32768 && { "aria-invalid": (
             /*invalid*/
             ctx2[15]
           ) },
           dirty[0] & /*cx, className, classes, disabled, invalid, variant*/
-          12640264 && input_class_value !== (input_class_value = /*cx*/
-          ctx2[23](
+          25223176 && input_class_value !== (input_class_value = /*cx*/
+          ctx2[24](
             /*className*/
             ctx2[3],
             /*classes*/
-            ctx2[22].input,
+            ctx2[23].input,
             {
               [
                 /*classes*/
-                ctx2[22].disabled
+                ctx2[23].disabled
               ]: (
                 /*disabled*/
                 ctx2[14]
               ),
               [
                 /*classes*/
-                ctx2[22].invalid
+                ctx2[23].invalid
               ]: (
                 /*invalid*/
                 ctx2[15]
               )
             },
-            `${/*variant*/
-            ctx2[13]}Variant`
+            /*classes*/
+            ctx2[23][`${/*variant*/
+            ctx2[13]}Variant`] ?? {}
           )) && { class: input_class_value },
           dirty[0] & /*$$restProps*/
-          268435456 && /*$$restProps*/
-          ctx2[28]
+          536870912 && /*$$restProps*/
+          ctx2[29]
         ])), "value" in input_data && (input2.value = input_data.value), useActions_action && is_function(useActions_action.update) && dirty[0] & /*use*/
         4 && useActions_action.update.call(
           null,
           /*use*/
           ctx2[2]
-        ), toggle_class(
-          input2,
-          "disabled",
-          /*disabled*/
-          ctx2[14]
-        ), toggle_class(
-          input2,
-          "invalid",
-          /*invalid*/
-          ctx2[15]
         ), toggle_class(
           input2,
           "withIcon",
@@ -9676,7 +12962,7 @@ https://www.w3ctech.com/topic/2226`
       i: noop,
       o: noop,
       d(detaching) {
-        detaching && detach(input2), ctx[35](null), mounted = !1, run_all(dispose);
+        detaching && detach(input2), ctx[36](null), mounted = !1, run_all(dispose);
       }
     };
   }
@@ -9684,12 +12970,12 @@ https://www.w3ctech.com/topic/2226`
     let current;
     const default_slot_template = (
       /*#slots*/
-      ctx[34].default
+      ctx[35].default
     ), default_slot = create_slot(
       default_slot_template,
       ctx,
       /*$$scope*/
-      ctx[39],
+      ctx[40],
       null
     );
     return {
@@ -9701,21 +12987,21 @@ https://www.w3ctech.com/topic/2226`
       },
       p(ctx2, dirty) {
         default_slot && default_slot.p && (!current || dirty[1] & /*$$scope*/
-        256) && update_slot_base(
+        512) && update_slot_base(
           default_slot,
           default_slot_template,
           ctx2,
           /*$$scope*/
-          ctx2[39],
+          ctx2[40],
           current ? get_slot_changes(
             default_slot_template,
             /*$$scope*/
-            ctx2[39],
+            ctx2[40],
             dirty,
             null
           ) : get_all_dirty_from_scope(
             /*$$scope*/
-            ctx2[39]
+            ctx2[40]
           ),
           null
         );
@@ -9735,12 +13021,12 @@ https://www.w3ctech.com/topic/2226`
     let svelte_element, svelte_element_class_value, useActions_action, current, mounted, dispose;
     const default_slot_template = (
       /*#slots*/
-      ctx[34].default
+      ctx[35].default
     ), default_slot = create_slot(
       default_slot_template,
       ctx,
       /*$$scope*/
-      ctx[39],
+      ctx[40],
       null
     );
     let svelte_element_levels = [
@@ -9768,23 +13054,44 @@ https://www.w3ctech.com/topic/2226`
         /*type*/
         ctx[17]
       ) },
+      { autofocus: (
+        /*autofocus*/
+        ctx[19]
+      ) },
       { "aria-invalid": (
         /*invalid*/
         ctx[15]
       ) },
       {
         class: svelte_element_class_value = /*cx*/
-        ctx[23](
+        ctx[24](
           /*className*/
           ctx[3],
           /*classes*/
-          ctx[22].input,
-          `${/*variant*/
-          ctx[13]}Variant`
+          ctx[23].input,
+          {
+            [
+              /*classes*/
+              ctx[23].disabled
+            ]: (
+              /*disabled*/
+              ctx[14]
+            ),
+            [
+              /*classes*/
+              ctx[23].invalid
+            ]: (
+              /*invalid*/
+              ctx[15]
+            )
+          },
+          /*classes*/
+          ctx[23][`${/*variant*/
+          ctx[13]}Variant`] ?? {}
         )
       },
       /*$$restProps*/
-      ctx[28]
+      ctx[29]
     ], svelte_element_data = {};
     for (let i2 = 0; i2 < svelte_element_levels.length; i2 += 1)
       svelte_element_data = assign(svelte_element_data, svelte_element_levels[i2]);
@@ -9792,10 +13099,10 @@ https://www.w3ctech.com/topic/2226`
       c() {
         svelte_element = element(
           /*castRoot*/
-          ctx[25]()
+          ctx[26]()
         ), default_slot && default_slot.c(), /-/.test(
           /*castRoot*/
-          ctx[25]()
+          ctx[26]()
         ) ? set_custom_element_data_map(svelte_element, svelte_element_data) : set_attributes(svelte_element, svelte_element_data), toggle_class(
           svelte_element,
           "disabled",
@@ -9814,12 +13121,12 @@ https://www.w3ctech.com/topic/2226`
         );
       },
       m(target, anchor) {
-        insert(target, svelte_element, anchor), default_slot && default_slot.m(svelte_element, null), ctx[36](svelte_element), current = !0, mounted || (dispose = [
+        insert(target, svelte_element, anchor), default_slot && default_slot.m(svelte_element, null), ctx[37](svelte_element), current = !0, mounted || (dispose = [
           listen(
             svelte_element,
             "change",
             /*onChange*/
-            ctx[26]
+            ctx[27]
           ),
           action_destroyer(useActions_action = useActions.call(
             null,
@@ -9829,27 +13136,27 @@ https://www.w3ctech.com/topic/2226`
           )),
           action_destroyer(
             /*forwardEvents*/
-            ctx[24].call(null, svelte_element)
+            ctx[25].call(null, svelte_element)
           )
         ], mounted = !0);
       },
       p(ctx2, dirty) {
         default_slot && default_slot.p && (!current || dirty[1] & /*$$scope*/
-        256) && update_slot_base(
+        512) && update_slot_base(
           default_slot,
           default_slot_template,
           ctx2,
           /*$$scope*/
-          ctx2[39],
+          ctx2[40],
           current ? get_slot_changes(
             default_slot_template,
             /*$$scope*/
-            ctx2[39],
+            ctx2[40],
             dirty,
             null
           ) : get_all_dirty_from_scope(
             /*$$scope*/
-            ctx2[39]
+            ctx2[40]
           ),
           null
         ), svelte_element_data = get_spread_update(svelte_element_levels, [
@@ -9883,27 +13190,49 @@ https://www.w3ctech.com/topic/2226`
             /*type*/
             ctx2[17]
           ) },
+          (!current || dirty[0] & /*autofocus*/
+          524288) && { autofocus: (
+            /*autofocus*/
+            ctx2[19]
+          ) },
           (!current || dirty[0] & /*invalid*/
           32768) && { "aria-invalid": (
             /*invalid*/
             ctx2[15]
           ) },
-          (!current || dirty[0] & /*cx, className, classes, variant*/
-          12591112 && svelte_element_class_value !== (svelte_element_class_value = /*cx*/
-          ctx2[23](
+          (!current || dirty[0] & /*cx, className, classes, disabled, invalid, variant*/
+          25223176 && svelte_element_class_value !== (svelte_element_class_value = /*cx*/
+          ctx2[24](
             /*className*/
             ctx2[3],
             /*classes*/
-            ctx2[22].input,
-            `${/*variant*/
-            ctx2[13]}Variant`
+            ctx2[23].input,
+            {
+              [
+                /*classes*/
+                ctx2[23].disabled
+              ]: (
+                /*disabled*/
+                ctx2[14]
+              ),
+              [
+                /*classes*/
+                ctx2[23].invalid
+              ]: (
+                /*invalid*/
+                ctx2[15]
+              )
+            },
+            /*classes*/
+            ctx2[23][`${/*variant*/
+            ctx2[13]}Variant`] ?? {}
           ))) && { class: svelte_element_class_value },
           dirty[0] & /*$$restProps*/
-          268435456 && /*$$restProps*/
-          ctx2[28]
+          536870912 && /*$$restProps*/
+          ctx2[29]
         ]), /-/.test(
           /*castRoot*/
-          ctx2[25]()
+          ctx2[26]()
         ) ? set_custom_element_data_map(svelte_element, svelte_element_data) : set_attributes(svelte_element, svelte_element_data), useActions_action && is_function(useActions_action.update) && dirty[0] & /*use*/
         4 && useActions_action.update.call(
           null,
@@ -9933,7 +13262,7 @@ https://www.w3ctech.com/topic/2226`
         transition_out(default_slot, local), current = !1;
       },
       d(detaching) {
-        detaching && detach(svelte_element), default_slot && default_slot.d(detaching), ctx[36](null), mounted = !1, run_all(dispose);
+        detaching && detach(svelte_element), default_slot && default_slot.d(detaching), ctx[37](null), mounted = !1, run_all(dispose);
       }
     };
   }
@@ -9941,12 +13270,12 @@ https://www.w3ctech.com/topic/2226`
     let div, div_class_value, current;
     const rightSection_slot_template = (
       /*#slots*/
-      ctx[34].rightSection
+      ctx[35].rightSection
     ), rightSection_slot = create_slot(
       rightSection_slot_template,
       ctx,
       /*$$scope*/
-      ctx[39],
+      ctx[40],
       get_rightSection_slot_context$2
     );
     let div_levels = [
@@ -9954,7 +13283,7 @@ https://www.w3ctech.com/topic/2226`
       ctx[9],
       {
         class: div_class_value = /*classes*/
-        ctx[22].rightSection
+        ctx[23].rightSection
       }
     ], div_data = {};
     for (let i2 = 0; i2 < div_levels.length; i2 += 1)
@@ -9968,21 +13297,21 @@ https://www.w3ctech.com/topic/2226`
       },
       p(ctx2, dirty) {
         rightSection_slot && rightSection_slot.p && (!current || dirty[1] & /*$$scope*/
-        256) && update_slot_base(
+        512) && update_slot_base(
           rightSection_slot,
           rightSection_slot_template,
           ctx2,
           /*$$scope*/
-          ctx2[39],
+          ctx2[40],
           current ? get_slot_changes(
             rightSection_slot_template,
             /*$$scope*/
-            ctx2[39],
+            ctx2[40],
             dirty,
             get_rightSection_slot_changes$2
           ) : get_all_dirty_from_scope(
             /*$$scope*/
-            ctx2[39]
+            ctx2[40]
           ),
           get_rightSection_slot_context$2
         ), set_attributes(div, div_data = get_spread_update(div_levels, [
@@ -9990,8 +13319,8 @@ https://www.w3ctech.com/topic/2226`
           512 && /*rightSectionProps*/
           ctx2[9],
           (!current || dirty[0] & /*classes*/
-          4194304 && div_class_value !== (div_class_value = /*classes*/
-          ctx2[22].rightSection)) && { class: div_class_value }
+          8388608 && div_class_value !== (div_class_value = /*classes*/
+          ctx2[23].rightSection)) && { class: div_class_value }
         ]));
       },
       i(local) {
@@ -10013,15 +13342,15 @@ https://www.w3ctech.com/topic/2226`
     const if_block_creators = [create_if_block_1$1, create_if_block_2$1, create_if_block_3], if_blocks = [];
     function select_block_type(ctx2, dirty) {
       return dirty[0] & /*isHTMLElement, root*/
-      524320 && (show_if = null), /*isHTMLElement*/
-      ctx2[19] && /*root*/
+      1048608 && (show_if = null), /*isHTMLElement*/
+      ctx2[20] && /*root*/
       ctx2[5] === "input" ? 0 : (show_if == null && (show_if = !!/*isHTMLElement*/
-      (ctx2[19] && isInput(String(
+      (ctx2[20] && isInput(String(
         /*root*/
         ctx2[5]
       )))), show_if ? 1 : (
         /*isComponent*/
-        ctx2[20] && typeof /*root*/
+        ctx2[21] && typeof /*root*/
         ctx2[5] != "string" ? 2 : -1
       ));
     }
@@ -10070,15 +13399,20 @@ https://www.w3ctech.com/topic/2226`
       ctx[10],
       {
         class: (
-          /*getStyles*/
-          ctx[21]({ css: (
-            /*override*/
-            ctx[4]
-          ) })
+          /*cx*/
+          ctx[24](
+            /*classes*/
+            ctx[23].root,
+            /*getStyles*/
+            ctx[22]({ css: (
+              /*override*/
+              ctx[4]
+            ) })
+          )
         )
       },
       /*$$restProps*/
-      ctx[28]
+      ctx[29]
     ];
     let box_props = {
       $$slots: { default: [create_default_slot$3] },
@@ -10094,32 +13428,37 @@ https://www.w3ctech.com/topic/2226`
         mount_component(box, target, anchor), current = !0;
       },
       p(ctx2, dirty) {
-        const box_changes = dirty[0] & /*wrapperProps, getStyles, override, $$restProps*/
-        270533648 ? get_spread_update(box_spread_levels, [
+        const box_changes = dirty[0] & /*wrapperProps, cx, classes, getStyles, override, $$restProps*/
+        566232080 ? get_spread_update(box_spread_levels, [
           dirty[0] & /*wrapperProps*/
           1024 && get_spread_object(
             /*wrapperProps*/
             ctx2[10]
           ),
-          dirty[0] & /*getStyles, override*/
-          2097168 && {
+          dirty[0] & /*cx, classes, getStyles, override*/
+          29360144 && {
             class: (
-              /*getStyles*/
-              ctx2[21]({ css: (
-                /*override*/
-                ctx2[4]
-              ) })
+              /*cx*/
+              ctx2[24](
+                /*classes*/
+                ctx2[23].root,
+                /*getStyles*/
+                ctx2[22]({ css: (
+                  /*override*/
+                  ctx2[4]
+                ) })
+              )
             )
           },
           dirty[0] & /*$$restProps*/
-          268435456 && get_spread_object(
+          536870912 && get_spread_object(
             /*$$restProps*/
-            ctx2[28]
+            ctx2[29]
           )
         ]) : {};
-        dirty[0] & /*rightSectionProps, classes, showRightSection, value, type, required, disabled, id, placeholder, autocomplete, invalid, cx, className, variant, $$restProps, element, use, icon, isHTMLElement, root, isComponent, iconProps*/
-        283114479 | dirty[1] & /*$$scope*/
-        256 && (box_changes.$$scope = { dirty, ctx: ctx2 }), box.$set(box_changes);
+        dirty[0] & /*rightSectionProps, classes, showRightSection, value, type, required, disabled, id, placeholder, autocomplete, autofocus, invalid, cx, className, variant, $$restProps, element, use, icon, isHTMLElement, root, isComponent, iconProps*/
+        566229999 | dirty[1] & /*$$scope*/
+        512 && (box_changes.$$scope = { dirty, ctx: ctx2 }), box.$set(box_changes);
       },
       i(local) {
         current || (transition_in(box.$$.fragment, local), current = !0);
@@ -10161,11 +13500,12 @@ https://www.w3ctech.com/topic/2226`
       "multiline",
       "autocomplete",
       "type",
-      "placeholder"
+      "placeholder",
+      "autofocus"
     ];
     let $$restProps = compute_rest_props($$props, omit_props_names), { $$slots: slots = {}, $$scope } = $$props;
     const $$slots = compute_slots(slots);
-    let { use = [], element: element2 = void 0, class: className = "", override = {}, root: root2 = "input", icon = null, iconWidth = 36, iconProps = { size: 20, color: "currentColor" }, showRightSection = $$slots.rightSection, rightSectionWidth = 36, rightSectionProps = {}, wrapperProps = {}, id = "input-id", required = !1, radius: radius2 = "sm", variant: variant2 = "default", disabled = !1, size: size2 = "sm", value = "", invalid = !1, multiline = !1, autocomplete = "on", type = "text", placeholder = void 0 } = $$props;
+    let { use = [], element: element2 = void 0, class: className = "", override = {}, root: root2 = "input", icon = null, iconWidth = 36, iconProps = { size: 20, color: "currentColor" }, showRightSection = $$slots.rightSection, rightSectionWidth = 36, rightSectionProps = {}, wrapperProps = {}, id = "input-id", required = !1, radius: radius2 = "sm", variant: variant2 = "default", disabled = !1, size: size2 = "sm", value = "", invalid = !1, multiline = !1, autocomplete = "on", type = "text", placeholder = void 0, autofocus = void 0 } = $$props;
     const forwardEvents = createEventForwarder(get_current_component());
     function castRoot() {
       return root2;
@@ -10194,13 +13534,13 @@ https://www.w3ctech.com/topic/2226`
       value = value$1, $$invalidate(1, value);
     }
     return $$self.$$set = ($$new_props) => {
-      $$props = assign(assign({}, $$props), exclude_internal_props($$new_props)), $$invalidate(28, $$restProps = compute_rest_props($$props, omit_props_names)), "use" in $$new_props && $$invalidate(2, use = $$new_props.use), "element" in $$new_props && $$invalidate(0, element2 = $$new_props.element), "class" in $$new_props && $$invalidate(3, className = $$new_props.class), "override" in $$new_props && $$invalidate(4, override = $$new_props.override), "root" in $$new_props && $$invalidate(5, root2 = $$new_props.root), "icon" in $$new_props && $$invalidate(6, icon = $$new_props.icon), "iconWidth" in $$new_props && $$invalidate(29, iconWidth = $$new_props.iconWidth), "iconProps" in $$new_props && $$invalidate(7, iconProps = $$new_props.iconProps), "showRightSection" in $$new_props && $$invalidate(8, showRightSection = $$new_props.showRightSection), "rightSectionWidth" in $$new_props && $$invalidate(30, rightSectionWidth = $$new_props.rightSectionWidth), "rightSectionProps" in $$new_props && $$invalidate(9, rightSectionProps = $$new_props.rightSectionProps), "wrapperProps" in $$new_props && $$invalidate(10, wrapperProps = $$new_props.wrapperProps), "id" in $$new_props && $$invalidate(11, id = $$new_props.id), "required" in $$new_props && $$invalidate(12, required = $$new_props.required), "radius" in $$new_props && $$invalidate(31, radius2 = $$new_props.radius), "variant" in $$new_props && $$invalidate(13, variant2 = $$new_props.variant), "disabled" in $$new_props && $$invalidate(14, disabled = $$new_props.disabled), "size" in $$new_props && $$invalidate(32, size2 = $$new_props.size), "value" in $$new_props && $$invalidate(1, value = $$new_props.value), "invalid" in $$new_props && $$invalidate(15, invalid = $$new_props.invalid), "multiline" in $$new_props && $$invalidate(33, multiline = $$new_props.multiline), "autocomplete" in $$new_props && $$invalidate(16, autocomplete = $$new_props.autocomplete), "type" in $$new_props && $$invalidate(17, type = $$new_props.type), "placeholder" in $$new_props && $$invalidate(18, placeholder = $$new_props.placeholder), "$$scope" in $$new_props && $$invalidate(39, $$scope = $$new_props.$$scope);
+      $$props = assign(assign({}, $$props), exclude_internal_props($$new_props)), $$invalidate(29, $$restProps = compute_rest_props($$props, omit_props_names)), "use" in $$new_props && $$invalidate(2, use = $$new_props.use), "element" in $$new_props && $$invalidate(0, element2 = $$new_props.element), "class" in $$new_props && $$invalidate(3, className = $$new_props.class), "override" in $$new_props && $$invalidate(4, override = $$new_props.override), "root" in $$new_props && $$invalidate(5, root2 = $$new_props.root), "icon" in $$new_props && $$invalidate(6, icon = $$new_props.icon), "iconWidth" in $$new_props && $$invalidate(30, iconWidth = $$new_props.iconWidth), "iconProps" in $$new_props && $$invalidate(7, iconProps = $$new_props.iconProps), "showRightSection" in $$new_props && $$invalidate(8, showRightSection = $$new_props.showRightSection), "rightSectionWidth" in $$new_props && $$invalidate(31, rightSectionWidth = $$new_props.rightSectionWidth), "rightSectionProps" in $$new_props && $$invalidate(9, rightSectionProps = $$new_props.rightSectionProps), "wrapperProps" in $$new_props && $$invalidate(10, wrapperProps = $$new_props.wrapperProps), "id" in $$new_props && $$invalidate(11, id = $$new_props.id), "required" in $$new_props && $$invalidate(12, required = $$new_props.required), "radius" in $$new_props && $$invalidate(32, radius2 = $$new_props.radius), "variant" in $$new_props && $$invalidate(13, variant2 = $$new_props.variant), "disabled" in $$new_props && $$invalidate(14, disabled = $$new_props.disabled), "size" in $$new_props && $$invalidate(33, size2 = $$new_props.size), "value" in $$new_props && $$invalidate(1, value = $$new_props.value), "invalid" in $$new_props && $$invalidate(15, invalid = $$new_props.invalid), "multiline" in $$new_props && $$invalidate(34, multiline = $$new_props.multiline), "autocomplete" in $$new_props && $$invalidate(16, autocomplete = $$new_props.autocomplete), "type" in $$new_props && $$invalidate(17, type = $$new_props.type), "placeholder" in $$new_props && $$invalidate(18, placeholder = $$new_props.placeholder), "autofocus" in $$new_props && $$invalidate(19, autofocus = $$new_props.autofocus), "$$scope" in $$new_props && $$invalidate(40, $$scope = $$new_props.$$scope);
     }, $$self.$$.update = () => {
       $$self.$$.dirty[0] & /*root*/
-      32 && ($$invalidate(19, isHTMLElement = root2 && typeof root2 == "string"), $$invalidate(20, isComponent = root2 && typeof root2 == "function")), $$self.$$.dirty[0] & /*icon, iconWidth, invalid, rightSectionWidth, showRightSection, variant*/
-      1610654016 | $$self.$$.dirty[1] & /*multiline, radius, size*/
-      7 && $$invalidate(
-        23,
+      32 && ($$invalidate(20, isHTMLElement = root2 && typeof root2 == "string"), $$invalidate(21, isComponent = root2 && typeof root2 == "function")), $$self.$$.dirty[0] & /*icon, iconWidth, invalid, showRightSection, variant*/
+      1073783104 | $$self.$$.dirty[1] & /*multiline, radius, rightSectionWidth, size*/
+      15 && $$invalidate(
+        24,
         { cx: cx2, classes, getStyles } = useStyles(
           {
             icon,
@@ -10216,8 +13556,8 @@ https://www.w3ctech.com/topic/2226`
           { name: "Input" }
         ),
         cx2,
-        ($$invalidate(22, classes), $$invalidate(6, icon), $$invalidate(29, iconWidth), $$invalidate(15, invalid), $$invalidate(33, multiline), $$invalidate(31, radius2), $$invalidate(30, rightSectionWidth), $$invalidate(8, showRightSection), $$invalidate(32, size2), $$invalidate(13, variant2)),
-        ($$invalidate(21, getStyles), $$invalidate(6, icon), $$invalidate(29, iconWidth), $$invalidate(15, invalid), $$invalidate(33, multiline), $$invalidate(31, radius2), $$invalidate(30, rightSectionWidth), $$invalidate(8, showRightSection), $$invalidate(32, size2), $$invalidate(13, variant2))
+        ($$invalidate(23, classes), $$invalidate(6, icon), $$invalidate(30, iconWidth), $$invalidate(15, invalid), $$invalidate(34, multiline), $$invalidate(32, radius2), $$invalidate(31, rightSectionWidth), $$invalidate(8, showRightSection), $$invalidate(33, size2), $$invalidate(13, variant2)),
+        ($$invalidate(22, getStyles), $$invalidate(6, icon), $$invalidate(30, iconWidth), $$invalidate(15, invalid), $$invalidate(34, multiline), $$invalidate(32, radius2), $$invalidate(31, rightSectionWidth), $$invalidate(8, showRightSection), $$invalidate(33, size2), $$invalidate(13, variant2))
       );
     }, [
       element2,
@@ -10239,6 +13579,7 @@ https://www.w3ctech.com/topic/2226`
       autocomplete,
       type,
       placeholder,
+      autofocus,
       isHTMLElement,
       isComponent,
       getStyles,
@@ -10277,24 +13618,25 @@ https://www.w3ctech.com/topic/2226`
           override: 4,
           root: 5,
           icon: 6,
-          iconWidth: 29,
+          iconWidth: 30,
           iconProps: 7,
           showRightSection: 8,
-          rightSectionWidth: 30,
+          rightSectionWidth: 31,
           rightSectionProps: 9,
           wrapperProps: 10,
           id: 11,
           required: 12,
-          radius: 31,
+          radius: 32,
           variant: 13,
           disabled: 14,
-          size: 32,
+          size: 33,
           value: 1,
           invalid: 15,
-          multiline: 33,
+          multiline: 34,
           autocomplete: 16,
           type: 17,
-          placeholder: 18
+          placeholder: 18,
+          autofocus: 19
         },
         null,
         [-1, -1]
@@ -10634,10 +13976,8 @@ https://www.w3ctech.com/topic/2226`
         ctx[25]
       ) },
       { autocomplete: "off" },
-      { invalid: Boolean(
-        /*error*/
-        ctx[20]
-      ) },
+      { invalid: !!/*error*/
+      ctx[20] },
       {
         override: {
           .../*base*/
@@ -10747,10 +14087,8 @@ https://www.w3ctech.com/topic/2226`
             ) },
             input_spread_levels[3],
             dirty[0] & /*error*/
-            1048576 && { invalid: Boolean(
-              /*error*/
-              ctx2[20]
-            ) },
+            1048576 && { invalid: !!/*error*/
+            ctx2[20] },
             dirty[0] & /*base, inputStyle*/
             134217792 && {
               override: {
@@ -10852,10 +14190,12 @@ https://www.w3ctech.com/topic/2226`
         /*uuid*/
         ctx[25]
       ) },
-      { class: (
-        /*className*/
-        ctx[3]
-      ) },
+      {
+        class: (
+          /*className*/
+          ctx[3] + " svelteui-NativeSelect-root"
+        )
+      },
       { size: (
         /*size*/
         ctx[8]
@@ -10919,10 +14259,12 @@ https://www.w3ctech.com/topic/2226`
             ctx2[25]
           ) },
           dirty[0] & /*className*/
-          8 && { class: (
-            /*className*/
-            ctx2[3]
-          ) },
+          8 && {
+            class: (
+              /*className*/
+              ctx2[3] + " svelteui-NativeSelect-root"
+            )
+          },
           dirty[0] & /*size*/
           256 && { size: (
             /*size*/
@@ -11543,7 +14885,7 @@ https://www.w3ctech.com/topic/2226`
     function nativeselect_value_binding(value) {
       $$self.$$.not_equal($appStore.usedConfigId, value) && ($appStore.usedConfigId = value, appStore.set($appStore));
     }
-    return $$invalidate(0, configSelectData = [INNER_CONFIG, ...GM_getValue("CONFIG_LIST", [])].map((config2) => ({ label: config2.name, value: config2.id }))), [configSelectData, $appStore, nativeselect_value_binding];
+    return $$invalidate(0, configSelectData = [INNER_CONFIG, INNER_CONFIG_TAILWIND, ...GM_getValue("CONFIG_LIST", [])].map((config2) => ({ label: config2.name, value: config2.id }))), [configSelectData, $appStore, nativeselect_value_binding];
   }
   class ConfigSelect extends SvelteComponent {
     constructor(options) {
@@ -11961,7 +15303,7 @@ https://www.w3ctech.com/topic/2226`
   function instance($$self, $$props, $$invalidate) {
     let configSelectData, currentConfig, isInnerConfig, $appStore;
     component_subscribe($$self, appStore, ($$value) => $$invalidate(15, $appStore = $$value));
-    let configList = [INNER_CONFIG, ...GM_getValue("CONFIG_LIST", [])], currentConfigId = $appStore.usedConfigId, configData, loadUrl;
+    let configList = [INNER_CONFIG, INNER_CONFIG_TAILWIND, ...GM_getValue("CONFIG_LIST", [])], currentConfigId = $appStore.usedConfigId, configData, loadUrl;
     function syncConfigData() {
       $$invalidate(1, configData = structuredClone(currentConfig));
     }
@@ -11986,7 +15328,7 @@ https://www.w3ctech.com/topic/2226`
       ]), $$invalidate(0, currentConfigId = id);
     }
     function cacheLocalConfig() {
-      const newList = configList.filter((i2) => i2.id !== "inner").map((i2) => i2.id === currentConfigId ? configData.url ? { ...configData, options: {} } : configData : i2);
+      const newList = configList.filter((i2) => !innerConfigIds.includes(i2.id)).map((i2) => i2.id === currentConfigId ? configData.url ? { ...configData, options: {} } : configData : i2);
       GM_setValue("CONFIG_LIST", newList), $$invalidate(8, configList = [INNER_CONFIG, ...newList]);
     }
     function saveConfig() {
@@ -12014,7 +15356,7 @@ https://www.w3ctech.com/topic/2226`
       4 && currentConfig && syncConfigData(), $$self.$$.dirty & /*configData*/
       2 && (configData.url || $$invalidate(9, loadUrl = void 0)), $$self.$$.dirty & /*configData, loadUrl*/
       514 && configData.url && configData.url !== loadUrl && loadConfigData(), $$self.$$.dirty & /*currentConfigId*/
-      1 && $$invalidate(3, isInnerConfig = currentConfigId === "inner");
+      1 && $$invalidate(3, isInnerConfig = innerConfigIds.includes(currentConfigId));
     }, [
       currentConfigId,
       configData,

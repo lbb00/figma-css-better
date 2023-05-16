@@ -1,6 +1,6 @@
 import { writable } from 'svelte/store'
 import { loadConfig } from '../utils/loadConfig.js'
-import { INNER_CONFIG } from '../constant/config.js'
+import { INNER_CONFIG, INNER_CONFIG_TAILWIND } from '../constant/config.js'
 
 // 兼容旧的逻辑
 console.log('old config url', GM_getValue('__CONFIG_URL'))
@@ -24,9 +24,11 @@ export const appStore = writable({
 })
 
 async function loadNewConfig(id) {
-  const configLocal = [INNER_CONFIG, ...GM_getValue('CONFIG_LIST', [])].find(
-    (i) => i.id === id
-  )
+  const configLocal = [
+    INNER_CONFIG,
+    INNER_CONFIG_TAILWIND,
+    ...GM_getValue('CONFIG_LIST', []),
+  ].find((i) => i.id === id)
 
   if (configLocal.url) {
     configLocal.options = await loadConfig(configLocal.url)

@@ -6,13 +6,14 @@ import { appStore } from '../store/app.js'
 import { get } from 'svelte/store'
 import replaceColor from './replaceColor'
 import { toast } from '../components/Toast/index.js'
+import { CssToTailwindTranslator } from 'css-to-tailwind-translator'
+import {INNER_CONFIG_TAILWIND} from '../constant/config.js'
 
 export async function getCSS(css) {
   const {
     currentConfigData: { options },
   } = get(appStore)
   const filters = options.filter || []
-
   css = css
     .split('\n')
     .filter((raw) => {
@@ -67,6 +68,12 @@ export async function getCSS(css) {
       }
     }
   })
+  if (options.tailwind) {
+    const {
+      data: [{ resultVal }],
+    } = CssToTailwindTranslator(`{${css}}`)
+    css = resultVal
+  }
   await navigator.clipboard.writeText(css.replace(/^\s*\n/gm, ''))
   toast({
     title: '复制成功',

@@ -4,6 +4,7 @@ import fs from 'node:fs'
 import { svelte } from '@sveltejs/vite-plugin-svelte'
 import banner from 'vite-plugin-banner'
 import { visualizer } from 'rollup-plugin-visualizer'
+import smvp from 'speed-measure-vite-plugin'
 
 const version = JSON.parse(fs.readFileSync('./package.json', 'utf-8')).version
 
@@ -86,7 +87,11 @@ export default defineConfig(({ mode }) => {
                 window.location.reload()
               } else {
                 if(!isInit) {
-                  eval(text)
+                  try{
+                    eval(text)
+                  }catch(e){
+                    console.log(e)
+                  }
                   isInit = true
                 }
                 setTimeout(checkReload, 1000)
@@ -130,7 +135,7 @@ export default defineConfig(({ mode }) => {
       'process.env.NODE_ENV': JSON.stringify(mode),
       'process.env.LANG': JSON.stringify('cn'),
     },
-    plugins: [
+    plugins: smvp([
       visualizer(),
       svelte({
         emitCss: false,
@@ -141,6 +146,6 @@ export default defineConfig(({ mode }) => {
           verify: false,
           content: genBannerStr(),
         }),
-    ],
+    ]),
   }
 })
