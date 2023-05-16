@@ -1,5 +1,5 @@
 {
-  "version": "2.2.0",
+  "version": "2.3.0",
   "scripts": {
     "prebuild": "eslint --ext .js,.svelte --fix",
     "build": "vite build",
@@ -7,7 +7,7 @@
   },
   "type": "module",
   "devDependencies": {
-    "@sveltejs/vite-plugin-svelte": "^2.0.2",
+    "@sveltejs/vite-plugin-svelte": "^2.2.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-config-standard": "^16.0.3",
@@ -16,19 +16,21 @@
     "eslint-plugin-promise": "^5.2.0",
     "eslint-plugin-svelte3": "^3.4.1",
     "prettier": "^2.7.1",
+    "speed-measure-vite-plugin": "^1.0.1",
     "svelte": "^3.55.1",
-    "vite": "^4.1.1",
+    "vite": "^4.3.6",
     "vite-plugin-banner": "^0.7.0"
   },
   "dependencies": {
-    "@svelteuidev/composables": "^0.10.0",
-    "@svelteuidev/core": "^0.11.0",
+    "@svelteuidev/composables": "^0.12.1",
+    "@svelteuidev/core": "^0.12.1",
     "color-rgba": "^2.4.0",
+    "css-to-tailwind-translator": "^1.2.1",
     "jsoneditor": "^9.9.2",
     "lodash-es": "^4.17.21",
     "nanoid": "^4.0.1",
-    "postcss": "^8.4.16",
-    "postcss-discard-comments": "^5.1.2",
+    "postcss": "^8.4.23",
+    "postcss-discard-comments": "^6.0.0",
     "postcss-px2vp": "^1.1.4",
     "rollup-plugin-visualizer": "^5.9.0",
     "use-singleton": "^0.3.0"
