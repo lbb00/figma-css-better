@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Figma CSS Better
 // @namespace   https://github.com/lbb00
-// @version     2.3.0
+// @version     2.4.0
 // @description Figma CSS 转为微信小程序样式,rpx,figma,微信,小程序
 // @author      lbb00
 // @homepage    https://github.com/lbb00/figma-css-better
@@ -6710,7 +6710,7 @@ https://www.w3ctech.com/topic/2226`
       const {
         data: [{ resultVal }]
       } = CssToTailwindTranslator(`{${css2}}`);
-      css2 = resultVal;
+      css2 = resultVal, options.tailwind?.defaultSizeUnitRem === !1 && (css2 = css2.replace(/\[([-+]?\d+(?:\.\d+)?)px\]/g, (_, p1) => p1));
     }
     await navigator.clipboard.writeText(css2.replace(/^\s*\n/gm, "")), toast({
       title: "复制成功"

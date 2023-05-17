@@ -7,7 +7,7 @@ import { get } from 'svelte/store'
 import replaceColor from './replaceColor'
 import { toast } from '../components/Toast/index.js'
 import { CssToTailwindTranslator } from 'css-to-tailwind-translator'
-import {INNER_CONFIG_TAILWIND} from '../constant/config.js'
+import { INNER_CONFIG_TAILWIND } from '../constant/config.js'
 
 export async function getCSS(css) {
   const {
@@ -73,6 +73,9 @@ export async function getCSS(css) {
       data: [{ resultVal }],
     } = CssToTailwindTranslator(`{${css}}`)
     css = resultVal
+    if (options.tailwind?.defaultSizeUnitRem === false) {
+      css = css.replace(/\[([-+]?\d+(?:\.\d+)?)px\]/g, (_, p1) => p1)
+    }
   }
   await navigator.clipboard.writeText(css.replace(/^\s*\n/gm, ''))
   toast({
