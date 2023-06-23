@@ -23,7 +23,7 @@
   },
   "dependencies": {
     "@svelteuidev/composables": "^0.12.1",
-    "@svelteuidev/core": "^0.12.1",
+    "@svelteuidev/core": "^0.13.0",
     "color-rgba": "^2.4.0",
     "css-to-tailwind-translator": "^1.2.1",
     "jsoneditor": "^9.9.2",
