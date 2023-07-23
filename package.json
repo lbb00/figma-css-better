@@ -22,7 +22,7 @@
     "vite-plugin-banner": "^0.7.0"
   },
   "dependencies": {
-    "@svelteuidev/composables": "^0.12.1",
+    "@svelteuidev/composables": "^0.13.0",
     "@svelteuidev/core": "^0.12.1",
     "color-rgba": "^2.4.0",
     "css-to-tailwind-translator": "^1.2.1",
