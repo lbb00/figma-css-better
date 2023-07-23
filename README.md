@@ -1,5 +1,7 @@
 # Figma CSS Better
 
+> 由于 Figma 更新了 Dev 模式，该插件已放弃维护。
+
 > Figma CSS 转换为你需要的样式
 
 - 内置 postcss px-to-viewport 可转换为小程序样式
